@@ -1,0 +1,87 @@
+## -------------------------
+## Visual Studio build files
+## -------------------------
+
+# Build directories
+Debug/
+Release/
+x64/
+x86/
+ARM/
+ARM64/
+[Aa][Rr][Mm]*/
+[Bb]uild/
+ipch/
+
+# Visual Studio cache / temp
+.vs/
+*.VC.db
+*.VC.opendb
+*.VC.VC.opendb
+*.lastbuildstate
+
+# Generated files
+*.obj
+*.o
+*.pch
+*.pdb
+*.idb
+*.ilk
+*.log
+*.tlog
+*.tmp
+*.cache
+*.res
+*.rsp
+
+# Auto-generated project files
+*.user
+*.userosscache
+*.suo
+*.ncb
+*.aps
+
+# Solution-specific backup files
+*.sdf
+*.opensdf
+*.cachefile
+
+# Auto-generated files from MSBuild
+*.ipdb
+*.iobj
+*.iuser
+*.ipch
+*.metagen
+*.obj.enc
+
+## -------------------------
+## C++ / Compiler outputs
+## -------------------------
+
+# Executables and libs
+*.exe
+*.dll
+*.lib
+*.exp
+*.so
+*.dylib
+
+# Static/temporary build artifacts
+*.a
+*.la
+
+## -------------------------
+## Editor / IDE stuff
+## -------------------------
+
+# VS Code (if used)
+.vscode/
+
+# CLion / JetBrains (just in case)
+.idea/
+
+## -------------------------
+## You KEEP this folder
+## -------------------------
+
+# external/  <-- NOT ignored on purpose
