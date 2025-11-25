@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "time.hpp"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -59,19 +61,29 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // describes the layout of the vertex data to the shader
     glEnableVertexAttribArray(0); // turns the attribute on
 
-    // ========SHADER===========
+    // ============SHADER===========
+    // vertex shader
     const char* vertexShaderSource = R"(
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
-    void main() { gl_Position = vec4(aPos, 1.0); }
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        void main() 
+        { 
+            gl_Position = vec4(aPos, 1.0); 
+        }
     )";
 
+    // fragment shader
     const char* fragmentShaderSource = R"(
-    #version 330 core
-    out vec4 FragColor;
-    void main() { FragColor = vec4(1.0, 0.5, 0.2, 1.0); }
+        #version 330 core
+        out vec4 FragColor;
+        uniform vec3 uColor;
+        void main() 
+        { 
+            FragColor = vec4(uColor,1.0); 
+        }
     )";
 
+    //compiling and linking shaders
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -80,6 +92,7 @@ int main()
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
 
+    //links the shader
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -89,23 +102,46 @@ int main()
     glDeleteShader(fragmentShader);
     //=======================================
 
+    //getting location id for uniforms
+    int colorLoc = glGetUniformLocation(shaderProgram, "uColor"); //has to be same signature as in shaders
 
-    // ============================
-    // Render loop
-    // ============================
+    //initializing time for dt/fdt
+    Engine::Time time;
+    Engine::TimeSystem::Initialize(time);
+
+    // engine loop
     while (!glfwWindowShouldClose(window))
     {
+        Engine::TimeSystem::Update(time);
+
+        // Fixed-step physics
+        while (time.accumulator >= time.fixedDeltaTime)
+        {
+            time.accumulator -= time.fixedDeltaTime;
+        }
+
+
+        // clears the buffer and sets it to this colour
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // runs our shader program
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        //binding uniforms
+        glUniform3f(colorLoc, 1.0f, 0.5f, 0.2f);
+
+
+        glBindVertexArray(VAO); // bind our vertex setup
+        glDrawArrays(GL_TRIANGLES, 0, 3); //draw the triangle
+
+        glfwSwapBuffers(window); // show rendered frame
+        glfwPollEvents(); // keyboard/mouse/window events
+
+        printf("DT : %f, FDT : %f\n",time.deltaTime,time.fixedDeltaTime);
     }
 
+    //cleanup and terminate window
     glfwTerminate();
     return 0;
 }
