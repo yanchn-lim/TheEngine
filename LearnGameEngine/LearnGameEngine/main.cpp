@@ -106,13 +106,16 @@ int main()
     int colorLoc = glGetUniformLocation(shaderProgram, "uColor"); //has to be same signature as in shaders
 
     //initializing time for dt/fdt
-    Engine::Time time;
-    Engine::TimeSystem::Initialize(time);
+    Engine::Time       g_Time;
+    Engine::TimeConfig g_TimeConfig;
 
+    double startTime = glfwGetTime();
+    Engine::TimeSystem::Initialize(g_Time, startTime, g_TimeConfig);
     // engine loop
     while (!glfwWindowShouldClose(window))
     {
-        Engine::TimeSystem::Update(time);
+        double now = glfwGetTime();
+        Engine::TimeSystem::BeginFrame(g_Time, now);
 
         // Fixed-step physics
         while (time.accumulator >= time.fixedDeltaTime)
