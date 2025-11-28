@@ -144,10 +144,13 @@
     <ClCompile Include="time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="components.hpp" />
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="debug_system.hpp" />
+    <ClInclude Include="ecs.hpp" />
     <ClInclude Include="events.hpp" />
     <ClInclude Include="input.hpp" />
+    <ClInclude Include="math.hpp" />
     <ClInclude Include="time.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

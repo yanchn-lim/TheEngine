@@ -19,6 +19,9 @@
     <Filter Include="Engine\Header Files\Debug">
       <UniqueIdentifier>{2f56e7cf-a3b6-45e6-bb9f-43e9204d1bd9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Header Files\ECS">
+      <UniqueIdentifier>{6df71d66-39f5-4e7b-9378-cf023f2408a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -47,11 +50,20 @@
     <ClInclude Include="events.hpp">
       <Filter>Engine\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="debug_system.hpp">
-      <Filter>Engine\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="input.hpp">
       <Filter>Engine\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="math.hpp">
+      <Filter>Engine\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_system.hpp">
+      <Filter>Engine\Header Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="ecs.hpp">
+      <Filter>Engine\Header Files\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="components.hpp">
+      <Filter>Engine\Header Files\ECS</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

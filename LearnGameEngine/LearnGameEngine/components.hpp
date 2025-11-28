@@ -1,0 +1,28 @@
+#pragma once
+
+#include "math.hpp"
+
+namespace Engine
+{
+	namespace ECS
+	{
+		struct Transform
+		{
+			float3 position{ 0.0f,0.0f,0.0f };
+
+			float rotationZ = 0.0f; //replace with quaternion later on
+			float3 scale{ 1.0f,1.0f,1.0f };
+		};
+
+		struct Renderable
+		{
+			unsigned int vao = 0;
+			unsigned int vertexCount = 0;
+
+			unsigned int shaderProgram = 0;
+			int colorUniformLocation = -1;
+
+			float3 color{ 1.0f,1.0f,1.0f };
+		};
+	}
+}
