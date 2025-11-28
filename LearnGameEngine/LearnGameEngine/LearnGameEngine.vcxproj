@@ -141,6 +141,8 @@
     <ClCompile Include="external\glad\src\glad.c" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="renderer2d.cpp" />
+    <ClCompile Include="render_system.cpp" />
     <ClCompile Include="time.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +153,8 @@
     <ClInclude Include="events.hpp" />
     <ClInclude Include="input.hpp" />
     <ClInclude Include="math.hpp" />
+    <ClInclude Include="renderer2d.hpp" />
+    <ClInclude Include="render_system.hpp" />
     <ClInclude Include="time.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

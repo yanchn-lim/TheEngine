@@ -6,6 +6,9 @@
 #include "time.hpp"
 #include "events.hpp"
 #include "input.hpp"
+#include "ecs.hpp"
+#include "components.hpp"
+#include "render_system.hpp"
 
 #include "debug.hpp"
 #include "debug_system.hpp"
@@ -20,7 +23,7 @@
     FUNCTION / Types  :
         - names in pamel case [GetThing() or PlayerController]
 */
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
@@ -34,7 +37,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // forces VAOs,shaders,etc
 
     // creating the window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1600, 900, "The Engine", NULL, NULL);
     if (!window)
     {
         std::cout << "Failed to create GLFW window\n";
@@ -51,80 +54,14 @@ int main()
     }
 
     // viewport and resize
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, 1600, 900);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    // triangle vertex data
-    float vertices[] = //in clip space
-    {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
-    };
-
-    // VBO -> Vertex Buffer Object (stores vertex data)
-    // VAO -> Vertex Array Object (data to intepret vertex data)
-    // sending data to gpu
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO); // get id from opengl
-    glGenBuffers(1, &VBO); // get a buffer id from opengl
-
-    glBindVertexArray(VAO); // set active array to this
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // set the active buffer to the current
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // copy vertex data into gpu
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // describes the layout of the vertex data to the shader
-    glEnableVertexAttribArray(0); // turns the attribute on
-
-    // ============SHADER===========
-    // vertex shader
-    const char* vertexShaderSource = R"(
-        #version 330 core
-        layout (location = 0) in vec3 aPos;
-        void main() 
-        { 
-            gl_Position = vec4(aPos, 1.0); 
-        }
-    )";
-
-    // fragment shader
-    const char* fragmentShaderSource = R"(
-        #version 330 core
-        out vec4 FragColor;
-        uniform vec3 uColor;
-        void main() 
-        { 
-            FragColor = vec4(uColor,1.0); 
-        }
-    )";
-
-    //compiling and linking shaders
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    //links the shader
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    //=======================================
-
-    //getting location id for uniforms
-    int colorLoc = glGetUniformLocation(shaderProgram, "uColor"); //has to be same signature as in shaders
 
     //initializing global systems
     Engine::Time       g_Time; 
     Engine::TimeConfig g_TimeConfig;
     Engine::EventBus   g_EventBus; //create a global event bus
+    Engine::ECS::World g_World;
 
     double startTime = glfwGetTime();
     Engine::TimeSystem::Initialize(g_Time, startTime, g_TimeConfig);
@@ -141,6 +78,21 @@ int main()
             }
         });
 
+    // ===== ECS CREATE ENTITY =====
+    Engine::ECS::EntityId quadEntity = g_World.CreateEntity();
+    auto& transform = g_World.AddComponent<Engine::ECS::Transform>(quadEntity);
+    transform.position = { 0.0f, 0.0f, 0.0f };
+    transform.scale = { 1.0f, 1.0f, 1.0f };
+    transform.rotationZ = 0.0f;
+
+    // add sprite component (what gets drawn)
+    auto& sprite = g_World.AddComponent<Engine::ECS::Sprite2D>(quadEntity);
+    sprite.size = { 0.2f, 0.2f };                 // visible size in NDC-ish world
+    sprite.color = { 1.0f, 0.5f, 0.2f, 1.0f };     // orange-ish
+
+    //creater render system
+    Engine::RenderSystem renderSystem(g_World, g_EventBus);
+
     // engine loop
     while (!glfwWindowShouldClose(window))
     {
@@ -153,7 +105,7 @@ int main()
 
         g_EventBus.Emit(Engine::FrameStartEvent{ g_Time });
 
-        //=====FIXED UPDATE=====
+        //===== FIXED UPDATE =====
         int stepIndex = 0;
         while (Engine::TimeSystem::StepFixed(g_Time))
         {
@@ -163,10 +115,12 @@ int main()
                     g_Time.fixedDeltaTime,
                     stepIndex++
                 });
+
+            transform.rotationZ += g_Time.fixedDeltaTime;
             // PhysicsSystem::FixedUpdate(g_Time.fixedDeltaTime);
         }
 
-        //=====UPDATE=====
+        //===== UPDATE =====
         g_EventBus.Emit(Engine::UpdateEvent{ g_Time });
 
         //manually checking input
@@ -175,9 +129,7 @@ int main()
             printf("IM PRESSING SPACE\n");
         }
 
-
-
-        //=====RENDER=====
+        //===== RENDER =====
         float alpha = 0.0f;
         if (g_Time.fixedDeltaTime > 0.0f)
         {
@@ -188,24 +140,13 @@ int main()
             );
         }
 
-        g_EventBus.Emit(Engine::RenderEvent{ g_Time,alpha });
-
         // clears the buffer and sets it to this colour
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // runs our shader program
-        glUseProgram(shaderProgram);
-
-        //binding uniforms
-        glUniform3f(colorLoc, 1.0f, 0.5f, 0.2f);
-
-
-        glBindVertexArray(VAO); // bind our vertex setup
-        glDrawArrays(GL_TRIANGLES, 0, 3); //draw the triangle
-
-
-        //=====FRAME END=====
+        g_EventBus.Emit(Engine::RenderEvent{ g_Time,alpha });
+        
+        //===== FRAME END =====
         g_EventBus.Emit(Engine::FrameEndEvent{ g_Time });
 
         glfwSwapBuffers(window); // show rendered frame

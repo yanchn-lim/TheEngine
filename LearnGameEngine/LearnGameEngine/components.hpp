@@ -21,8 +21,15 @@ namespace Engine
 
 			unsigned int shaderProgram = 0;
 			int colorUniformLocation = -1;
+			int modelUniformLocation = -1;
 
 			float3 color{ 1.0f,1.0f,1.0f };
+		};
+
+		struct Sprite2D
+		{
+			float2 size{ 1.0f,1.0f };
+			float4 color{ 1.0f,1.0f,1.0f,1.0f };
 		};
 	}
 }

@@ -22,6 +22,9 @@
     <Filter Include="Engine\Header Files\ECS">
       <UniqueIdentifier>{6df71d66-39f5-4e7b-9378-cf023f2408a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Header Files\Render">
+      <UniqueIdentifier>{c70b7a9f-6ebc-469b-85e1-83e1884e9eb3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -37,6 +40,12 @@
       <Filter>Engine\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="input.cpp">
+      <Filter>Engine\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render_system.cpp">
+      <Filter>Engine\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer2d.cpp">
       <Filter>Engine\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -64,6 +73,12 @@
     </ClInclude>
     <ClInclude Include="components.hpp">
       <Filter>Engine\Header Files\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer2d.hpp">
+      <Filter>Engine\Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="render_system.hpp">
+      <Filter>Engine\Header Files\Render</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
