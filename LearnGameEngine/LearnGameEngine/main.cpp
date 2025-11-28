@@ -1,9 +1,25 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <algorithm>
 
 #include "time.hpp"
+#include "events.hpp"
+#include "debug.hpp"
+#include "debug_system.hpp"
 
+/*=====GENERAL NAMING CONVENTIONS=====
+    VARIABLES :
+        - m_foo -> member variable (non-static)
+        - g_foo -> global variable
+        - s_foo -> static variable (member or function-local)
+        - kFoo  -> constant value
+
+    TYPES     :
+        - names in pascal case [PlayerController]
+    FUNCTION  :
+        - names in camel case [getThing()]
+*/
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -105,24 +121,54 @@ int main()
     //getting location id for uniforms
     int colorLoc = glGetUniformLocation(shaderProgram, "uColor"); //has to be same signature as in shaders
 
-    //initializing time for dt/fdt
-    Engine::Time       g_Time;
+    //initializing global systems
+    Engine::Time       g_Time; 
     Engine::TimeConfig g_TimeConfig;
+    Engine::EventBus   g_EventBus; //create a global event bus
 
     double startTime = glfwGetTime();
     Engine::TimeSystem::Initialize(g_Time, startTime, g_TimeConfig);
+
+    // plug in debug frame listener
+    Engine::DebugFrameListener g_DebugFrameListener(g_EventBus);
+
     // engine loop
     while (!glfwWindowShouldClose(window))
     {
         double now = glfwGetTime();
         Engine::TimeSystem::BeginFrame(g_Time, now);
+        g_EventBus.Emit(Engine::FrameStartEvent{ g_Time });
 
-        // Fixed-step physics
-        while (time.accumulator >= time.fixedDeltaTime)
+        //=====FIXED UPDATE=====
+        int stepIndex = 0;
+        while (Engine::TimeSystem::StepFixed(g_Time))
         {
-            time.accumulator -= time.fixedDeltaTime;
+            g_EventBus.Emit(Engine::FixedUpdateEvent
+                {
+                    g_Time,
+                    g_Time.fixedDeltaTime,
+                    stepIndex++
+                });
+            // PhysicsSystem::FixedUpdate(g_Time.fixedDeltaTime);
+            // (later: emit FixedUpdateEvent here)
         }
 
+        //=====UPDATE=====
+        g_EventBus.Emit(Engine::UpdateEvent{ g_Time });
+
+
+        //=====RENDER=====
+        float alpha = 0.0f;
+        if (g_Time.fixedDeltaTime > 0.0f)
+        {
+            alpha = std::clamp(
+                g_Time.accumulator / g_Time.fixedDeltaTime,
+                0.0f,
+                1.0f
+            );
+        }
+
+        g_EventBus.Emit(Engine::RenderEvent{ g_Time,alpha });
 
         // clears the buffer and sets it to this colour
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -138,10 +184,12 @@ int main()
         glBindVertexArray(VAO); // bind our vertex setup
         glDrawArrays(GL_TRIANGLES, 0, 3); //draw the triangle
 
+
+        //=====FRAME END=====
+        g_EventBus.Emit(Engine::FrameEndEvent{ g_Time });
+
         glfwSwapBuffers(window); // show rendered frame
         glfwPollEvents(); // keyboard/mouse/window events
-
-        printf("DT : %f, FDT : %f\n",time.deltaTime,time.fixedDeltaTime);
     }
 
     //cleanup and terminate window
