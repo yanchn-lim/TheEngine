@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="external\glad\src\glad.c" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="time.cpp" />
   </ItemGroup>
@@ -146,6 +147,7 @@
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="debug_system.hpp" />
     <ClInclude Include="events.hpp" />
+    <ClInclude Include="input.hpp" />
     <ClInclude Include="time.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

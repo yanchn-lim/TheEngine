@@ -33,6 +33,9 @@
     <ClCompile Include="debug.cpp">
       <Filter>Engine\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Engine\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="time.hpp">
@@ -45,6 +48,9 @@
       <Filter>Engine\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="debug_system.hpp">
+      <Filter>Engine\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input.hpp">
       <Filter>Engine\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

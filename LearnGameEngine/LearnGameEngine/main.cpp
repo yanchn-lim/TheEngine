@@ -5,6 +5,8 @@
 
 #include "time.hpp"
 #include "events.hpp"
+#include "input.hpp"
+
 #include "debug.hpp"
 #include "debug_system.hpp"
 
@@ -15,10 +17,8 @@
         - s_foo -> static variable (member or function-local)
         - kFoo  -> constant value
 
-    TYPES     :
-        - names in pascal case [PlayerController]
-    FUNCTION  :
-        - names in camel case [getThing()]
+    FUNCTION / Types  :
+        - names in pamel case [GetThing() or PlayerController]
 */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -128,15 +128,29 @@ int main()
 
     double startTime = glfwGetTime();
     Engine::TimeSystem::Initialize(g_Time, startTime, g_TimeConfig);
+    Engine::InputSystem::Initialize(window, &g_EventBus);
 
     // plug in debug frame listener
     Engine::DebugFrameListener g_DebugFrameListener(g_EventBus);
+
+    //subscribing to the key pressed event
+    g_EventBus.Subscribe<Engine::KeyPressedEvent>([](const Engine::KeyPressedEvent& e) {
+            if (e.key == GLFW_KEY_ESCAPE) 
+            {
+                printf("ESCAPE\n");
+            }
+        });
 
     // engine loop
     while (!glfwWindowShouldClose(window))
     {
         double now = glfwGetTime();
+
+        //begin system frame
         Engine::TimeSystem::BeginFrame(g_Time, now);
+        Engine::InputSystem::BeginFrame();
+        glfwPollEvents(); // keyboard/mouse/window events
+
         g_EventBus.Emit(Engine::FrameStartEvent{ g_Time });
 
         //=====FIXED UPDATE=====
@@ -150,11 +164,17 @@ int main()
                     stepIndex++
                 });
             // PhysicsSystem::FixedUpdate(g_Time.fixedDeltaTime);
-            // (later: emit FixedUpdateEvent here)
         }
 
         //=====UPDATE=====
         g_EventBus.Emit(Engine::UpdateEvent{ g_Time });
+
+        //manually checking input
+        if (Engine::InputSystem::WasKeyPressed(GLFW_KEY_SPACE)) 
+        { 
+            printf("IM PRESSING SPACE\n");
+        }
+
 
 
         //=====RENDER=====
@@ -189,7 +209,6 @@ int main()
         g_EventBus.Emit(Engine::FrameEndEvent{ g_Time });
 
         glfwSwapBuffers(window); // show rendered frame
-        glfwPollEvents(); // keyboard/mouse/window events
     }
 
     //cleanup and terminate window
