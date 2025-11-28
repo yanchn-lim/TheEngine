@@ -3,25 +3,27 @@
 #include <GLFW/glfw3.h>
 #include <algorithm>
 
+//GO FIGURE OUT AND COMMENT FUNCTIONALITY
+
 namespace Engine
 {
-    namespace
+    namespace //anonymous to keep all these within this file
     {
-        InputState  s_State{};
-        EventBus* s_EventBus = nullptr;
+        InputState  s_State{}; //global instance to hold input info
+        EventBus* s_EventBus = nullptr; 
         GLFWwindow* s_Window = nullptr;
 
-        // GLFW Callbacks ------------------------------------------------------
-
+        // ===== GLFW CALLBACK =====
+        // using /* ---- */ to avoid unused parameter warnings
         void KeyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/,
             int action, int /*mods*/)
         {
-            if (key < 0 || key >= MaxKeys)
+            if (key < 0 || key >= kMaxKeys)
                 return;
 
             switch (action)
             {
-            case GLFW_PRESS:
+            case GLFW_PRESS: //press
             {
                 if (!s_State.keyDown[key])
                 {
@@ -29,8 +31,9 @@ namespace Engine
                 }
                 s_State.keyDown[key] = true;
 
-                if (s_EventBus)
+                if (s_EventBus) //check null
                 {
+                    //call the event for the key pressed
                     s_EventBus->Emit(KeyPressedEvent{
                         static_cast<KeyCode>(key),
                         false // not a repeat
@@ -38,7 +41,7 @@ namespace Engine
                 }
             } break;
 
-            case GLFW_RELEASE:
+            case GLFW_RELEASE: //release
             {
                 s_State.keyDown[key] = false;
                 s_State.keyReleased[key] = true;
@@ -51,7 +54,7 @@ namespace Engine
                 }
             } break;
 
-            case GLFW_REPEAT:
+            case GLFW_REPEAT: //hold
             {
                 if (s_EventBus)
                 {
@@ -67,7 +70,7 @@ namespace Engine
         void MouseButtonCallback(GLFWwindow* window, int button,
             int action, int /*mods*/)
         {
-            if (button < 0 || button >= MaxMouseButtons)
+            if (button < 0 || button >= kMaxMouseButtons)
                 return;
 
             double x = 0.0, y = 0.0;
@@ -149,13 +152,14 @@ namespace Engine
     {
         void Initialize(GLFWwindow* window, EventBus* eventBus)
         {
+            //store pointer to the window and event bus
             s_Window = window;
             s_EventBus = eventBus;
 
             // Clear state
             s_State = InputState{};
 
-            // Set GLFW callbacks
+            // set glfw callback to the functions we have
             glfwSetKeyCallback(window, KeyCallback);
             glfwSetMouseButtonCallback(window, MouseButtonCallback);
             glfwSetCursorPosCallback(window, CursorPosCallback);
@@ -164,14 +168,14 @@ namespace Engine
 
         void BeginFrame()
         {
-            // Reset per-frame flags and deltas
-            for (int i = 0; i < MaxKeys; ++i)
+            //reset all the keys at the start of frame
+            for (int i = 0; i < kMaxKeys; ++i)
             {
                 s_State.keyPressed[i] = false;
                 s_State.keyReleased[i] = false;
             }
 
-            for (int i = 0; i < MaxMouseButtons; ++i)
+            for (int i = 0; i < kMaxMouseButtons; ++i)
             {
                 s_State.mousePressed[i] = false;
                 s_State.mouseReleased[i] = false;
@@ -190,42 +194,42 @@ namespace Engine
 
         bool IsKeyDown(KeyCode key)
         {
-            if (key < 0 || key >= MaxKeys)
+            if (key < 0 || key >= kMaxKeys)
                 return false;
             return s_State.keyDown[key];
         }
 
         bool WasKeyPressed(KeyCode key)
         {
-            if (key < 0 || key >= MaxKeys)
+            if (key < 0 || key >= kMaxKeys)
                 return false;
             return s_State.keyPressed[key];
         }
 
         bool WasKeyReleased(KeyCode key)
         {
-            if (key < 0 || key >= MaxKeys)
+            if (key < 0 || key >= kMaxKeys)
                 return false;
             return s_State.keyReleased[key];
         }
 
         bool IsMouseButtonDown(MouseButton button)
         {
-            if (button < 0 || button >= MaxMouseButtons)
+            if (button < 0 || button >= kMaxMouseButtons)
                 return false;
             return s_State.mouseDown[button];
         }
 
         bool WasMouseButtonPressed(MouseButton button)
         {
-            if (button < 0 || button >= MaxMouseButtons)
+            if (button < 0 || button >= kMaxMouseButtons)
                 return false;
             return s_State.mousePressed[button];
         }
 
         bool WasMouseButtonReleased(MouseButton button)
         {
-            if (button < 0 || button >= MaxMouseButtons)
+            if (button < 0 || button >= kMaxMouseButtons)
                 return false;
             return s_State.mouseReleased[button];
         }

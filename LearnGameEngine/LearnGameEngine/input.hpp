@@ -8,12 +8,13 @@ struct GLFWwindow;
 
 namespace Engine
 {
+	//alias int to one of these
 	using KeyCode		= int;
 	using MouseButton	= int;
 
 	//set some limits
-	constexpr int MaxKeys			= 512;
-	constexpr int MaxMouseButtons	= 8;
+	constexpr int kMaxKeys			= 512;
+	constexpr int kMaxMouseButtons	= 8;
 
 #pragma region INPUT EVENTS
 	//=====INPUT EVENTS=====
@@ -60,13 +61,13 @@ namespace Engine
 
 	struct InputState
 	{
-		bool keyDown[MaxKeys] = {};
-		bool keyPressed[MaxKeys] = {}; // true only on the frame key went from up -> down
-		bool keyReleased[MaxKeys] = {}; // true only on the frame key went from down -> up
+		bool keyDown[kMaxKeys] = {};
+		bool keyPressed[kMaxKeys] = {}; // true only on the frame key went from up -> down
+		bool keyReleased[kMaxKeys] = {}; // true only on the frame key went from down -> up
 
-		bool mouseDown[MaxMouseButtons] = {};
-		bool mousePressed[MaxMouseButtons] = {};
-		bool mouseReleased[MaxMouseButtons] = {};
+		bool mouseDown[kMaxMouseButtons] = {};
+		bool mousePressed[kMaxMouseButtons] = {};
+		bool mouseReleased[kMaxMouseButtons] = {};
 
 		double mouseX = 0.0;
 		double mouseY = 0.0;

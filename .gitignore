@@ -1,87 +1,115 @@
-## -------------------------
-## Visual Studio build files
-## -------------------------
+#############################
+# General
+#############################
 
-# Build directories
-Debug/
-Release/
+# OS junk
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Generic temp/backup files
+*.tmp
+*.temp
+*.bak
+*.old
+*~
+*.orig
+
+#############################
+# Visual Studio (user-specific)
+#############################
+
+.vs/
+
+# User-specific project files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# VS profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+#############################
+# Build outputs (VS/MSVC)
+#############################
+
+# Top-level build folders (common layouts)
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Per-config build dirs
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Rr]etail/
 x64/
 x86/
 ARM/
 ARM64/
-[Aa][Rr][Mm]*/
-[Bb]uild/
-ipch/
+bld/
 
-# Visual Studio cache / temp
-.vs/
-*.VC.db
-*.VC.opendb
-*.VC.VC.opendb
-*.lastbuildstate
-
-# Generated files
+# Intermediate / debug symbols / etc.
 *.obj
-*.o
 *.pch
 *.pdb
 *.idb
 *.ilk
-*.log
-*.tlog
-*.tmp
-*.cache
-*.res
-*.rsp
-
-# Auto-generated project files
-*.user
-*.userosscache
-*.suo
-*.ncb
-*.aps
-
-# Solution-specific backup files
-*.sdf
-*.opensdf
-*.cachefile
-
-# Auto-generated files from MSBuild
-*.ipdb
 *.iobj
-*.iuser
-*.ipch
-*.metagen
-*.obj.enc
+*.ipdb
+*.tlog
+*.lastbuildstate
+*.log
+*.tmp_proj
 
-## -------------------------
-## C++ / Compiler outputs
-## -------------------------
+# Precompiled header stuff
+*.pch
 
-# Executables and libs
-*.exe
-*.dll
-*.lib
-*.exp
-*.so
-*.dylib
+# Other intermediate DBs
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
 
-# Static/temporary build artifacts
-*.a
-*.la
+#############################
+# NuGet / package management
+#############################
 
-## -------------------------
-## Editor / IDE stuff
-## -------------------------
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+artifacts/
 
-# VS Code (if used)
+#############################
+# Others
+#############################
+
+# VS Code
 .vscode/
 
-# CLion / JetBrains (just in case)
+# CLion / JetBrains
 .idea/
 
-## -------------------------
-## You KEEP this folder
-## -------------------------
+# Crash dumps
+*.dmp
 
-# external/  <-- NOT ignored on purpose
+
+# NOTE: We intentionally do NOT ignore:
+#   - external/
+#   - *.lib
+#   - *.dll
+#
+# If you later add any broad ignore like `*.lib`, make sure to
+# re-include your vendor libs with rules like:
+#   !external/glfw/**
+#   !external/glad/**
+#   !external/glm/**

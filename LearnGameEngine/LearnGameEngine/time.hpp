@@ -5,9 +5,9 @@ namespace Engine
 {
 	struct TimeConfig
 	{
-		float fixedDeltaTime = 1.0f / 60.0f;
-		float maxDeltaTime = 0.25f; // 250 ms
-		float initialTimeScale = 1.0f;
+		float kFixedDeltaTime = 1.0f / 60.0f;
+		float kMaxDeltaTime = 0.25f; // 250 ms
+		float kInitialTimeScale = 1.0f;
 	};
 
 	struct Time

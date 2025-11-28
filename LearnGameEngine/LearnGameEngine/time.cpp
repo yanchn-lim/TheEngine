@@ -17,19 +17,19 @@ namespace Engine
         {
             //set values
             s_LastTimeSeconds = startTimeSeconds;
-            s_MaxDeltaTime = config.maxDeltaTime;
+            s_MaxDeltaTime = config.kMaxDeltaTime;
 
             time.deltaTime = 0.0f;
             time.unscaledDeltaTime = 0.0f;
 
-            time.fixedDeltaTime = config.fixedDeltaTime;
+            time.fixedDeltaTime = config.kFixedDeltaTime;
 
             time.timeSinceStart = 0.0f;
             time.unscaledTimeSinceStart = 0.0f;
 
             time.accumulator = 0.0f;
 
-            time.timeScale = config.initialTimeScale;
+            time.timeScale = config.kInitialTimeScale;
             time.paused = false;
 
             time.frameCount = 0;
