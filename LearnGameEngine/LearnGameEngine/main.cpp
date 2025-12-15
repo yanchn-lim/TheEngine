@@ -58,12 +58,14 @@ int main()
     glViewport(0, 0, 1600, 900);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    //pretty much singletons here
     //initializing global systems
     Engine::Time       g_Time; 
     Engine::TimeConfig g_TimeConfig;
     Engine::EventBus   g_EventBus; //create a global event bus
     Engine::ECS::World g_World;
 
+    //initializing systems
     double startTime = glfwGetTime();
     Engine::TimeSystem::Initialize(g_Time, startTime, g_TimeConfig);
     Engine::InputSystem::Initialize(window, &g_EventBus);
@@ -79,6 +81,20 @@ int main()
             }
         });
 
+    // ===== ECS CAMERA ENTITY =====
+    Engine::ECS::EntityId cameraEntity = g_World.CreateEntity();
+    auto& cameraTransform = g_World.AddComponent <Engine::ECS::Transform>(cameraEntity);
+    cameraTransform.position = { 0.0f,0.0f,0.0f };
+    cameraTransform.scale = { 1.0f,1.0f,1.0f };
+    cameraTransform.rotationZ = 0.0f;
+
+    // Camera component
+    auto& camera2D = g_World.AddComponent<Engine::ECS::Camera2D>(cameraEntity);
+    camera2D.zoom = 1.0f;   // see 1 unit vertically (like your current setup)
+    camera2D.nearClip = -1.0f;
+    camera2D.farClip = 1.0f;
+    camera2D.primary = true;
+
     // ===== ECS CREATE ENTITY =====
     Engine::ECS::EntityId quadEntity = g_World.CreateEntity();
     auto& transform = g_World.AddComponent<Engine::ECS::Transform>(quadEntity);
@@ -91,7 +107,7 @@ int main()
     sprite.size = { 0.2f, 0.2f };                 // visible size in NDC-ish world
     sprite.color = { 1.0f, 0.5f, 0.2f, 1.0f };     // orange-ish
 
-    //creater render system
+    //create render system
     Engine::RenderSystem renderSystem(g_World, g_EventBus);
 
     // engine loop
@@ -118,6 +134,7 @@ int main()
                 });
 
             transform.rotationZ += g_Time.fixedDeltaTime;
+            cameraTransform.position.x = std::sin(g_Time.timeSinceStart) * 0.5f;
             // PhysicsSystem::FixedUpdate(g_Time.fixedDeltaTime);
         }
 

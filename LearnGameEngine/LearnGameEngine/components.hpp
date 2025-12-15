@@ -31,5 +31,18 @@ namespace Engine
 			float2 size{ 1.0f,1.0f };
 			float4 color{ 1.0f,1.0f,1.0f,1.0f };
 		};
+
+		struct Camera2D
+		{
+			// >1 = zoom in, <1 = zoom out
+			float zoom = 1.0f;
+
+			//near/far clip
+			float nearClip = -1.0f;
+			float farClip = 1.0f;
+
+			//marking as main render camera
+			bool primary = true;
+		};
 	}
 }

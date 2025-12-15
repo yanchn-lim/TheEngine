@@ -30,20 +30,54 @@ namespace Engine
 
 		if (!m_World) return;
 
-		// For now, hardcode to your window size (800x600)
+		// For now, hardcode to your window size
 		const float viewportWidth = 1600.0f;
 		const float viewportHeight = 900.0f;
 		const float aspect = viewportWidth / viewportHeight;
 
+		//default camera
+		float cameraX = 0.0f;
+		float cameraY = 0.0f;
+		float cameraZoom = 1.0f;
+		float nearClip = -1.0f;
+		float farClip = 1.0f;
+
+		bool hasCamera = false;
+
+		//search for a camera
+		m_World->ForEach<ECS::Transform, ECS::Camera2D>(
+			[&](ECS::EntityId /*entity*/,
+				ECS::Transform& camTransform,
+				ECS::Camera2D& camera)
+			{
+				if (!hasCamera || camera.primary)
+				{
+					cameraX = camTransform.position.x;
+					cameraY = camTransform.position.y;
+					cameraZoom = camera.zoom;
+					nearClip = camera.nearClip;
+					farClip = camera.farClip;
+					hasCamera = true;
+				}
+			}
+		);
+
 		// Define a logical world height of 2 units, centered at origin
-		const float worldHeight = 1.0f;
+		const float baseWorldHeight = 1.0f;
+		const float worldHeight = baseWorldHeight / cameraZoom;
 		const float worldWidth = worldHeight * aspect;
 
+		const float left = cameraX - worldWidth * 0.5f;
+		const float right = cameraX + worldWidth * 0.5f;
+		const float bottom = cameraY - worldHeight * 0.5f;
+		const float top = cameraY + worldHeight * 0.5f;
+
 		float4x4 viewProj = MakeOrtho(
-			-worldWidth * 0.5f, worldWidth * 0.5f,   // left, right
-			-worldHeight * 0.5f, worldHeight * 0.5f,   // bottom, top
-			-1.0f, 1.0f                                      // zNear, zFar
+			left, right,
+			bottom, top,
+			nearClip, farClip
 		);
+
 		Renderer2D::BeginScene(viewProj);
 
 		m_World->ForEach<ECS::Transform, ECS::Sprite2D>(
