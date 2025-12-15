@@ -32,9 +32,10 @@ int main()
 {
     // initializing glfw
 	glfwInit(); // setting up internal stuff to interface with windows
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // telling glfw that i want v3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // specifically v3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // telling glfw that i want v4
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5); // specifically v4.5
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // forces VAOs,shaders,etc
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // creating the window
     GLFWwindow* window = glfwCreateWindow(1600, 900, "The Engine", NULL, NULL);
