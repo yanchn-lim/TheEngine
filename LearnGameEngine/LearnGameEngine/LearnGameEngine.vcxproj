@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Core\debug.hpp" />
     <ClInclude Include="Engine\Core\debug_system.hpp" />
+    <ClInclude Include="Engine\Core\engine_context.hpp" />
     <ClInclude Include="Engine\Core\time.hpp" />
     <ClInclude Include="Engine\ECS\components.hpp" />
     <ClInclude Include="Engine\ECS\ecs.hpp" />

@@ -54,6 +54,9 @@
     <ClInclude Include="Engine\Rendering\renderer2d.hpp">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Core\engine_context.hpp">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\main.cpp">
