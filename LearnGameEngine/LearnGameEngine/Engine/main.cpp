@@ -3,15 +3,15 @@
 #include <iostream>
 #include <algorithm>
 
-#include "time.hpp"
+#include "Core/time.hpp"
 #include "events.hpp"
-#include "input.hpp"
-#include "ecs.hpp"
-#include "components.hpp"
-#include "render_system.hpp"
+#include "Input/input.hpp"
+#include "ECS/ecs.hpp"
+#include "ECS/components.hpp"
+#include "Rendering/render_system.hpp"
 
-#include "debug.hpp"
-#include "debug_system.hpp"
+#include "Core/debug.hpp"
+#include "Core/debug_system.hpp"
 
 /*=====GENERAL NAMING CONVENTIONS=====
     VARIABLES :

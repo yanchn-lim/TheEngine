@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ecs.hpp"
-#include "components.hpp"
+#include "ECS/ecs.hpp"
+#include "ECS/components.hpp"
 #include "events.hpp"
 
 namespace Engine

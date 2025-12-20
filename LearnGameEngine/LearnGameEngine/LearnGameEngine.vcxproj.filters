@@ -1,84 +1,81 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Engine">
       <UniqueIdentifier>{2cd43304-fca1-4641-8240-f5adf2be0f81}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Engine\Core">
+      <UniqueIdentifier>{d192d1f4-ec23-47d4-855f-078a37d074f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Engine\ECS">
+      <UniqueIdentifier>{6bc63956-d86e-4aaa-af07-8655f4712f91}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Header Files\Debug">
-      <UniqueIdentifier>{2f56e7cf-a3b6-45e6-bb9f-43e9204d1bd9}</UniqueIdentifier>
+    <Filter Include="Engine\Input">
+      <UniqueIdentifier>{304481c4-c8d8-4fc8-920c-d2a591c8050f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Header Files\ECS">
-      <UniqueIdentifier>{6df71d66-39f5-4e7b-9378-cf023f2408a2}</UniqueIdentifier>
+    <Filter Include="Engine\Math">
+      <UniqueIdentifier>{b93926d3-d415-4fb1-8902-3f6cc14127cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Header Files\Render">
-      <UniqueIdentifier>{c70b7a9f-6ebc-469b-85e1-83e1884e9eb3}</UniqueIdentifier>
+    <Filter Include="Engine\Rendering">
+      <UniqueIdentifier>{0fbf338a-b3c3-4f71-8e15-402b97afbc5f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Engine\Source Files</Filter>
+    <ClInclude Include="Engine\engine.hpp">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\events.hpp">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\debug.hpp">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\debug_system.hpp">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\time.hpp">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ECS\components.hpp">
+      <Filter>Engine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ECS\ecs.hpp">
+      <Filter>Engine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Input\input.hpp">
+      <Filter>Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\math.hpp">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Rendering\render_system.hpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Rendering\renderer2d.hpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine\main.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\debug.cpp">
+      <Filter>Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\time.cpp">
+      <Filter>Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Input\input.cpp">
+      <Filter>Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Rendering\render_system.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Rendering\renderer2d.cpp">
+      <Filter>Engine\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="external\glad\src\glad.c">
-      <Filter>Engine\Source Files</Filter>
+      <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="time.cpp">
-      <Filter>Engine\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="debug.cpp">
-      <Filter>Engine\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="input.cpp">
-      <Filter>Engine\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="render_system.cpp">
-      <Filter>Engine\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer2d.cpp">
-      <Filter>Engine\Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="time.hpp">
-      <Filter>Engine\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="debug.hpp">
-      <Filter>Engine\Header Files\Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="events.hpp">
-      <Filter>Engine\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="input.hpp">
-      <Filter>Engine\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="math.hpp">
-      <Filter>Engine\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="debug_system.hpp">
-      <Filter>Engine\Header Files\Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="ecs.hpp">
-      <Filter>Engine\Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="components.hpp">
-      <Filter>Engine\Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer2d.hpp">
-      <Filter>Engine\Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="render_system.hpp">
-      <Filter>Engine\Header Files\Render</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

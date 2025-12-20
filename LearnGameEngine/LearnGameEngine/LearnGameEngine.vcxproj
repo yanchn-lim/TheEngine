@@ -18,6 +18,28 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Core\debug.hpp" />
+    <ClInclude Include="Engine\Core\debug_system.hpp" />
+    <ClInclude Include="Engine\Core\time.hpp" />
+    <ClInclude Include="Engine\ECS\components.hpp" />
+    <ClInclude Include="Engine\ECS\ecs.hpp" />
+    <ClInclude Include="Engine\engine.hpp" />
+    <ClInclude Include="Engine\events.hpp" />
+    <ClInclude Include="Engine\Input\input.hpp" />
+    <ClInclude Include="Engine\Math\math.hpp" />
+    <ClInclude Include="Engine\Rendering\renderer2d.hpp" />
+    <ClInclude Include="Engine\Rendering\render_system.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine\Core\debug.cpp" />
+    <ClCompile Include="Engine\Core\time.cpp" />
+    <ClCompile Include="Engine\Input\input.cpp" />
+    <ClCompile Include="Engine\main.cpp" />
+    <ClCompile Include="Engine\Rendering\renderer2d.cpp" />
+    <ClCompile Include="Engine\Rendering\render_system.cpp" />
+    <ClCompile Include="external\glad\src\glad.c" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -108,7 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;$(AdditionalIncludeDirectories);$(ProjectDir)Engine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -126,7 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;$(AdditionalIncludeDirectories);$(ProjectDir)Engine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -136,28 +158,6 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;opengl32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="debug.cpp" />
-    <ClCompile Include="external\glad\src\glad.c" />
-    <ClCompile Include="input.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="renderer2d.cpp" />
-    <ClCompile Include="render_system.cpp" />
-    <ClCompile Include="time.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="components.hpp" />
-    <ClInclude Include="debug.hpp" />
-    <ClInclude Include="debug_system.hpp" />
-    <ClInclude Include="ecs.hpp" />
-    <ClInclude Include="engine.hpp" />
-    <ClInclude Include="events.hpp" />
-    <ClInclude Include="input.hpp" />
-    <ClInclude Include="math.hpp" />
-    <ClInclude Include="renderer2d.hpp" />
-    <ClInclude Include="render_system.hpp" />
-    <ClInclude Include="time.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

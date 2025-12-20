@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math.hpp"
+#include "Math/math.hpp"
 
 namespace Engine
 {
