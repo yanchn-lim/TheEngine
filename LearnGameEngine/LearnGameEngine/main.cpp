@@ -28,13 +28,13 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-int main()
+GLFWwindow* InitializeGLFW()
 {
     // initializing glfw
-	glfwInit(); // setting up internal stuff to interface with windows
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // telling glfw that i want v4
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5); // specifically v4.5
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // forces VAOs,shaders,etc
+    glfwInit(); // setting up internal stuff to interface with windows
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // telling glfw that i want v4
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5); // specifically v4.5
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // forces VAOs,shaders,etc
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // creating the window
@@ -43,7 +43,7 @@ int main()
     {
         std::cout << "Failed to create GLFW window\n";
         glfwTerminate();
-        return -1;
+        exit(-1);
     }
     glfwMakeContextCurrent(window);
 
@@ -51,12 +51,25 @@ int main()
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD\n";
-        return -1;
+        exit(-1);
     }
 
     // viewport and resize
     glViewport(0, 0, 1600, 900);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    
+    return window;
+}
+
+void MainLoop(GLFWwindow* window)
+{
+   
+}
+
+int main()
+{
+    // creating the window
+    GLFWwindow* window = InitializeGLFW();
 
     //pretty much singletons here
     //initializing global systems
@@ -64,6 +77,7 @@ int main()
     Engine::TimeConfig g_TimeConfig;
     Engine::EventBus   g_EventBus; //create a global event bus
     Engine::ECS::World g_World;
+    bool m_Running = true;
 
     //initializing systems
     double startTime = glfwGetTime();

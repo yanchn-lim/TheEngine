@@ -150,6 +150,7 @@
     <ClInclude Include="debug.hpp" />
     <ClInclude Include="debug_system.hpp" />
     <ClInclude Include="ecs.hpp" />
+    <ClInclude Include="engine.hpp" />
     <ClInclude Include="events.hpp" />
     <ClInclude Include="input.hpp" />
     <ClInclude Include="math.hpp" />
