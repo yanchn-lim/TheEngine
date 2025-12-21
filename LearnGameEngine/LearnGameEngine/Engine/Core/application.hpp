@@ -31,11 +31,15 @@ namespace Engine
 		virtual void OnFixedUpdate(float fixedDeltaTime) {}
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender(float alpha) {}
+		virtual void OnRenderGUI() {}
 
 	private:
 		void InitializeEngine(const ApplicationConfig& config);
 		void ShutdownEngine();
 		void MainLoop();
+
+		void InitializeImGui();
+		void ShutdownImGui();
 
 	private:
 		EngineCtx m_Ctx{};
@@ -44,5 +48,7 @@ namespace Engine
 		// Engine-owned systems
 		std::unique_ptr<class RenderSystem>       m_RenderSystem;
 		std::unique_ptr<class DebugFrameListener> m_DebugSystem;
+
+		bool m_ImGuiInitialized = false;
 	};
 };

@@ -13,6 +13,10 @@
 #include "Scene/scene_manager.hpp"
 #include "events.hpp"
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
 namespace
 {
 	Engine::EngineCtx* s_ActiveCtx = nullptr;
@@ -134,10 +138,14 @@ namespace Engine
 		// Get the world from the active scene and give it to RenderSystem
 		Scene& scene = m_Ctx.sceneManager.GetActiveScene();
 		m_RenderSystem = std::make_unique<RenderSystem>(scene.GetWorld(), m_Ctx.eventBus);
+
+		InitializeImGui();
 	}
 
 	void Application::ShutdownEngine()
 	{
+		ShutdownImGui();
+
 		m_RenderSystem.reset();
 		m_DebugSystem.reset();
 
@@ -196,18 +204,66 @@ namespace Engine
 				);
 			}
 
-			// Clear + render
-			glClearColor(0.0f, 0.4f, 0.5f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			// ===== IMGUI FRAME =====
+			if (m_ImGuiInitialized)
+			{
+				ImGui_ImplOpenGL3_NewFrame();
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
+			}
 
 			// ===== RENDER =====
+			glClearColor(0.0f, 0.4f, 0.5f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 			m_Ctx.eventBus.Emit(RenderEvent{ m_Ctx.time, alpha });
 			OnRender(alpha);
+
+			// ===== BUILD IMGUI =====
+			if (m_ImGuiInitialized)
+			{
+				//build gui here
+				OnRenderGUI();
+			}
 
 			// ===== END OF FRAME =====
 			m_Ctx.eventBus.Emit(FrameEndEvent{ m_Ctx.time });
 
+			if (m_ImGuiInitialized)
+			{
+				ImGui::Render();
+				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			}
+
 			glfwSwapBuffers(m_Ctx.window);
 		}
+	}
+
+	void Application::InitializeImGui()
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+
+		ImGuiIO& io = ImGui::GetIO();
+		(void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		//add other flags here
+
+		ImGui::StyleColorsDark();
+
+		ImGui_ImplGlfw_InitForOpenGL(m_Ctx.window, true);
+		ImGui_ImplOpenGL3_Init("#version 450");
+
+		m_ImGuiInitialized = true;
+	}
+
+	void Application::ShutdownImGui()
+	{
+		if (!m_ImGuiInitialized) return;
+
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+
+		m_ImGuiInitialized = false;
 	}
 }

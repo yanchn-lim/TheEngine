@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <algorithm>
+#include <string>
 
 
 /*=====GENERAL NAMING CONVENTIONS=====
@@ -20,6 +21,8 @@
 #include "ECS/ecs.hpp"
 #include "ECS/components.hpp"
 #include "ECS/entity.hpp"
+
+#include "imgui.h"
 
 namespace
 {
@@ -85,9 +88,70 @@ namespace
             // per-frame (non-physics) logic can go here
         }
 
+        void OnRenderGUI() override
+        {
+            //DrawDockspace();          // optional, later
+            DrawSceneHierarchyPanel();
+            DrawInspectorPanel();
+        }
+
+        void DrawSceneHierarchyPanel()
+        {
+            auto& ctx = GetContext();
+            auto& scene = ctx.sceneManager.GetActiveScene();
+            auto& world = scene.GetWorld();
+
+            ImGui::Begin("Scene Hierarchy");
+
+            // naive: iterate over all entities in world (depends on your ECS API)
+            world.ForEach<Engine::ECS::Transform>(
+                [&](Engine::ECS::EntityId id, Engine::ECS::Transform&)
+                {
+                    // For now just print ID; later store names in a NameComponent
+                    if (ImGui::Selectable(std::to_string(id).c_str(), id == m_SelectedEntityId))
+                    {
+                        m_SelectedEntityId = id;
+                    }
+                }
+            );
+
+            ImGui::End();
+        }
+
+        void DrawInspectorPanel()
+        {
+            if (m_SelectedEntityId == Engine::ECS::kInvalidEntity)
+                return;
+
+            auto& ctx = GetContext();
+            auto& scene = ctx.sceneManager.GetActiveScene();
+            auto& world = scene.GetWorld();
+
+            ImGui::Begin("Inspector");
+
+            if (auto* t = world.GetComponent<Engine::ECS::Transform>(m_SelectedEntityId))
+            {
+                ImGui::Text("Transform");
+                ImGui::DragFloat3("Position", &t->position.x, 0.1f);
+                ImGui::DragFloat("RotationZ", &t->rotationZ, 0.01f);
+                ImGui::DragFloat3("Scale", &t->scale.x, 0.1f);
+            }
+
+            if (auto* sprite = world.GetComponent<Engine::ECS::Sprite2D>(m_SelectedEntityId))
+            {
+                ImGui::Separator();
+                ImGui::Text("Sprite2D");
+                ImGui::DragFloat2("Size", &sprite->size.x, 0.01f);
+                ImGui::ColorEdit4("Color", &sprite->color.x);
+            }
+
+            ImGui::End();
+        }
+
     private:
         ECS::EntityId quadId;
         ECS::EntityId camId;
+        ECS::EntityId m_SelectedEntityId = Engine::ECS::kInvalidEntity;
     };
 }
 
