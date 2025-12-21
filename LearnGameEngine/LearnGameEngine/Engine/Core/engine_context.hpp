@@ -2,7 +2,7 @@
 
 #include "Core/time.hpp"
 #include "events.hpp"
-#include "ECS/ecs.hpp"
+#include "Scene/scene_manager.hpp"
 
 struct GLFWwindow;
 
@@ -13,7 +13,8 @@ namespace Engine
 		Time time;
 		TimeConfig timeConfig;
 		EventBus eventBus;
-		ECS::World world;
+
+		SceneManager sceneManager;
 
 		//platform
 		GLFWwindow* window = nullptr;

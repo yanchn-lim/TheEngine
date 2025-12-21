@@ -26,11 +26,23 @@
     <ClInclude Include="Engine\Core\time.hpp" />
     <ClInclude Include="Engine\ECS\components.hpp" />
     <ClInclude Include="Engine\ECS\ecs.hpp" />
+    <ClInclude Include="Engine\ECS\entity.hpp" />
     <ClInclude Include="Engine\events.hpp" />
     <ClInclude Include="Engine\Input\input.hpp" />
     <ClInclude Include="Engine\Math\math.hpp" />
     <ClInclude Include="Engine\Rendering\renderer2d.hpp" />
     <ClInclude Include="Engine\Rendering\render_system.hpp" />
+    <ClInclude Include="Engine\Scene\scene.hpp" />
+    <ClInclude Include="Engine\Scene\scene_manager.hpp" />
+    <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="external\imgui\backends\imgui_impl_opengl3.h" />
+    <ClInclude Include="external\imgui\backends\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="external\imgui\imconfig.h" />
+    <ClInclude Include="external\imgui\imgui.h" />
+    <ClInclude Include="external\imgui\imgui_internal.h" />
+    <ClInclude Include="external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="external\imgui\imstb_textedit.h" />
+    <ClInclude Include="external\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Core\application.cpp" />
@@ -40,7 +52,16 @@
     <ClCompile Include="Engine\main.cpp" />
     <ClCompile Include="Engine\Rendering\renderer2d.cpp" />
     <ClCompile Include="Engine\Rendering\render_system.cpp" />
+    <ClCompile Include="Engine\Scene\scene.cpp" />
+    <ClCompile Include="Engine\Scene\scene_manager.cpp" />
     <ClCompile Include="external\glad\src\glad.c" />
+    <ClCompile Include="external\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="external\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="external\imgui\imgui.cpp" />
+    <ClCompile Include="external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="external\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -132,7 +153,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;$(AdditionalIncludeDirectories);$(ProjectDir)Engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;$(ProjectDir)external\imgui;$(AdditionalIncludeDirectories);$(ProjectDir)Engine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -150,7 +171,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;$(AdditionalIncludeDirectories);$(ProjectDir)Engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glad\include;$(ProjectDir)external\glm;$(ProjectDir)external\imgui;$(AdditionalIncludeDirectories);$(ProjectDir)Engine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>

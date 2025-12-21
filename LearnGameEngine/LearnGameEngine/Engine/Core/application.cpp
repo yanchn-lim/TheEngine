@@ -10,6 +10,7 @@
 #include "Core/debug_system.hpp"
 #include "Input/input.hpp"
 #include "Rendering/render_system.hpp"
+#include "Scene/scene_manager.hpp"
 #include "events.hpp"
 
 namespace
@@ -124,7 +125,15 @@ namespace Engine
 		TimeSystem::Initialize(m_Ctx.time, startTime, m_Ctx.timeConfig);
 		InputSystem::Initialize(m_Ctx.window, &m_Ctx.eventBus);
 		m_DebugSystem = std::make_unique<DebugFrameListener>(m_Ctx.eventBus);
-		m_RenderSystem = std::make_unique<RenderSystem>(m_Ctx.world, m_Ctx.eventBus);
+
+		if (!m_Ctx.sceneManager.HasActiveScene())
+		{
+			m_Ctx.sceneManager.SetActiveScene(std::make_unique<Scene>());
+		}
+
+		// Get the world from the active scene and give it to RenderSystem
+		Scene& scene = m_Ctx.sceneManager.GetActiveScene();
+		m_RenderSystem = std::make_unique<RenderSystem>(scene.GetWorld(), m_Ctx.eventBus);
 	}
 
 	void Application::ShutdownEngine()
