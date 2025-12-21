@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Core\application.hpp" />
     <ClInclude Include="Engine\Core\debug.hpp" />
     <ClInclude Include="Engine\Core\debug_system.hpp" />
     <ClInclude Include="Engine\Core\engine_context.hpp" />
     <ClInclude Include="Engine\Core\time.hpp" />
     <ClInclude Include="Engine\ECS\components.hpp" />
     <ClInclude Include="Engine\ECS\ecs.hpp" />
-    <ClInclude Include="Engine\engine.hpp" />
     <ClInclude Include="Engine\events.hpp" />
     <ClInclude Include="Engine\Input\input.hpp" />
     <ClInclude Include="Engine\Math\math.hpp" />
@@ -33,6 +33,7 @@
     <ClInclude Include="Engine\Rendering\render_system.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Core\application.cpp" />
     <ClCompile Include="Engine\Core\debug.cpp" />
     <ClCompile Include="Engine\Core\time.cpp" />
     <ClCompile Include="Engine\Input\input.cpp" />

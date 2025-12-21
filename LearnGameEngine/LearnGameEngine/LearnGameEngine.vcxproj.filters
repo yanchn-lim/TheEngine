@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\engine.hpp">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\events.hpp">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -57,6 +54,9 @@
     <ClInclude Include="Engine\Core\engine_context.hpp">
       <Filter>Engine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Core\application.hpp">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\main.cpp">
@@ -79,6 +79,9 @@
     </ClCompile>
     <ClCompile Include="external\glad\src\glad.c">
       <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\application.cpp">
+      <Filter>Engine\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
