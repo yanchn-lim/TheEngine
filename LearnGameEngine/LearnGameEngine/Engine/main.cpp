@@ -41,7 +41,7 @@ namespace
             auto& world = scene.GetWorld();
 
             // Camera
-            Engine::Entity camera(world.CreateEntity(), &world);
+            Engine::Entity camera(world.CreateEntity(), &world,"Camera");
 
             auto& camTransform = camera.AddComponent<ECS::Transform>();
             camTransform.position = { 0.0f, 0.0f, 0.0f };
@@ -57,7 +57,7 @@ namespace
             camId = camera.GetId();
 
             // Quad
-            Engine::Entity quad(world.CreateEntity(), &world);
+            Engine::Entity quad(world.CreateEntity(), &world,"Quad");
 
             auto& quadTransform = quad.AddComponent<Engine::ECS::Transform>();
             quadTransform.position = { 0.0f, 0.0f, 0.0f };
@@ -107,8 +107,10 @@ namespace
             world.ForEach<Engine::ECS::Transform>(
                 [&](Engine::ECS::EntityId id, Engine::ECS::Transform&)
                 {
-                    // For now just print ID; later store names in a NameComponent
-                    if (ImGui::Selectable(std::to_string(id).c_str(), id == m_SelectedEntityId))
+                    std::string label = "Entity " + std::to_string(id);
+
+                    bool selected = (id == m_SelectedEntityId);
+                    if (ImGui::Selectable(label.c_str(), selected))
                     {
                         m_SelectedEntityId = id;
                     }

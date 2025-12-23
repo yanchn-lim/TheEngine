@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <utility>
-
+#include <string>
 #include "ECS/ecs.hpp"
 
 namespace Engine
@@ -11,9 +11,10 @@ namespace Engine
 	{
 	public:
 		Entity() = default;
-		Entity(ECS::EntityId id, ECS::World* world) 
+		Entity(ECS::EntityId id, ECS::World* world,std::string name)
 			: m_Id(id)
-			, m_World(world){}
+			, m_World(world)
+			, m_Name(name) {}
 
 
 		bool IsValid() const
@@ -92,5 +93,6 @@ namespace Engine
 	private:
 		ECS::EntityId m_Id = ECS::kInvalidEntity;
 		ECS::World* m_World = nullptr;
+		std::string m_Name;
 	};
 }

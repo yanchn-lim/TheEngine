@@ -7,6 +7,12 @@
 #include <memory>
 #include <utility>
 
+// ===== NEW SYSTEM =====
+/*
+	--- ARCHETYPE
+*/	
+
+
 namespace Engine
 {
 	namespace ECS
