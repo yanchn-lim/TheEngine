@@ -33,6 +33,12 @@ namespace Engine
 				timeSinceLastLog = 0.0f;
 			}
 		}
+		
+		void LogSystem()
+		{
+
+		}
+		/*void Logerror*/
 	}
 }
 #endif

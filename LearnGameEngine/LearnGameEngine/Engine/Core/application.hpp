@@ -7,7 +7,7 @@ namespace Engine
 {
 	struct ApplicationConfig
 	{
-		const char* windowTitle = "Engine";
+		const char* windowTitle = "Banana Engine";
 		int windowWidth = 1600;
 		int windowHeight = 900;
 		bool vsync = true;

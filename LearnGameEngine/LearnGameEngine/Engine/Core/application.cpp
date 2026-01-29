@@ -125,9 +125,9 @@ namespace Engine
 
 
 		//init engine systems
-		double startTime = glfwGetTime();
+		/*double startTime = glfwGetTime();
 		TimeSystem::Initialize(m_Ctx.time, startTime, m_Ctx.timeConfig);
-		InputSystem::Initialize(m_Ctx.window, &m_Ctx.eventBus);
+		InputSystem::Initialize(m_Ctx.window, &m_Ctx.eventBus);*/
 		m_DebugSystem = std::make_unique<DebugFrameListener>(m_Ctx.eventBus);
 
 		if (!m_Ctx.sceneManager.HasActiveScene())

@@ -160,7 +160,7 @@ namespace
 int main()
 {
     Engine::ApplicationConfig config;
-    config.windowTitle = "Engine Sandbox";
+    config.windowTitle = "Bananana Sandbox";
     config.windowWidth = 1600;
     config.windowHeight = 900;
 
