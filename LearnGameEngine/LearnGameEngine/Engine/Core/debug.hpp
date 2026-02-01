@@ -10,7 +10,7 @@ namespace Engine
 		void LogSystem();
 #else
 		inline void LogTimeStats(Time& time) {};
-
+		inline void LogSystem() {};
 #endif
 }
 	}

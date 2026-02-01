@@ -71,7 +71,7 @@ namespace
             quadId = quad.GetId();
         }
 
-        void OnFixedUpdate(float fixedDeltaTime) override
+        void OnFixedUpdate(float fixedDeltaTime) override 
         {
             auto& ctx = GetContext();
             auto& scene = ctx.sceneManager.GetActiveScene();

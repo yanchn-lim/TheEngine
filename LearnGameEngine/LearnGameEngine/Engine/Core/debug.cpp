@@ -1,6 +1,7 @@
 #include "debug.hpp"
 #include <cstdio>
 
+
 #if defined(_DEBUG)
 namespace Engine
 {
@@ -36,6 +37,7 @@ namespace Engine
 		
 		void LogSystem()
 		{
+			
 
 		}
 		/*void Logerror*/
