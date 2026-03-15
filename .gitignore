@@ -1,0 +1,26 @@
+# Build output
+bin/
+out/
+x64/
+Debug/
+Release/
+
+*.ipch
+*.suo
+*.db
+*.pdb
+*.exe
+*.ilk
+.vs
+.tmp
+*.tlog
+*.obj
+*.idb
+*.log
+*.exp
+*.iobj
+*.ipdb
+
+
+# third_party binaries (keep headers/source, ignore precompiled libs)
+# third_party/glfw/lib-vc2022/
