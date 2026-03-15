@@ -7,6 +7,9 @@
 
 namespace Engine
 {
+
+	//simple helper stuff to query and keep record of the entity
+
 	class Entity
 	{
 	public:

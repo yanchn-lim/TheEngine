@@ -105,6 +105,12 @@
     <ClInclude Include="external\imgui\imstb_truetype.h">
       <Filter>Engine\External\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\ECS\archetype.hpp">
+      <Filter>Engine\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ECS\ecs_types.hpp">
+      <Filter>Engine\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\main.cpp">

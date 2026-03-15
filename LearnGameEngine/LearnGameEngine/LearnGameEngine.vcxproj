@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -24,8 +24,10 @@
     <ClInclude Include="Engine\Core\debug_system.hpp" />
     <ClInclude Include="Engine\Core\engine_context.hpp" />
     <ClInclude Include="Engine\Core\time.hpp" />
+    <ClInclude Include="Engine\ECS\archetype.hpp" />
     <ClInclude Include="Engine\ECS\components.hpp" />
     <ClInclude Include="Engine\ECS\ecs.hpp" />
+    <ClInclude Include="Engine\ECS\ecs_types.hpp" />
     <ClInclude Include="Engine\ECS\entity.hpp" />
     <ClInclude Include="Engine\events.hpp" />
     <ClInclude Include="Engine\Input\input.hpp" />

@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 
+#include "ECS/archetype.hpp"
 // ===== NEW SYSTEM =====
 /*
 	--- ARCHETYPE
@@ -45,11 +46,13 @@ namespace Engine
 
 				//remove from entity list
 				std::uint32_t index = m_EntityIndex[entity];
-				EntityId last = m_Entities.back();
+				EntityId last = m_Entities.back(); //get last entity in the array
 
+				//swap index to remove to the back
 				m_Entities[index] = last;
 				m_EntityIndex[last] = index;
 
+				//pop last entity
 				m_Entities.pop_back();
 				m_EntityIndex.erase(entity);
 
@@ -62,7 +65,7 @@ namespace Engine
 
 			bool IsAlive(EntityId entity) const
 			{
-				return m_EntityIndex.find(entity) != m_EntityIndex.end();
+				return m_EntityIndex.find(entity) != m_EntityIndex.end(); //compare to one past last element
 			}
 
 			//===== COMPONENT API =====
@@ -210,5 +213,69 @@ namespace Engine
 			//component type -> storage mapping
 			std::unordered_map<std::type_index, std::unique_ptr<IComponentStorage>> m_ComponentStorages;
 		};
+	}
+
+	namespace ECS2
+	{
+		using uint32 = std::uint32_t;
+		using EntityId = std::uint32_t;
+		constexpr EntityId kInvalidEntity = 0;
+
+		class World
+		{
+		public:
+			World() : m_NextEntityId(1) {} //start first entity at 1
+
+			EntityId CreateEntity()
+			{
+				EntityId id = m_NextEntityId++;
+				m_Entities.push_back(id); //add to the back of the array
+				m_EntityIndex[id] = static_cast<uint32>(m_Entities.size() - 1);
+				return id;
+			}
+
+			void DestroyEntity(EntityId id)
+			{
+				if (!IsAlive(id)) return;
+
+				//get the target entity and last entity
+				uint32 index = m_EntityIndex[id];
+				EntityId last = m_Entities.back();
+
+				//swap remove target and last entity
+				m_Entities[index] = last;
+				m_EntityIndex[last] = index;
+
+				m_Entities.pop_back();
+				m_EntityIndex.erase(id);
+
+				//remove components from archetype manager
+				//...
+			}
+
+			//const to prevent mutating anything
+			bool IsAlive(EntityId id) const
+			{
+				return m_EntityIndex.find(id) != m_EntityIndex.end();
+			}
+
+			// ===== COMPONENTS =====
+			template<typename ComponentT, typename... Args>
+			ComponentT AddComponent(EntityId id,Args&... args)
+			{
+
+			}
+
+		private:
+			//global entity entries
+			EntityId m_NextEntityId = 1;
+			std::vector<EntityId> m_Entities;
+			std::unordered_map<EntityId, uint32> m_EntityIndex;
+
+			//inactive list?
+
+			//archetype
+			//std::unordered_map<uint32, Archetype> m_Archetypes; //bit to archetype
+		};	
 	}
 }

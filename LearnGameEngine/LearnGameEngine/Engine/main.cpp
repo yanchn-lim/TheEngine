@@ -19,6 +19,7 @@
 // Engine/main.cpp
 #include "Core/application.hpp"
 #include "ECS/ecs.hpp"
+#include "ECS/ecs_types.hpp"
 #include "ECS/components.hpp"
 #include "ECS/entity.hpp"
 

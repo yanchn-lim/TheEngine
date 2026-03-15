@@ -12,6 +12,10 @@ namespace Engine
 
 			float rotationZ = 0.0f; //replace with quaternion later on
 			float3 scale{ 1.0f,1.0f,1.0f };
+
+			Transform() {
+				//when called instanced, register into component registry
+			}
 		};
 
 		struct Renderable
@@ -44,5 +48,18 @@ namespace Engine
 			//marking as main render camera
 			bool primary = true;
 		};
+	
 	}
+
+	
+	
+	
+}
+
+namespace Engine::ECS2
+{
+	using Transform = Engine::ECS::Transform;
+	using Renderable = Engine::ECS::Renderable;
+	using Sprite2D = Engine::ECS::Sprite2D;
+	using Camera2D = Engine::ECS::Camera2D;
 }
