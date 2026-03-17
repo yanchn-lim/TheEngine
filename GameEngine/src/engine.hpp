@@ -1,5 +1,7 @@
 #pragma once
 
+#include "profiler_ui.hpp"
+
 struct GLFWwindow;
 
 struct Window
@@ -7,7 +9,7 @@ struct Window
 	GLFWwindow* handle{ nullptr };
 	int2 size{ 1600,900 };
 	const char* title{ "Engine" };
-	bool vsync = true;
+	bool vsync = false;
 
 	bool Init();
 	void Shutdown();
@@ -39,6 +41,8 @@ public:
 
 	Window window;
 	ImGuiLayer imgui;
+
+	ProfilerUI profilerUI;
 private:
 	Engine() = default;
 

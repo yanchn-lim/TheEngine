@@ -5,20 +5,21 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 // Standard library
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
 #include <array>
-#include <unordered_map>
-#include <map>
-#include <memory>
-#include <functional>
 #include <algorithm>
-#include <utility>
 #include <cassert>
 #include <cstdint>
+#include <chrono>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 // GLM
 #include <glm/glm.hpp>

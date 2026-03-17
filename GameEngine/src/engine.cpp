@@ -1,11 +1,13 @@
 #include "pch.hpp"
 
-#include "engine.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+
+#include "engine.hpp"
+#include "profiler.hpp"
 
 bool Window::Init()
 {
@@ -98,16 +100,23 @@ void ImGuiLayer::Shutdown()
 //ENGINE
 int Engine::Run()
 {
-	if (!Initialize()) return -1;
+	if (!Initialize()) 
+        return -1;
+
 	Update();
 	Shutdown();
+
 	return 0;
 }
 
 bool Engine::Initialize()
 {
-    if (!window.Init())        return false;
-    if (!imgui.Init(window.handle)) return false;
+    if (!window.Init())        
+        return false;
+
+    if (!imgui.Init(window.handle)) 
+        return false;
+
     return true;
 }
 
@@ -115,16 +124,21 @@ void Engine::Update()
 {
     while (!glfwWindowShouldClose(window.handle))
     {
+        PROFILE_SCOPE("MainLoop");
         glfwPollEvents();
 
         // --- Begin frame ---
-        imgui.Begin();
+        //clear buffers
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // [game update]
         // [render]
 
-        // --- End frame ---
+        imgui.Begin();
+        profilerUI.Draw();
         imgui.End();
+        // --- End frame ---
         glfwSwapBuffers(window.handle);
     }
 }
