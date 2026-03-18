@@ -4,12 +4,28 @@
 
 constexpr size_t PROFILER_CAP = 1024;
 
+struct ProfileSample
+{
+	const char* name{ nullptr };
+	float startMs{ 0.f };
+	float durationMs{ 0.f };
+	int depth{ 0 }; //stack depth for hierarchy view
+};
+
+struct FrameData
+{
+	std::vector<ProfileSample> samples;
+	float frameTimeMs = 0.0f;
+};
+
 struct ScopeData
 {
 	RingBuffer<float, PROFILER_CAP> history;
 	float lastMs = 0.0f;
 	float avgMs = 0.0f;
 };
+
+
 
 
 class Profiler

@@ -43,6 +43,8 @@ public:
 	ImGuiLayer imgui;
 
 	ProfilerUI profilerUI;
+
+	bool running = false;
 private:
 	Engine() = default;
 

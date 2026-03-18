@@ -9,9 +9,24 @@
 #include "engine.hpp"
 #include "profiler.hpp"
 
+static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+        Engine::Get().running = false;
+    }
+}
+
+static void ErrorCallback(int error, const char* description)
+{
+    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
+
 bool Window::Init()
 {
     if (!glfwInit()) return false;
+
+	glfwSetErrorCallback(ErrorCallback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -32,6 +47,8 @@ bool Window::Init()
             glViewport(0, 0, w, h);
         });
 
+    glfwSetKeyCallback(handle, ProcessInput);
+
     return true;
 }
 
@@ -51,6 +68,7 @@ bool ImGuiLayer::Init(GLFWwindow* window)
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
 
     ImGuiStyle& style = ImGui::GetStyle();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -70,6 +88,7 @@ void ImGuiLayer::Begin()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    
 }
 
 void ImGuiLayer::End()
@@ -95,8 +114,6 @@ void ImGuiLayer::Shutdown()
     ImGui::DestroyContext();
 }
 
-
-
 //ENGINE
 int Engine::Run()
 {
@@ -117,15 +134,18 @@ bool Engine::Initialize()
     if (!imgui.Init(window.handle)) 
         return false;
 
+    running = true;
+
     return true;
 }
 
 void Engine::Update()
 {
-    while (!glfwWindowShouldClose(window.handle))
+    while (!glfwWindowShouldClose(window.handle) && running)
     {
         PROFILE_SCOPE("MainLoop");
         glfwPollEvents();
+
 
         // --- Begin frame ---
         //clear buffers
@@ -133,11 +153,26 @@ void Engine::Update()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // [game update]
-        // [render]
+        {
+            PROFILE_SCOPE("Update");
 
-        imgui.Begin();
-        profilerUI.Draw();
-        imgui.End();
+        }
+
+        // [render]
+        {
+			PROFILE_SCOPE("Render");
+        }
+
+        {
+            PROFILE_SCOPE("ImGui");
+            imgui.Begin();
+		    //set a dockspace to the entire viewport
+            ImGui::DockSpaceOverViewport();
+            //draw ui
+            profilerUI.Draw();
+            ImGui::ShowDemoWindow();
+            imgui.End();
+        }
         // --- End frame ---
         glfwSwapBuffers(window.handle);
     }
@@ -145,6 +180,7 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
+    std::cout << "Graceful shutdown...\n";
     imgui.Shutdown();
     window.Shutdown();
 }
