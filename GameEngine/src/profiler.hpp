@@ -4,36 +4,69 @@
 
 constexpr size_t PROFILER_CAP = 1024;
 
+/*
+  STRUCTURE :
+	RingBuffer of frames
+	{
+		FrameData
+		{
+			->  frame time
+			->  samples
+				{
+					ProfileSample
+				}
+		}
+	}
+*/
+
+constexpr size_t MAX_SAMPLES_PER_FRAME = 256;
+constexpr size_t MAX_SCOPE_DEPTH = 32;
+
+struct ProfileSampleNode
+{
+	const char* name{ nullptr };
+	float       startMs{ 0.f };
+	float       durationMs{ 0.f };
+
+	std::vector<ProfileSampleNode> children{};
+};
+
 struct ProfileSample
 {
 	const char* name{ nullptr };
 	float startMs{ 0.f };
 	float durationMs{ 0.f };
-	int depth{ 0 }; //stack depth for hierarchy view
+	size_t depth{ 0 }; //stack depth for hierarchy view
 };
 
 struct FrameData
 {
-	std::vector<ProfileSample> samples;
+	//std::array<ProfileSample,MAX_SAMPLES_PER_FRAME> samples;
+	std::vector<ProfileSampleNode> roots;
 	float frameTimeMs = 0.0f;
 };
 
-struct ScopeData
-{
-	RingBuffer<float, PROFILER_CAP> history;
-	float lastMs = 0.0f;
-	float avgMs = 0.0f;
-};
-
-
-
-
 class Profiler
 {
-	using Scopes = std::unordered_map<std::string, ScopeData>;
-private:
-	Scopes _scopes;
+	using Frames = RingBuffer<FrameData, PROFILER_CAP>;
+	using Clock = std::chrono::high_resolution_clock;
+	using TimePoint = std::chrono::time_point<Clock>;
 
+private:
+	FrameData _displayFrame{};
+	FrameData _currentFrame{};
+	Frames _frames{};
+
+	std::array<ProfileSampleNode*, MAX_SCOPE_DEPTH> _scopeStack{};
+	size_t _scopeDepth;
+
+	bool _paused;
+	TimePoint _frameStart;
+
+	double ToMs(std::chrono::duration<double> d)
+	{
+		return d.count() * 1000.0;
+	}
 public:
 	static Profiler& Get()
 	{
@@ -41,14 +74,22 @@ public:
 		return instance;
 	}
 	
-	void Record(const char* name,float ms);
+	void BeginFrame();
+	void EndFrame();
 
-	const Scopes& GetScopes() const
+	void PushScope(const char* name);
+	void PopScope();
+
+	const FrameData& GetDisplayFrame() const { return _displayFrame; }
+	const Frames& GetFrames() const	{ return _frames; }
+	void SetPaused(bool pause)
 	{
-		return _scopes;
+		_paused = pause;
 	}
 
-	Profiler() {};
+	const bool IsPaused() { return _paused; }
+	Profiler() : _scopeDepth(0), _paused(false) {};
+
 	//singleton?
 	Profiler(const Profiler&) = delete;
 	Profiler& operator=(const Profiler&) = delete;
@@ -57,16 +98,16 @@ public:
 //RAII profile scope
 struct ProfileScope
 {
-	const char* name;
-	std::chrono::high_resolution_clock::time_point start;
+	//on construct, pushes the scope into profiler
+	ProfileScope(const char* name)
+	{
+		Profiler::Get().PushScope(name);
+	};
 
-	ProfileScope(const char* name) : name(name), start(std::chrono::high_resolution_clock::now()) {};
-
+	//on destruct, pop the scope and record
 	~ProfileScope()
 	{
-		auto end = std::chrono::high_resolution_clock::now();
-		float ms = std::chrono::duration<float, std::milli>(end - start).count();
-		Profiler::Get().Record(name, ms);
+		Profiler::Get().PopScope();
 	}
 };
 

@@ -18,7 +18,7 @@ struct RingBuffer
 		if (count < N) ++count;
 	}
 
-	//copy from array into the ring buffer
+	//copy from ringbuffer into an array chronologically
 	void CopyOrdered(std::array<T, N>& dst) const
 	{
 		for (size_t i = 0; i < N; ++i)
@@ -29,5 +29,15 @@ struct RingBuffer
 	T Last() const
 	{
 		return count ? data[(head + N - 1) % N] : T{};
+	}
+
+	T& operator[](size_t i)
+	{
+		return data[i];
+	}
+
+	const T& operator[](size_t i) const
+	{
+		return data[i];
 	}
 };

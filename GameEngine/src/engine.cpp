@@ -15,6 +15,11 @@ static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, 
     {
         Engine::Get().running = false;
     }
+
+    if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
+    {
+        Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
+    }
 }
 
 static void ErrorCallback(int error, const char* description)
@@ -139,42 +144,67 @@ bool Engine::Initialize()
     return true;
 }
 
+void Render()
+{
+    PROFILE_FUNCTION();
+}
+
 void Engine::Update()
 {
     while (!glfwWindowShouldClose(window.handle) && running)
     {
-        PROFILE_SCOPE("MainLoop");
-        glfwPollEvents();
-
-
-        // --- Begin frame ---
-        //clear buffers
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // [game update]
-        {
-            PROFILE_SCOPE("Update");
-
-        }
-
-        // [render]
-        {
-			PROFILE_SCOPE("Render");
-        }
+        Profiler::Get().BeginFrame();
 
         {
-            PROFILE_SCOPE("ImGui");
-            imgui.Begin();
-		    //set a dockspace to the entire viewport
-            ImGui::DockSpaceOverViewport();
-            //draw ui
-            profilerUI.Draw();
-            ImGui::ShowDemoWindow();
-            imgui.End();
+            PROFILE_SCOPE("MainLoop");
+            glfwPollEvents();
+
+
+            // --- Begin frame ---
+            //clear buffers
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // [game update]
+            {
+                PROFILE_SCOPE("Update");
+                {
+                    PROFILE_SCOPE("EXAMPLE_1");
+                }
+                {
+                    PROFILE_SCOPE("EXAMPLE_2");
+                    {
+                        PROFILE_SCOPE("EXAMPLE_3");
+                    }
+                }
+            }
+
+            // [render]
+            {
+			    PROFILE_SCOPE("Render");
+                {
+                    PROFILE_SCOPE("EXAMPLE_1");
+                } 
+                {
+                    PROFILE_SCOPE("EXAMPLE_2");
+                }
+            }
+
+            {
+                PROFILE_SCOPE("ImGui");
+                imgui.Begin();
+		        //set a dockspace to the entire viewport
+                ImGui::DockSpaceOverViewport();
+                //draw ui
+                profilerUI.Draw();
+                ImGui::ShowDemoWindow();
+                imgui.End();
+            }
+            // --- End frame ---
+            glfwSwapBuffers(window.handle);
         }
-        // --- End frame ---
-        glfwSwapBuffers(window.handle);
+
+        Profiler::Get().EndFrame();
     }
 }
 
