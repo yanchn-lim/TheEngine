@@ -3,23 +3,6 @@
 #include "ring_buffer.hpp"
 
 constexpr size_t PROFILER_CAP = 1024;
-
-/*
-  STRUCTURE :
-	RingBuffer of frames
-	{
-		FrameData
-		{
-			->  frame time
-			->  samples
-				{
-					ProfileSample
-				}
-		}
-	}
-*/
-
-constexpr size_t MAX_SAMPLES_PER_FRAME = 256;
 constexpr size_t MAX_SCOPE_DEPTH = 32;
 
 struct ProfileSampleNode

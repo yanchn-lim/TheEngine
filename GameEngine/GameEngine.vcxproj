@@ -148,6 +148,7 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ForcedIncludeFiles>
     </ClCompile>
+    <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pch.cpp">
@@ -167,6 +168,7 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\debug.hpp" />
     <ClInclude Include="src\engine.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\profiler.hpp" />
