@@ -38,13 +38,24 @@ bool Window::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	Debug::CLog("Creating window...\n");
     handle = glfwCreateWindow(size.x, size.y, title, nullptr, nullptr);
-    if (!handle) { glfwTerminate(); return false; }
+    if (!handle) 
+    {   
+		Debug::CLog("Failed to create window\n");
+        glfwTerminate(); 
+        return false; 
+    }
 
     glfwMakeContextCurrent(handle);
     glfwSwapInterval(vsync ? 1 : 0);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) return false;
+	Debug::CLog("Initializing GLAD...\n");
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+		Debug::CLog("Failed to initialize GLAD\n");
+        return false;
+    }
 
     // Keep size in sync if the user resizes
     glfwSetFramebufferSizeCallback(handle, [](GLFWwindow*, int w, int h)
@@ -55,6 +66,7 @@ bool Window::Init()
 
     glfwSetKeyCallback(handle, ProcessInput);
 
+	Debug::CLog("Window created successfully\n");
     return true;
 }
 
@@ -66,6 +78,7 @@ void Window::Shutdown()
 
 bool ImGuiLayer::Init(GLFWwindow* window)
 {
+	Debug::CLog("Initializing ImGui...\n");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -83,9 +96,18 @@ bool ImGuiLayer::Init(GLFWwindow* window)
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
 
-    if (!ImGui_ImplGlfw_InitForOpenGL(window, true)) return false;
-    if (!ImGui_ImplOpenGL3_Init("#version 460"))      return false;
+    if (!ImGui_ImplGlfw_InitForOpenGL(window, true))
+    {
+		Debug::CLog("Failed to initialize ImGui GLFW backend\n");
+        return false;
+    }
+    if (!ImGui_ImplOpenGL3_Init("#version 460"))
+    {
+		Debug::CLog("Failed to initialize ImGui OpenGL backend\n");
+        return false;
+    }
 
+	Debug::CLog("ImGui initialized successfully\n");
     return true;
 }
 
@@ -134,16 +156,24 @@ int Engine::Run()
 
 bool Engine::Initialize()
 {
-    if (!window.Init())        
+	Debug::CLog("========== Initializing engine... ==========\n");
+    if (!window.Init())
+    {
+		Debug::CLog("Failed to initialize window\n");
         return false;
+    }
 
-    if (!imgui.Init(window.handle)) 
+    if (!imgui.Init(window.handle))
+    {
+		Debug::CLog("Failed to initialize ImGui\n");
         return false;
+    }
 
     running = true;
 
-    Debug::Log("bing bang ", running);
+	Debug::CLog("========== Initialization Success! ==========\n\n");
 
+    Debug::Log("TESINTG");
     return true;
 }
 
@@ -154,6 +184,7 @@ void Render()
 
 void Engine::Update()
 {
+    int frameCount = 0;
     while (!glfwWindowShouldClose(window.handle) && running)
     {
         Profiler::Get().BeginFrame();
@@ -171,15 +202,8 @@ void Engine::Update()
             // [game update]
             {
                 PROFILE_SCOPE("Update");
-                {
-                    PROFILE_SCOPE("EXAMPLE_1");
-                }
-                {
-                    PROFILE_SCOPE("EXAMPLE_2");
-                    {
-                        PROFILE_SCOPE("EXAMPLE_3");
-                    }
-                }
+                //Debug::Log("Frames passed : ",frameCount++);
+
             }
 
             // [render]
@@ -200,7 +224,9 @@ void Engine::Update()
                 ImGui::DockSpaceOverViewport();
                 //draw ui
                 profilerUI.Draw();
-                ImGui::ShowDemoWindow();
+				DebugConsole::Get().Draw();
+                //ImGui::ShowDemoWindow();
+
                 imgui.End();
             }
             // --- End frame ---
@@ -213,7 +239,8 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
-    std::cout << "Graceful shutdown...\n";
+	Debug::CLog("========== Shutting down engine... ==========\n");
     imgui.Shutdown();
     window.Shutdown();
+	Debug::CLog("Engine shutdown complete\n");
 }
