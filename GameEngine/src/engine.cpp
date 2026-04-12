@@ -1,5 +1,3 @@
-#include "pch.hpp"
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -9,6 +7,37 @@
 #include "engine.hpp"
 #include "debug.hpp"
 #include "profiler.hpp"
+#include "graphics.hpp"
+#include "shader.hpp"
+#include "mesh.hpp"
+
+static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    // let ImGui consume scroll if it wants it
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
+
+    Debug::CLog("IM ZOOM\n");
+    Engine::Get().camera.ProcessZoom((float)yoffset);
+}
+
+static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
+
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+    {
+        Engine::Get().input.middleMouseHeld = (action == GLFW_PRESS);
+
+        if (action == GLFW_PRESS)
+        {
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            Engine::Get().input.lastMousePos = float2((float)x, (float)y);
+        }
+    }
+}
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -21,6 +50,9 @@ static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, 
     {
         Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
     }
+
+    //build a map of keys to a function ptr?
+    //set map layers to change on the fly
 }
 
 static void ErrorCallback(int error, const char* description)
@@ -65,6 +97,8 @@ bool Window::Init()
         });
 
     glfwSetKeyCallback(handle, ProcessInput);
+    glfwSetScrollCallback(handle, ScrollCallback);
+    glfwSetMouseButtonCallback(handle, MouseButtonCallback);
 
 	Debug::CLog("Window created successfully\n");
     return true;
@@ -171,15 +205,31 @@ bool Engine::Initialize()
 
     running = true;
 
+    if (!Renderer::Get().Init())
+    {
+        Debug::CLog("Failed to initialize Renderer\n");
+        return false;
+    }
+
+    //switch this out to properly load assets
+    if (!ShaderLibrary::Get().Load("unlit", "assets/unlit.vert", "assets/unlit.frag"))
+    {
+        Debug::CLog("Failed to load unlit shader");
+        return false;
+    }
+
+    MeshLibrary::Get().Add("quad", MeshLibrary::MakeQuad());
+    MeshLibrary::Get().Add("circle", MeshLibrary::MakeCircle(32));
+
 	Debug::CLog("========== Initialization Success! ==========\n\n");
 
-    Debug::Log("TESINTG");
+
     return true;
 }
 
-void Render()
+static void Render()
 {
-    PROFILE_FUNCTION();
+    Renderer::Get().End();
 }
 
 void Engine::Update()
@@ -204,24 +254,32 @@ void Engine::Update()
                 PROFILE_SCOPE("Update");
                 //Debug::Log("Frames passed : ",frameCount++);
 
+                if (Engine::Get().input.middleMouseHeld)
+                {
+                    double x, y;
+                    glfwGetCursorPos(window.handle, &x, &y);
+                    float2 currentPos = float2((float)x, (float)y);
+                    float2 delta = input.lastMousePos - currentPos; // inverted: drag right moves camera right
+                    input.lastMousePos = currentPos;
+                    camera.ProcessPan(delta);
+                }
             }
 
             // [render]
             {
 			    PROFILE_SCOPE("Render");
-                {
-                    PROFILE_SCOPE("EXAMPLE_1");
-                } 
-                {
-                    PROFILE_SCOPE("EXAMPLE_2");
-                }
+                Renderer::Get().Begin();
+                Renderer::Get().Queue({ "unlit", "quad", float3(0.f, 0.f, 0.f), float3(100.f, 100.f, 1.f), 0.f });
+                Renderer::Get().SetCamera(camera.GetViewProjection(window.size));
+                Render();
             }
 
             {
+                
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
 		        //set a dockspace to the entire viewport
-                ImGui::DockSpaceOverViewport();
+                ImGui::DockSpaceOverViewport(0,ImGui::GetMainViewport(),ImGuiDockNodeFlags_PassthruCentralNode);
                 //draw ui
                 profilerUI.Draw();
 				DebugConsole::Get().Draw();
@@ -242,5 +300,8 @@ void Engine::Shutdown()
 	Debug::CLog("========== Shutting down engine... ==========\n");
     imgui.Shutdown();
     window.Shutdown();
+    MeshLibrary::Get().Shutdown();
 	Debug::CLog("Engine shutdown complete\n");
+
+    Renderer::Get().Shutdown();
 }

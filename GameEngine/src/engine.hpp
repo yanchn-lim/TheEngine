@@ -1,6 +1,7 @@
 #pragma once
 
 #include "profiler_ui.hpp"
+#include "camera.hpp"
 
 struct GLFWwindow;
 
@@ -23,6 +24,13 @@ struct ImGuiLayer
 	void Shutdown();
 };
 
+// tracks raw input state for camera controls
+struct InputState
+{
+	bool  middleMouseHeld = false;
+	float2 lastMousePos = float2(0.f);
+};
+
 
 class Engine
 {
@@ -43,6 +51,9 @@ public:
 	ImGuiLayer imgui;
 
 	ProfilerUI profilerUI;
+
+	Camera2D   camera;
+	InputState input;
 
 	bool running = false;
 private:

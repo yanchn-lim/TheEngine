@@ -1,5 +1,4 @@
 #include "profiler.hpp"
-#include <iostream>
 
 void Profiler::BeginFrame()
 {
