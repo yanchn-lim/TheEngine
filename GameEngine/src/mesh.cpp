@@ -4,32 +4,39 @@
 
 #include <glad/glad.h>
 
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Mesh
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------
 
 bool Mesh::Init(const std::vector<Vertex>& verts, const std::vector<uint>& indices)
 {
     indexCount = (uint)indices.size();
 
-    //get a handle id for each buffer
+    // Create the GPU objects; these calls fill the uint handles with IDs assigned by OpenGL.
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ibo);
 
+    // Bind the VAO first - every buffer bind and attribute setup below is recorded inside it.
+    // Re-binding the VAO later automatically restores all of this state.
     glBindVertexArray(vao);
 
+    // Upload vertex data. GL_STATIC_DRAW hints that the data will not change.
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(Vertex), verts.data(), GL_STATIC_DRAW);
 
+    // Upload index data. The IBO binding is also stored inside the VAO.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
-    // aPos - location 0
+    // Tell OpenGL how to read each field out of the raw vertex bytes.
+    // Args: attribute slot, component count, type, normalise, stride, byte offset into Vertex.
+
+    // slot 0 = aPos (vec2)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
     glEnableVertexAttribArray(0);
 
-    // aCol - location 1
+    // slot 1 = aCol (vec3)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
     glEnableVertexAttribArray(1);
 
@@ -45,22 +52,22 @@ void Mesh::Shutdown()
     vao = vbo = ibo = 0;
 }
 
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // MeshLibrary - built-in generators
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------
 
 Mesh MeshLibrary::MakeQuad()
 {
-    // unit quad centered at origin, in local space
-    // scale via model matrix at draw time
+    // 1x1 square centered at origin. Scale to desired size via the model matrix.
     const std::vector<Vertex> verts =
     {
         { float2(-0.5f,  0.5f), float3(1.f, 1.f, 1.f) },  // top-left
-        { float2(0.5f,  0.5f), float3(1.f, 1.f, 1.f) },  // top-right
-        { float2(0.5f, -0.5f), float3(1.f, 1.f, 1.f) },  // bottom-right
+        { float2( 0.5f,  0.5f), float3(1.f, 1.f, 1.f) },  // top-right
+        { float2( 0.5f, -0.5f), float3(1.f, 1.f, 1.f) },  // bottom-right
         { float2(-0.5f, -0.5f), float3(1.f, 1.f, 1.f) },  // bottom-left
     };
 
+    // Two triangles: (top-left, top-right, bottom-right) and (bottom-right, bottom-left, top-left).
     const std::vector<uint> indices = { 0, 1, 2, 2, 3, 0 };
 
     Mesh m;
@@ -73,11 +80,11 @@ Mesh MeshLibrary::MakeCircle(int segments)
     std::vector<Vertex> verts;
     std::vector<uint> indices;
 
-    // center vertex
-    verts.push_back({ float2(0.f, 0.f), float3(1.f, 1.f, 1.f) });
+    verts.push_back({ float2(0.f, 0.f), float3(1.f, 1.f, 1.f) }); // center vertex (hub of the fan)
 
     const float step = (2.f * glm::pi<float>()) / (float)segments;
 
+    // Place one vertex per segment evenly around the circumference (radius 0.5).
     for (int i = 0; i < segments; ++i)
     {
         float angle = step * (float)i;
@@ -88,7 +95,8 @@ Mesh MeshLibrary::MakeCircle(int segments)
             });
     }
 
-    // fan triangles from center
+    // Each triangle connects the center to two adjacent rim vertices.
+    // Modulo wraps the last triangle back to vertex 1 to close the circle.
     for (int i = 1; i <= segments; ++i)
     {
         indices.push_back(0);
@@ -101,9 +109,9 @@ Mesh MeshLibrary::MakeCircle(int segments)
     return m;
 }
 
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // MeshLibrary
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------
 
 bool MeshLibrary::Add(const std::string& name, Mesh mesh)
 {
@@ -119,7 +127,7 @@ bool MeshLibrary::Add(const std::string& name, Mesh mesh)
         return false;
     }
 
-    _meshes.emplace(name, std::move(mesh));
+    _meshes.emplace(name, std::move(mesh)); // std::move transfers ownership without copying GPU handles
     Debug::Log("MeshLibrary: registered '", name, "'");
     return true;
 }

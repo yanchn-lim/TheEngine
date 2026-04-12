@@ -1,48 +1,39 @@
 #pragma once
 
-//collect draw data
-//figure out using the camera which is visible
-//cull unseen renderers
-//build rendergraph
-//do render passes
-//do draw calls
-
-namespace Graphics
-{
-	
-}
-
+// Plain data describing one object to draw. No GPU work happens here -
+// commands are collected each frame, sorted, then flushed all at once.
 struct DrawCommand
 {
-	std::string shaderName;
-	std::string meshName;
-	float3 position;
-	float3 size;
-	float rotation;
+    std::string shaderName; // key into ShaderLibrary
+    std::string meshName;   // key into MeshLibrary
+    float3 position;        // world-space position
+    float3 size;            // scale applied via model matrix
+    float rotation;         // radians around the Z axis
 };
 
+// Collects DrawCommands, sorts them to minimise GPU state changes, then issues draw calls.
+// Usage per frame: Begin() -> SetCamera() -> Queue() -> End().
 class Renderer
 {
 public:
-	static Renderer& Get() { static Renderer instance; return instance; }
-	Renderer(const Renderer&) = delete;
-	Renderer& operator=(const Renderer&) = delete;
+    static Renderer& Get() { static Renderer instance; return instance; }
+    Renderer(const Renderer&) = delete;
+    Renderer& operator=(const Renderer&) = delete;
 
-	bool Init();
-	void Shutdown();
+    bool Init();
+    void Shutdown();
 
-	void Begin();
-	void End();
-	void Queue(DrawCommand cmd);
+    void Begin();              // clears the command buffer
+    void End();                // sorts and flushes all queued commands to the GPU
+    void Queue(DrawCommand cmd);
 
-	// call once per frame before End(), after Begin()
-	void SetCamera(const mat4& viewProjection);
+    void SetCamera(const mat4& viewProjection); // stores the VP matrix; uploaded to each shader in Flush()
 
 private:
-	Renderer() = default;
-	std::vector<DrawCommand> _commandBuffer{};
-	mat4 _viewProjection = mat4(1.f);
+    Renderer() = default;
+    std::vector<DrawCommand> _commandBuffer{};
+    mat4 _viewProjection = mat4(1.f);
 
-	void Sort();
-	void Flush();
+    void Sort();  // sorts by shader name to reduce glUseProgram calls
+    void Flush(); // iterates sorted commands and calls glDrawElements for each
 };

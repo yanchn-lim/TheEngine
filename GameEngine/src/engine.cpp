@@ -17,7 +17,6 @@ static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
 
-    Debug::CLog("IM ZOOM\n");
     Engine::Get().camera.ProcessZoom((float)yoffset);
 }
 
