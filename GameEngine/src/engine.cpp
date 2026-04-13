@@ -226,11 +226,6 @@ bool Engine::Initialize()
     return true;
 }
 
-static void Render()
-{
-    Renderer::Get().End();
-}
-
 void Engine::Update()
 {
     int frameCount = 0;
@@ -268,9 +263,22 @@ void Engine::Update()
             {
 			    PROFILE_SCOPE("Render");
                 Renderer::Get().Begin();
-                Renderer::Get().Queue({ "unlit", "quad", float3(0.f, 0.f, 0.f), float3(100.f, 100.f, 1.f), 0.f });
+
                 Renderer::Get().SetCamera(camera.GetViewProjection(window.size));
-                Render();
+
+                {
+                    PROFILE_SCOPE("QUEUE");
+                    for (int x = 0; x < 100; x++)
+                    {
+                        for (int y = 0; y < 100; y++)
+                        {
+                            Renderer::Get().Queue({ "unlit", "quad", float3(x * 200.f, y * 200.f, 0.f), float3(100.f, 100.f, 1.f), 0.f });
+                        }
+                    }
+                }
+
+
+                Renderer::Get().End();
             }
 
             {

@@ -5,6 +5,7 @@
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "debug.hpp"
+#include "profiler.hpp"
 
 // -----------------------------------------------------------------------
 // Public API
@@ -34,6 +35,7 @@ void Renderer::Queue(DrawCommand cmd)
 
 void Renderer::End()
 {
+    PROFILE_FUNCTION();
     Sort();
     Flush();
 }
@@ -49,6 +51,7 @@ void Renderer::SetCamera(const mat4& viewProjection)
 
 void Renderer::Sort()
 {
+    PROFILE_FUNCTION();
     // Group commands by shader name so we minimise expensive glUseProgram switches.
     std::sort(_commandBuffer.begin(), _commandBuffer.end(),
         [](const DrawCommand& a, const DrawCommand& b)
@@ -59,6 +62,7 @@ void Renderer::Sort()
 
 void Renderer::Flush()
 {
+    PROFILE_FUNCTION();
     // Track what is currently bound to skip redundant bind calls.
     const std::string* boundShader = nullptr;
     const std::string* boundMesh   = nullptr;

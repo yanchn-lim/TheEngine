@@ -4,7 +4,7 @@ struct Camera2D
 {
 	float2 position{ 0.f,0.f };
 	float zoom = 1.f;
-	float zoomMin = 0.1f;
+	float zoomMin = 0.01f;
 	float zoomMax = 10.f;
 
     // returns combined view * projection matrix
