@@ -3,6 +3,8 @@
 // One point on a mesh. Position is in local (object) space; colour is RGB in [0,1].
 struct Vertex
 {
-    float2 pos; // XY position in local space
-    float3 col; // RGB colour
+    float3 pos; // vert pos
+    float3 col{1.f,1.f,1.f}; // vert col
+
+    float2 texcoords;  // tex coords
 };

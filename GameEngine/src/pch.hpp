@@ -36,4 +36,5 @@ using int4 = glm::i32vec4;
 using mat3 = glm::mat3;
 using mat4 = glm::mat4;
 using quat = glm::quat;
+
 using uint = unsigned int;

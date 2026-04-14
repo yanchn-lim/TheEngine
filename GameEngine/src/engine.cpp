@@ -7,9 +7,11 @@
 #include "engine.hpp"
 #include "debug.hpp"
 #include "profiler.hpp"
+
 #include "graphics.hpp"
-#include "shader.hpp"
-#include "mesh.hpp"
+#include "graphics_resource.hpp"
+#include "material.hpp"
+
 
 static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -63,17 +65,17 @@ bool Window::Init()
 {
     if (!glfwInit()) return false;
 
-	glfwSetErrorCallback(ErrorCallback);
+    glfwSetErrorCallback(ErrorCallback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	Debug::CLog("Creating window...\n");
+    Debug::CLog("Creating window...\n");
     handle = glfwCreateWindow(size.x, size.y, title, nullptr, nullptr);
     if (!handle) 
     {   
-		Debug::CLog("Failed to create window\n");
+        Debug::CLog("Failed to create window\n");
         glfwTerminate(); 
         return false; 
     }
@@ -81,10 +83,10 @@ bool Window::Init()
     glfwMakeContextCurrent(handle);
     glfwSwapInterval(vsync ? 1 : 0);
 
-	Debug::CLog("Initializing GLAD...\n");
+    Debug::CLog("Initializing GLAD...\n");
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-		Debug::CLog("Failed to initialize GLAD\n");
+        Debug::CLog("Failed to initialize GLAD\n");
         return false;
     }
 
@@ -99,7 +101,7 @@ bool Window::Init()
     glfwSetScrollCallback(handle, ScrollCallback);
     glfwSetMouseButtonCallback(handle, MouseButtonCallback);
 
-	Debug::CLog("Window created successfully\n");
+    Debug::CLog("Window created successfully\n");
     return true;
 }
 
@@ -111,7 +113,7 @@ void Window::Shutdown()
 
 bool ImGuiLayer::Init(GLFWwindow* window)
 {
-	Debug::CLog("Initializing ImGui...\n");
+    Debug::CLog("Initializing ImGui...\n");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -131,16 +133,16 @@ bool ImGuiLayer::Init(GLFWwindow* window)
 
     if (!ImGui_ImplGlfw_InitForOpenGL(window, true))
     {
-		Debug::CLog("Failed to initialize ImGui GLFW backend\n");
+        Debug::CLog("Failed to initialize ImGui GLFW backend\n");
         return false;
     }
     if (!ImGui_ImplOpenGL3_Init("#version 460"))
     {
-		Debug::CLog("Failed to initialize ImGui OpenGL backend\n");
+        Debug::CLog("Failed to initialize ImGui OpenGL backend\n");
         return false;
     }
 
-	Debug::CLog("ImGui initialized successfully\n");
+    Debug::CLog("ImGui initialized successfully\n");
     return true;
 }
 
@@ -178,49 +180,44 @@ void ImGuiLayer::Shutdown()
 //ENGINE
 int Engine::Run()
 {
-	if (!Initialize()) 
+    if (!Initialize()) 
         return -1;
 
-	Update();
-	Shutdown();
+    Update();
+    Shutdown();
 
-	return 0;
+    return 0;
 }
 
 bool Engine::Initialize()
 {
-	Debug::CLog("========== Initializing engine... ==========\n");
+    Debug::CLog("========== Initializing engine... ==========\n");
     if (!window.Init())
     {
-		Debug::CLog("Failed to initialize window\n");
+        Debug::CLog("Failed to initialize window\n");
         return false;
     }
 
     if (!imgui.Init(window.handle))
     {
-		Debug::CLog("Failed to initialize ImGui\n");
+        Debug::CLog("Failed to initialize ImGui\n");
         return false;
     }
 
     running = true;
 
-    if (!Renderer::Get().Init())
+    
+
+    if (!Graphics::Renderer::Get().Init())
     {
         Debug::CLog("Failed to initialize Renderer\n");
         return false;
     }
 
-    //switch this out to properly load assets
-    if (!ShaderLibrary::Get().Load("unlit", "assets/unlit.vert", "assets/unlit.frag"))
-    {
-        Debug::CLog("Failed to load unlit shader");
-        return false;
-    }
+    Graphics::Resource::Initialize();
+    Graphics::Resource::MaterialLibrary::Get().Add("unlit_mat", {"unlit","wall_brick",0});
 
-    MeshLibrary::Get().Add("quad", MeshLibrary::MakeQuad());
-    MeshLibrary::Get().Add("circle", MeshLibrary::MakeCircle(32));
-
-	Debug::CLog("========== Initialization Success! ==========\n\n");
+    Debug::CLog("========== Initialization Success! ==========\n\n");
 
 
     return true;
@@ -261,7 +258,8 @@ void Engine::Update()
 
             // [render]
             {
-			    PROFILE_SCOPE("Render");
+                using namespace Graphics;
+                PROFILE_SCOPE("Render");
                 Renderer::Get().Begin();
 
                 Renderer::Get().SetCamera(camera.GetViewProjection(window.size));
@@ -272,7 +270,8 @@ void Engine::Update()
                     {
                         for (int y = 0; y < 100; y++)
                         {
-                            Renderer::Get().Queue({ "unlit", "quad", float3(x * 200.f, y * 200.f, 0.f), float3(100.f, 100.f, 1.f), 0.f });
+                            DrawCommand cmd{ "unlit_mat", "quad", DrawCommand::SetModel(float3(x * 200.f, y * 200.f, 0.f), float3(100.f, 100.f, 1.f), 0.f) };
+                            Renderer::Get().Queue(cmd);
                         }
                     }
                 }
@@ -285,11 +284,11 @@ void Engine::Update()
                 
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
-		        //set a dockspace to the entire viewport
+                //set a dockspace to the entire viewport
                 ImGui::DockSpaceOverViewport(0,ImGui::GetMainViewport(),ImGuiDockNodeFlags_PassthruCentralNode);
                 //draw ui
                 profilerUI.Draw();
-				DebugConsole::Get().Draw();
+                DebugConsole::Get().Draw();
                 //ImGui::ShowDemoWindow();
 
                 imgui.End();
@@ -304,11 +303,11 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
-	Debug::CLog("========== Shutting down engine... ==========\n");
+    Debug::CLog("========== Shutting down engine... ==========\n");
     imgui.Shutdown();
     window.Shutdown();
-    MeshLibrary::Get().Shutdown();
-	Debug::CLog("Engine shutdown complete\n");
+    Graphics::Resource::Shutdown();
+    Debug::CLog("Engine shutdown complete\n");
 
-    Renderer::Get().Shutdown();
+    Graphics::Renderer::Get().Shutdown();
 }

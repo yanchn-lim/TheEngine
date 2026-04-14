@@ -4,9 +4,14 @@
 // "Unlit" means no lighting math - colour is written directly to the framebuffer.
 
 in  vec3 vCol;       // colour blended across the triangle from the vertex shader
+in  vec2 vUV;
+
+uniform sampler2D uTexture;
+
 out vec4 FragColor;  // final RGBA written to the framebuffer
 
 void main()
 {
-    FragColor = vec4(vCol, 1.0); // alpha forced to 1 (fully opaque)
+    vec4 texColor = texture(uTexture, vUV);
+    FragColor    = texColor;
 }
