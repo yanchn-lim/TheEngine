@@ -1,115 +1,26 @@
-#############################
-# General
-#############################
-
-# OS junk
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Generic temp/backup files
-*.tmp
-*.temp
-*.bak
-*.old
-*~
-*.orig
-
-#############################
-# Visual Studio (user-specific)
-#############################
-
-.vs/
-
-# User-specific project files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# VS profiler
-*.psess
-*.vsp
-*.vspx
-*.sap
-
-#############################
-# Build outputs (VS/MSVC)
-#############################
-
-# Top-level build folders (common layouts)
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
-
-# Per-config build dirs
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-[Rr]etail/
+# Build output
+bin/
+out/
 x64/
-x86/
-ARM/
-ARM64/
-bld/
+Debug/
+Release/
 
-# Intermediate / debug symbols / etc.
-*.obj
-*.pch
+*.ipch
+*.suo
+*.db
 *.pdb
-*.idb
+*.exe
 *.ilk
+.vs
+.tmp
+*.tlog
+*.obj
+*.idb
+*.log
+*.exp
 *.iobj
 *.ipdb
-*.tlog
-*.lastbuildstate
-*.log
-*.tmp_proj
-
-# Precompiled header stuff
-*.pch
-
-# Other intermediate DBs
-*.opensdf
-*.sdf
-*.cachefile
-*.VC.db
-*.VC.VC.opendb
-
-#############################
-# NuGet / package management
-#############################
-
-packages/
-*.nupkg
-*.snupkg
-project.lock.json
-artifacts/
-
-#############################
-# Others
-#############################
-
-# VS Code
-.vscode/
-
-# CLion / JetBrains
-.idea/
-
-# Crash dumps
-*.dmp
 
 
-# NOTE: We intentionally do NOT ignore:
-#   - external/
-#   - *.lib
-#   - *.dll
-#
-# If you later add any broad ignore like `*.lib`, make sure to
-# re-include your vendor libs with rules like:
-#   !external/glfw/**
-#   !external/glad/**
-#   !external/glm/**
+# third_party binaries (keep headers/source, ignore precompiled libs)
+# third_party/glfw/lib-vc2022/
