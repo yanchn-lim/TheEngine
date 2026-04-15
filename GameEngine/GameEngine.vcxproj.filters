@@ -69,7 +69,7 @@
     <ClCompile Include="src\debug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics.cpp">
+    <ClCompile Include="src\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\shader.cpp">
@@ -79,6 +79,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_resource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,7 +140,7 @@
     <ClInclude Include="src\vertex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics.hpp">
+    <ClInclude Include="src\renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\shader.hpp">
@@ -143,10 +152,24 @@
     <ClInclude Include="src\camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="external\stb\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_resource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\material.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="todo.md">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="assets\unlit.frag" />
+    <None Include="assets\unlit.vert" />
   </ItemGroup>
 </Project>

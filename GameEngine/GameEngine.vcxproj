@@ -151,7 +151,7 @@
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\engine.cpp" />
-    <ClCompile Include="src\graphics.cpp" />
+    <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\graphics_resource.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\material.cpp" />
@@ -179,7 +179,7 @@
     <ClInclude Include="src\camera.hpp" />
     <ClInclude Include="src\debug.hpp" />
     <ClInclude Include="src\engine.hpp" />
-    <ClInclude Include="src\graphics.hpp" />
+    <ClInclude Include="src\renderer.hpp" />
     <ClInclude Include="src\graphics_resource.hpp" />
     <ClInclude Include="src\material.hpp" />
     <ClInclude Include="src\mesh.hpp" />

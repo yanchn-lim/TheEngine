@@ -3,7 +3,7 @@
 #include "debug.hpp"
 #include "profiler.hpp"
 
-#include "graphics.hpp"
+#include "renderer.hpp"
 #include "shader.hpp"
 #include "mesh.hpp"
 #include "material.hpp"
@@ -124,14 +124,13 @@ namespace Graphics
                 boundMesh = &cmd.meshHandle;
             }
 
-            // Build the model matrix: scale -> rotate around Z -> translate to world position.
-
             shader.SetMat4("uModel", cmd.model);
             shader.SetTexture("uTexture", tex);
 
-
             // Draw using the IBO bound inside the VAO; nullptr = start from the beginning of the index buffer.
             glDrawElements(GL_TRIANGLES, (int)mesh.indexCount, GL_UNSIGNED_INT, nullptr);
+
+            //glDrawArraysInstanced();
         }
 
         glBindVertexArray(0);

@@ -8,7 +8,7 @@
 #include "debug.hpp"
 #include "profiler.hpp"
 
-#include "graphics.hpp"
+#include "renderer.hpp"
 #include "graphics_resource.hpp"
 #include "material.hpp"
 
@@ -207,7 +207,6 @@ bool Engine::Initialize()
     running = true;
 
     
-
     if (!Graphics::Renderer::Get().Init())
     {
         Debug::CLog("Failed to initialize Renderer\n");
@@ -280,8 +279,7 @@ void Engine::Update()
                 Renderer::Get().End();
             }
 
-            {
-                
+            {         
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
                 //set a dockspace to the entire viewport

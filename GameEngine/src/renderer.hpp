@@ -13,8 +13,11 @@ namespace Graphics
     {
         AssetHandle materialHandle; //key into material lib
         AssetHandle meshHandle;   // key into MeshLibrary
+        int layer;
 
-        mat4 model;
+        float3 position;
+        float3 scale;
+        float rotation;
 
         static mat4 SetModel(float3 position, float3 size, float rotation);
     };
