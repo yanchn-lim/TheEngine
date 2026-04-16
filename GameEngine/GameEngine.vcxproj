@@ -162,6 +162,7 @@
     </ClCompile>
     <ClCompile Include="src\profiler.cpp" />
     <ClCompile Include="src\profiler_ui.cpp" />
+    <ClCompile Include="src\render_graph.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
@@ -186,6 +187,7 @@
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\profiler.hpp" />
     <ClInclude Include="src\profiler_ui.hpp" />
+    <ClInclude Include="src\render_graph.hpp" />
     <ClInclude Include="src\ring_buffer.hpp" />
     <ClInclude Include="src\shader.hpp" />
     <ClInclude Include="src\texture.hpp" />

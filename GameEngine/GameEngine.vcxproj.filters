@@ -25,6 +25,12 @@
     <Filter Include="Header Files\external\imgui">
       <UniqueIdentifier>{5ce63fd0-904a-4fe0-85dd-1ddfe3102143}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\graphics">
+      <UniqueIdentifier>{2ec3dd92-2d95-43e4-9526-7a7442d95217}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics">
+      <UniqueIdentifier>{c4f06925-eb8d-4283-b577-94c446b09be8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -69,26 +75,29 @@
     <ClCompile Include="src\debug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\graphics_resource.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\material.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\texture.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_graph.cpp">
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,39 +146,46 @@
     <ClInclude Include="src\debug.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vertex.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\shader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mesh.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\stb\stb_image.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\renderer.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics_resource.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\material.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="external\stb\stb_image.h">
+      <Filter>Header Files\external</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shader.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\texture.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vertex.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\material.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_graph.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="todo.md">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="assets\unlit.frag" />
-    <None Include="assets\unlit.vert" />
+    <None Include="assets\unlit.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\unlit.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
