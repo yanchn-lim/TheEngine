@@ -11,10 +11,10 @@ namespace Graphics
 	struct AssetHandle
 	{
 		uint id{0}; //hashed id from a string
-
 #ifdef _DEBUG
 		std::string name{}; //for debugging and pinpointing missing assets
-	#endif
+#endif
+
 
 		bool IsValid() const { return id != 0; }
 		bool operator==(const AssetHandle& o) const { return id == o.id; }

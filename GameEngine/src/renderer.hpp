@@ -13,12 +13,9 @@ namespace Graphics
     {
         AssetHandle materialHandle; //key into material lib
         AssetHandle meshHandle;   // key into MeshLibrary
-        int layer;
+        mat4 model;
 
-        float3 position;
-        float3 scale;
-        float rotation;
-
+        //uint64 sortKey; //pack [<<32 (sort layer) | >>32 (shader id)]
         static mat4 SetModel(float3 position, float3 size, float rotation);
     };
 

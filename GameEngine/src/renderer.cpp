@@ -28,7 +28,7 @@ namespace Graphics
     bool Renderer::Init()
     {
         Debug::CLog("Initializing Renderer...\n");
-        _commandBuffer.reserve(8192);
+        _commandBuffer.reserve(8192 * 4);
         Debug::CLog("Renderer initialized successfully\n");
         return true;
     }
