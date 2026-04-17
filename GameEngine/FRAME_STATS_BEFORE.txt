@@ -1,0 +1,17 @@
+
+=== Frame Statistics (last 1024 frames) ===
+Count:  1024
+Mean:   0.63 ms
+Min:    0.39 ms
+Max:    2.65 ms
+StdDev: 0.36 ms
+
+=== Per-Scope Statistics (durations in ms) ===
+Scope Name                       Count      Mean       Min       Max    StdDev
+------------------------------------------------------------------------------
+MainLoop                          1024      0.63      0.39      2.65      0.36
+ImGui                             1024      0.32      0.21      1.10      0.08
+Render                            1024      0.12      0.11      0.58      0.02
+Flush                             1024      0.02      0.02      0.08      0.01
+Update                            1024      0.00      0.00      0.00      0.00
+

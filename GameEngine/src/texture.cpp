@@ -6,11 +6,10 @@
 #include "debug.hpp"
 #include "texture.hpp"
 
-namespace Graphics
+
+namespace Asset
 {
-	namespace Resource
-	{
-		bool Texture::Upload(const std::string& path)
+	bool Texture2D::Upload(const std::string& path)
 		{
 			int w{}, h{}, c{};
 			
@@ -45,11 +44,10 @@ namespace Graphics
 			return true;
 		}
 
-		void Texture::Shutdown()
-		{
-			//opengl release mem
-			glDeleteTextures(1,&id);
-		}
-
+	void Texture2D::Shutdown()
+	{
+		//opengl release mem
+		glDeleteTextures(1,&id);
 	}
+
 }

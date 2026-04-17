@@ -9,7 +9,6 @@
 #include "profiler.hpp"
 
 #include "renderer.hpp"
-#include "graphics_resource.hpp"
 #include "material.hpp"
 
 
@@ -50,6 +49,12 @@ static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, 
     if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
     {
         Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
+    }
+
+    if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
+    {
+        Profiler::Get().PrintFrameStatistics(2048);
+        Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt",2048);
     }
 
     //build a map of keys to a function ptr?
@@ -213,8 +218,7 @@ bool Engine::Initialize()
         return false;
     }
 
-    Graphics::Resource::Initialize();
-    Graphics::Resource::MaterialLibrary::Get().Add("unlit_mat", {"unlit","wall_brick",0});
+    Asset::Initialize();
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
 
@@ -257,26 +261,46 @@ void Engine::Update()
 
             // [render]
             {
-                using namespace Graphics;
                 PROFILE_SCOPE("Render");
-                Renderer::Get().Begin();
+                Graphics::Renderer::Get().Begin();
 
-                Renderer::Get().SetCamera(camera.GetViewProjection(window.size));
+                Graphics::Renderer::Get().SetCamera(camera.GetViewProjection(window.size));
 
+                // Grid of quads using unlit_mat
+                for (int x = 0; x < 50; x++)
                 {
-                    PROFILE_SCOPE("QUEUE");
-                    for (int x = 0; x < 100; x++)
+                    for (int y = 0; y < 50; y++)
                     {
-                        for (int y = 0; y < 100; y++)
-                        {
-                            DrawCommand cmd{ "unlit_mat", "quad", DrawCommand::SetModel(float3(x * 200.f, y * 200.f, 0.f), float3(100.f, 100.f, 1.f), 0.f) };
-                            Renderer::Get().Queue(cmd);
-                        }
+                        Graphics::DrawCommand cmd{};
+                        cmd.materialHandle = "unlit_mat";
+                        cmd.meshHandle = "quad";
+                        cmd.position = float3(x * 200.f, y * 200.f, 0.f);
+                        cmd.scale = float3(100.f, 100.f, 1.f);
+                        cmd.rotation = 0.f;
+                        cmd.tint = float4(1.f, 1.f, 1.f, 1.f);
+                        Graphics::Renderer::Get().Queue(cmd);
+                    }
+                }
+
+                // Grid of circles using unlit_mat_red, offset so they sit between the quads
+                for (int x = 0; x < 50; x++)
+                {
+                    for (int y = 0; y < 50; y++)
+                    {
+                        Graphics::DrawCommand cmd{};
+                        cmd.materialHandle = "unlit_mat_red";
+                        cmd.meshHandle = "circle";
+                        cmd.position = float3(x * 200.f + 100.f, y * 200.f + 100.f, 0.f);
+                        cmd.scale = float3(80.f, 80.f, 1.f);
+                        cmd.rotation = 0.f;
+                        cmd.tint = float4(1.f, 0.2f, 0.2f, 1.f);
+                        Graphics::Renderer::Get().Queue(cmd);
                     }
                 }
 
 
-                Renderer::Get().End();
+
+                Graphics::Renderer::Get().End();
             }
 
             {         
@@ -304,7 +328,9 @@ void Engine::Shutdown()
     Debug::CLog("========== Shutting down engine... ==========\n");
     imgui.Shutdown();
     window.Shutdown();
-    Graphics::Resource::Shutdown();
+
+    Asset::Shutdown();
+
     Debug::CLog("Engine shutdown complete\n");
 
     Graphics::Renderer::Get().Shutdown();

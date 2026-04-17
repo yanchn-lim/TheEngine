@@ -24,7 +24,6 @@ struct ProfileSample
 
 struct FrameData
 {
-	//std::array<ProfileSample,MAX_SAMPLES_PER_FRAME> samples;
 	std::vector<ProfileSampleNode> roots;
 	float frameTimeMs = 0.0f;
 };
@@ -62,6 +61,8 @@ public:
 
 	void PushScope(const char* name);
 	void PopScope();
+	void PrintFrameStatistics(size_t numFrames = 100) const;
+	void PrintFrameStatisticsToFile(const std::string& filename, size_t numFrames = 100) const;
 
 	const FrameData& GetDisplayFrame() const { return _displayFrame; }
 	const Frames& GetFrames() const	{ return _frames; }
