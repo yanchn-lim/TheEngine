@@ -18,8 +18,6 @@ namespace Graphics
         float4 tint{ 1.f, 1.f, 1.f, 1.f };
 
         DrawCommand() = default;
-
-        static mat4 SetModel(float3 position, float3 size, float rotation);
     };
 
     struct InstanceData

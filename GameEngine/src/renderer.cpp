@@ -74,24 +74,24 @@ namespace Graphics
 
         uint needed = (uint)instances.size();
 
-        //if (needed > instanceCap)
-        //{
-        //    // Allocate more space with GL_DYNAMIC_DRAW since this buffer is
-        //    // updated every frame. Over-allocate to avoid realloc every frame.
-        //    instanceCap = needed * 2;
-        //    glBufferData(GL_ARRAY_BUFFER,
-        //        instanceCap * sizeof(InstanceData),
-        //        nullptr,
-        //        GL_DYNAMIC_DRAW);
-        //}
-        //// Upload only the live slice; the rest of the allocation is unused.
-        //glBufferSubData(GL_ARRAY_BUFFER,
-        //    0,
-        //    needed * sizeof(InstanceData),
-        //    instances.data());
+        if (needed > instanceCap)
+        {
+            // Allocate more space with GL_DYNAMIC_DRAW since this buffer is
+            // updated every frame. Over-allocate to avoid realloc every frame.
+            instanceCap = needed * 2;
+            glBufferData(GL_ARRAY_BUFFER,
+                instanceCap * sizeof(InstanceData),
+                nullptr,
+                GL_DYNAMIC_DRAW);
+        }
+        // Upload only the live slice; the rest of the allocation is unused.
+        glBufferSubData(GL_ARRAY_BUFFER,
+            0,
+            needed * sizeof(InstanceData),
+            instances.data());
 
         //QUESTION THIS!
-        glBufferData(GL_ARRAY_BUFFER, needed * sizeof(InstanceData), instances.data(), GL_STREAM_DRAW);
+        //glBufferData(GL_ARRAY_BUFFER, needed * sizeof(InstanceData), instances.data(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
