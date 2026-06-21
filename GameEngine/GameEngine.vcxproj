@@ -50,7 +50,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glm;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;$(SolutionDir)external\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pch.hpp</ForcedIncludeFiles>
@@ -72,7 +72,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glm;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;$(SolutionDir)external\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pch.hpp</ForcedIncludeFiles>
@@ -149,23 +149,16 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="src\asset.cpp" />
-    <ClCompile Include="src\asset_types.cpp" />
-    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\debug.cpp" />
     <ClCompile Include="src\engine.cpp" />
-    <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\material.cpp" />
-    <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\profiler.cpp" />
     <ClCompile Include="src\profiler_ui.cpp" />
-    <ClCompile Include="src\shader.cpp" />
-    <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
@@ -177,26 +170,16 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
-    <ClInclude Include="external\stb\stb_image.h" />
-    <ClInclude Include="src\asset.hpp" />
-    <ClInclude Include="src\asset_types.hpp" />
-    <ClInclude Include="src\camera.hpp" />
+    <ClInclude Include="renderer.hpp" />
     <ClInclude Include="src\debug.hpp" />
     <ClInclude Include="src\engine.hpp" />
-    <ClInclude Include="src\renderer.hpp" />
-    <ClInclude Include="src\material.hpp" />
-    <ClInclude Include="src\mesh.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\profiler.hpp" />
     <ClInclude Include="src\profiler_ui.hpp" />
+    <ClInclude Include="src\rendercmd.hpp" />
     <ClInclude Include="src\ring_buffer.hpp" />
-    <ClInclude Include="src\shader.hpp" />
-    <ClInclude Include="src\texture.hpp" />
-    <ClInclude Include="src\vertex.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\unlit.frag" />
-    <None Include="assets\unlit.vert" />
     <None Include="todo.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

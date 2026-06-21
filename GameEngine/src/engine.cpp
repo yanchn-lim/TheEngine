@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -7,37 +9,6 @@
 #include "engine.hpp"
 #include "debug.hpp"
 #include "profiler.hpp"
-
-#include "renderer.hpp"
-#include "material.hpp"
-
-
-static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    // let ImGui consume scroll if it wants it
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse) return;
-
-    Engine::Get().camera.ProcessZoom((float)yoffset);
-}
-
-static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse) return;
-
-    if (button == GLFW_MOUSE_BUTTON_MIDDLE)
-    {
-        Engine::Get().input.middleMouseHeld = (action == GLFW_PRESS);
-
-        if (action == GLFW_PRESS)
-        {
-            double x, y;
-            glfwGetCursorPos(window, &x, &y);
-            Engine::Get().input.lastMousePos = float2((float)x, (float)y);
-        }
-    }
-}
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -54,11 +25,8 @@ static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, 
     if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
     {
         Profiler::Get().PrintFrameStatistics(2048);
-        Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt",2048);
+        Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt", 2048);
     }
-
-    //build a map of keys to a function ptr?
-    //set map layers to change on the fly
 }
 
 static void ErrorCallback(int error, const char* description)
@@ -77,12 +45,12 @@ bool Window::Init()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     Debug::CLog("Creating window...\n");
-    handle = glfwCreateWindow(size.x, size.y, title, nullptr, nullptr);
-    if (!handle) 
-    {   
+    handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
+    if (!handle)
+    {
         Debug::CLog("Failed to create window\n");
-        glfwTerminate(); 
-        return false; 
+        glfwTerminate();
+        return false;
     }
 
     glfwMakeContextCurrent(handle);
@@ -95,16 +63,14 @@ bool Window::Init()
         return false;
     }
 
-    // Keep size in sync if the user resizes
     glfwSetFramebufferSizeCallback(handle, [](GLFWwindow*, int w, int h)
         {
-            Engine::Get().window.size = { w, h };
+            Engine::Get().window.width = w;
+            Engine::Get().window.height = h;
             glViewport(0, 0, w, h);
         });
 
     glfwSetKeyCallback(handle, ProcessInput);
-    glfwSetScrollCallback(handle, ScrollCallback);
-    glfwSetMouseButtonCallback(handle, MouseButtonCallback);
 
     Debug::CLog("Window created successfully\n");
     return true;
@@ -127,7 +93,6 @@ bool ImGuiLayer::Init(GLFWwindow* window)
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
 
     ImGuiStyle& style = ImGui::GetStyle();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -156,7 +121,6 @@ void ImGuiLayer::Begin()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    
 }
 
 void ImGuiLayer::End()
@@ -164,7 +128,6 @@ void ImGuiLayer::End()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    // Multi-viewport support — render ImGui windows outside the main window
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
@@ -182,10 +145,9 @@ void ImGuiLayer::Shutdown()
     ImGui::DestroyContext();
 }
 
-//ENGINE
 int Engine::Run()
 {
-    if (!Initialize()) 
+    if (!Initialize())
         return -1;
 
     Update();
@@ -211,24 +173,12 @@ bool Engine::Initialize()
 
     running = true;
 
-    
-    if (!Graphics::Renderer::Get().Init())
-    {
-        Debug::CLog("Failed to initialize Renderer\n");
-        return false;
-    }
-
-    Asset::Initialize();
-
     Debug::CLog("========== Initialization Success! ==========\n\n");
-
-
     return true;
 }
 
 void Engine::Update()
 {
-    int frameCount = 0;
     while (!glfwWindowShouldClose(window.handle) && running)
     {
         Profiler::Get().BeginFrame();
@@ -237,85 +187,18 @@ void Engine::Update()
             PROFILE_SCOPE("MainLoop");
             glfwPollEvents();
 
-
-            // --- Begin frame ---
-            //clear buffers
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            // [game update]
             {
-                PROFILE_SCOPE("Update");
-                //Debug::Log("Frames passed : ",frameCount++);
-
-                if (Engine::Get().input.middleMouseHeld)
-                {
-                    double x, y;
-                    glfwGetCursorPos(window.handle, &x, &y);
-                    float2 currentPos = float2((float)x, (float)y);
-                    float2 delta = input.lastMousePos - currentPos; // inverted: drag right moves camera right
-                    input.lastMousePos = currentPos;
-                    camera.ProcessPan(delta);
-                }
-            }
-
-            // [render]
-            {
-                PROFILE_SCOPE("Render");
-                Graphics::Renderer::Get().Begin();
-
-                Graphics::Renderer::Get().SetCamera(camera.GetViewProjection(window.size));
-
-                // Grid of quads using unlit_mat
-                for (int x = 0; x < 50; x++)
-                {
-                    for (int y = 0; y < 50; y++)
-                    {
-                        Graphics::DrawCommand cmd{};
-                        cmd.materialHandle = "unlit_mat";
-                        cmd.meshHandle = "quad";
-                        cmd.position = float3(x * 200.f, y * 200.f, 0.f);
-                        cmd.scale = float3(100.f, 100.f, 1.f);
-                        cmd.rotation = 0.f;
-                        cmd.tint = float4(1.f, 1.f, 1.f, 1.f);
-                        Graphics::Renderer::Get().Queue(cmd);
-                    }
-                }
-
-                // Grid of circles using unlit_mat_red, offset so they sit between the quads
-                for (int x = 0; x < 50; x++)
-                {
-                    for (int y = 0; y < 50; y++)
-                    {
-                        Graphics::DrawCommand cmd{};
-                        cmd.materialHandle = "unlit_mat_red";
-                        cmd.meshHandle = "circle";
-                        cmd.position = float3(x * 200.f + 100.f, y * 200.f + 100.f, 0.f);
-                        cmd.scale = float3(80.f, 80.f, 1.f);
-                        cmd.rotation = 0.f;
-                        cmd.tint = float4(1.f, 0.2f, 0.2f, 1.f);
-                        Graphics::Renderer::Get().Queue(cmd);
-                    }
-                }
-
-
-
-                Graphics::Renderer::Get().End();
-            }
-
-            {         
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
-                //set a dockspace to the entire viewport
-                ImGui::DockSpaceOverViewport(0,ImGui::GetMainViewport(),ImGuiDockNodeFlags_PassthruCentralNode);
-                //draw ui
+                ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
                 profilerUI.Draw();
                 DebugConsole::Get().Draw();
-                //ImGui::ShowDemoWindow();
-
                 imgui.End();
             }
-            // --- End frame ---
+
             glfwSwapBuffers(window.handle);
         }
 
@@ -326,12 +209,9 @@ void Engine::Update()
 void Engine::Shutdown()
 {
     Debug::CLog("========== Shutting down engine... ==========\n");
+
     imgui.Shutdown();
     window.Shutdown();
 
-    Asset::Shutdown();
-
     Debug::CLog("Engine shutdown complete\n");
-
-    Graphics::Renderer::Get().Shutdown();
 }

@@ -1,14 +1,14 @@
 #pragma once
 
 #include "profiler_ui.hpp"
-#include "camera.hpp"
 
 struct GLFWwindow;
 
 struct Window
 {
 	GLFWwindow* handle{ nullptr };
-	int2 size{ 1600,900 };
+	int width{ 1600 };
+	int height{ 900 };
 	const char* title{ "Engine" };
 	bool vsync = false;
 
@@ -19,18 +19,10 @@ struct Window
 struct ImGuiLayer
 {
 	bool Init(GLFWwindow* window);
-	void Begin();   // call at start of frame
-	void End();     // call at end of frame, before SwapBuffers
+	void Begin();
+	void End();
 	void Shutdown();
 };
-
-// tracks raw input state for camera controls
-struct InputState
-{
-	bool  middleMouseHeld = false;
-	float2 lastMousePos = float2(0.f);
-};
-
 
 class Engine
 {
@@ -41,7 +33,6 @@ public:
 		return engine;
 	}
 
-	//set singleton
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
 
@@ -49,13 +40,10 @@ public:
 
 	Window window;
 	ImGuiLayer imgui;
-
 	ProfilerUI profilerUI;
 
-	Camera2D   camera;
-	InputState input;
-
 	bool running = false;
+
 private:
 	Engine() = default;
 
