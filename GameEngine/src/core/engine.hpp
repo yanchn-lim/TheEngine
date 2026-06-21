@@ -1,7 +1,7 @@
 #pragma once
 
-#include "profiler_ui.hpp"
-#include "renderer.hpp"
+#include "debug/profiler_ui.hpp"
+#include "graphics/renderer.hpp"
 
 struct GLFWwindow;
 

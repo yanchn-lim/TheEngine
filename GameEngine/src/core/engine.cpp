@@ -7,8 +7,8 @@
 #include <imgui_impl_opengl3.h>
 
 #include "engine.hpp"
-#include "debug.hpp"
-#include "profiler.hpp"
+#include "debug/debug.hpp"
+#include "debug/profiler.hpp"
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {

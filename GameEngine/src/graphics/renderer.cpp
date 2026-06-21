@@ -1,8 +1,8 @@
-#include "profiler.hpp"
+#include "debug/profiler.hpp"
 #include "drawcmd.hpp"
 #include "shader.hpp"
 #include "renderer.hpp"
-#include "debug.hpp"
+#include "debug/debug.hpp"
 
 #include <glad/glad.h>
 

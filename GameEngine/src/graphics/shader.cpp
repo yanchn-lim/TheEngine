@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include "shader.hpp"
-#include "debug.hpp"
+#include "debug/debug.hpp"
 
 namespace Graphics
 {

@@ -50,7 +50,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pch.hpp</ForcedIncludeFiles>
@@ -72,7 +72,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <ForcedIncludeFiles>pch.hpp</ForcedIncludeFiles>
@@ -149,17 +149,20 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="src\debug.cpp" />
-    <ClCompile Include="src\engine.cpp" />
+    <ClCompile Include="src\debug\debug.cpp" />
+    <ClCompile Include="src\core\engine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\profiler.cpp" />
-    <ClCompile Include="src\profiler_ui.cpp" />
-    <ClCompile Include="src\renderer.cpp" />
-    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\debug\profiler.cpp" />
+    <ClCompile Include="src\debug\profiler_ui.cpp" />
+    <ClCompile Include="src\graphics\mesh.cpp" />
+    <ClCompile Include="src\graphics\renderer.cpp" />
+    <ClCompile Include="src\graphics\shader.cpp" />
+    <ClCompile Include="src\graphics\vertex_array.cpp" />
+    <ClCompile Include="src\graphics\vertex_buffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
@@ -171,15 +174,18 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
-    <ClInclude Include="src\debug.hpp" />
-    <ClInclude Include="src\engine.hpp" />
+    <ClInclude Include="src\debug\debug.hpp" />
+    <ClInclude Include="src\core\engine.hpp" />
     <ClInclude Include="src\pch.hpp" />
-    <ClInclude Include="src\profiler.hpp" />
-    <ClInclude Include="src\profiler_ui.hpp" />
-    <ClInclude Include="src\drawcmd.hpp" />
-    <ClInclude Include="src\renderer.hpp" />
-    <ClInclude Include="src\ring_buffer.hpp" />
-    <ClInclude Include="src\shader.hpp" />
+    <ClInclude Include="src\debug\profiler.hpp" />
+    <ClInclude Include="src\debug\profiler_ui.hpp" />
+    <ClInclude Include="src\graphics\drawcmd.hpp" />
+    <ClInclude Include="src\graphics\mesh.hpp" />
+    <ClInclude Include="src\graphics\renderer.hpp" />
+    <ClInclude Include="src\core\ring_buffer.hpp" />
+    <ClInclude Include="src\graphics\shader.hpp" />
+    <ClInclude Include="src\graphics\vertex_array.hpp" />
+    <ClInclude Include="src\graphics\vertex_buffer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="todo.md" />

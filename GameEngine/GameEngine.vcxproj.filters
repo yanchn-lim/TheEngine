@@ -25,6 +25,24 @@
     <Filter Include="Header Files\external\imgui">
       <UniqueIdentifier>{5ce63fd0-904a-4fe0-85dd-1ddfe3102143}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{6afedc45-6cf8-42c7-b348-47b5a9c6f5f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debug">
+      <UniqueIdentifier>{81027967-9e66-4b59-9c2f-b59821b0bd1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics">
+      <UniqueIdentifier>{9ebdb4e0-7e42-424b-bf1b-9c45f2f5a77a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{0a2e52c6-19d0-4f3c-a848-e231a83b65d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\debug">
+      <UniqueIdentifier>{d8a758c0-9d2f-4585-8ff4-87db6d7e0716}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics">
+      <UniqueIdentifier>{7b4aa6a8-2957-4bfb-a94f-233cfd6703eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -57,23 +75,32 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\core\engine.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\profiler_ui.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\debug\profiler_ui.cpp">
+      <Filter>Source Files\debug</Filter>
     </ClCompile>
-    <ClCompile Include="src\profiler.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\debug\profiler.cpp">
+      <Filter>Source Files\debug</Filter>
     </ClCompile>
-    <ClCompile Include="src\debug.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\debug\debug.cpp">
+      <Filter>Source Files\debug</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\graphics\renderer.cpp">
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\shader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\graphics\shader.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\mesh.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\vertex_array.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\vertex_buffer.cpp">
+      <Filter>Source Files\graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,29 +134,38 @@
     <ClInclude Include="src\pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\core\engine.hpp">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\ring_buffer.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\core\ring_buffer.hpp">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\profiler_ui.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\debug\profiler_ui.hpp">
+      <Filter>Header Files\debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\profiler.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\debug\profiler.hpp">
+      <Filter>Header Files\debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\debug.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\debug\debug.hpp">
+      <Filter>Header Files\debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\drawcmd.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\graphics\drawcmd.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\graphics\renderer.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\shader.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\graphics\shader.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\mesh.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\vertex_array.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\vertex_buffer.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
