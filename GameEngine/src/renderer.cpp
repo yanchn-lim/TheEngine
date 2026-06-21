@@ -52,7 +52,6 @@ namespace Graphics
 			}
 		)";
 
-		_testTriangleShader = {};
 		if (!_testTriangleShader.Create(vertexSource, fragmentSource))
 			return false;
 		

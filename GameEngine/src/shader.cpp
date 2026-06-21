@@ -56,7 +56,6 @@ namespace Graphics
 			char infoLog[1024]{};
 			glGetProgramInfoLog(program, sizeof(infoLog), nullptr, infoLog);
 			Debug::LogError("Shader link failed: ", infoLog);
-			// log infoLog here
 			glDeleteProgram(program);
 			return false;
 		}
@@ -72,6 +71,7 @@ namespace Graphics
 			Debug::LogError("Shader is invalid!");
 			return;
 		}
+
 		glUseProgram(_id);
 	}
 
