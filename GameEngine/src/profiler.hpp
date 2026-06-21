@@ -1,5 +1,11 @@
 #pragma once
 
+#include <array>
+#include <chrono>
+#include <cstddef>
+#include <string>
+#include <vector>
+
 #include "ring_buffer.hpp"
 
 constexpr size_t PROFILER_CAP = 1024;

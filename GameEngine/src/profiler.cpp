@@ -17,7 +17,7 @@ void Profiler::EndFrame()
 	//get time
 	auto frameMs = ToMs(Clock::now() - _frameStart);
 
-	_currentFrame.frameTimeMs = frameMs;
+	_currentFrame.frameTimeMs = static_cast<float>(frameMs);
 	_displayFrame = _currentFrame;
 	_frames.Push(_currentFrame);
 }
@@ -30,7 +30,7 @@ void Profiler::PushScope(const char* name)
 
 	ProfileSampleNode node;
 	node.name = name;
-	node.startMs = ToMs(Clock::now() - _frameStart);
+	node.startMs = static_cast<float>(ToMs(Clock::now() - _frameStart));
 
 	ProfileSampleNode* inserted = nullptr;
 
@@ -60,7 +60,7 @@ void Profiler::PopScope()
 	--_scopeDepth;
 	ProfileSampleNode* node = _scopeStack[_scopeDepth];
 	//update timing
-	node->durationMs = ToMs(Clock::now() - _frameStart) - node->startMs;
+	node->durationMs = static_cast<float>(ToMs(Clock::now() - _frameStart) - node->startMs);
 }
 
 void Profiler::PrintFrameStatistics(size_t numFrames) const

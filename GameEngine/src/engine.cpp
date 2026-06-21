@@ -63,6 +63,11 @@ bool Window::Init()
         return false;
     }
 
+    //set debug
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    //glDebugMessageCallback();
+
     glfwSetFramebufferSizeCallback(handle, [](GLFWwindow*, int w, int h)
         {
             Engine::Get().window.width = w;
@@ -148,12 +153,12 @@ void ImGuiLayer::Shutdown()
 int Engine::Run()
 {
     if (!Initialize())
-        return -1;
+        return EXIT_FAILURE;
 
     Update();
     Shutdown();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 bool Engine::Initialize()
@@ -171,6 +176,13 @@ bool Engine::Initialize()
         return false;
     }
 
+    if (!renderer.Init())
+    {
+        Debug::CLog("Failed to initialize renderer\n");
+        return false;
+    }
+
+
     running = true;
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
@@ -186,9 +198,20 @@ void Engine::Update()
         {
             PROFILE_SCOPE("MainLoop");
             glfwPollEvents();
+   
+        }
 
-            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+        {
+            PROFILE_SCOPE("RendererLoop");
+            renderer.BeginFrame();
+
+            {
+                //for testing
+                Graphics::DrawCmd testcmd = renderer.GetTestTriangleCmd();
+                renderer.Submit(testcmd);
+            }
+
+            renderer.EndFrame();
 
             {
                 PROFILE_SCOPE("ImGui");
@@ -210,6 +233,7 @@ void Engine::Shutdown()
 {
     Debug::CLog("========== Shutting down engine... ==========\n");
 
+    renderer.Shutdown();
     imgui.Shutdown();
     window.Shutdown();
 

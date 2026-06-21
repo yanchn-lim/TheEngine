@@ -1,6 +1,7 @@
 #pragma once
 
 #include "profiler_ui.hpp"
+#include "renderer.hpp"
 
 struct GLFWwindow;
 
@@ -41,6 +42,7 @@ public:
 	Window window;
 	ImGuiLayer imgui;
 	ProfilerUI profilerUI;
+	Graphics::Renderer renderer;
 
 	bool running = false;
 

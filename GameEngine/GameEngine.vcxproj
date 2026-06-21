@@ -159,6 +159,7 @@
     <ClCompile Include="src\profiler.cpp" />
     <ClCompile Include="src\profiler_ui.cpp" />
     <ClCompile Include="src\renderer.cpp" />
+    <ClCompile Include="src\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
@@ -170,14 +171,15 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
-    <ClInclude Include="renderer.hpp" />
     <ClInclude Include="src\debug.hpp" />
     <ClInclude Include="src\engine.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\profiler.hpp" />
     <ClInclude Include="src\profiler_ui.hpp" />
-    <ClInclude Include="src\rendercmd.hpp" />
+    <ClInclude Include="src\drawcmd.hpp" />
+    <ClInclude Include="src\renderer.hpp" />
     <ClInclude Include="src\ring_buffer.hpp" />
+    <ClInclude Include="src\shader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="todo.md" />
