@@ -1,10 +1,11 @@
+#include <glad/glad.h>
+
 #include "debug/profiler.hpp"
 #include "drawcmd.hpp"
 #include "shader.hpp"
 #include "renderer.hpp"
 #include "debug/debug.hpp"
 
-#include <glad/glad.h>
 
 namespace Graphics
 {
@@ -20,9 +21,13 @@ namespace Graphics
 		constexpr float vertices[] =
 		{
 			// position          // color
-			-0.5f, -0.5f, 0.0f,  1.0f, 0.2f, 0.2f,
-			 0.5f, -0.5f, 0.0f,  0.2f, 1.0f, 0.2f,
-			 0.0f,  0.5f, 0.0f,  0.2f, 0.4f, 1.0f,
+			-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, //bl
+			 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //br
+			 0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //tr
+
+			 0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //tr
+			-0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, //tl
+			-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f
 		};
 
 		constexpr const char* vertexSource = R"(
@@ -30,13 +35,20 @@ namespace Graphics
 
 			layout(location = 0) in vec3 aPosition;
 			layout(location = 1) in vec3 aColor;
+			layout(location = 2) in vec2 aTexCoord;
 
+			uniform mat4 uModel;
+			uniform mat4 uView;
+			uniform mat4 uProjection;
+			
 			out vec3 vColor;
+			out vec2 vTexcoord;
 
 			void main()
 			{
 				vColor = aColor;
-				gl_Position = vec4(aPosition, 1.0);
+				gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+				vTexcoord = aTexcoord;		
 			}
 		)";
 
@@ -44,6 +56,7 @@ namespace Graphics
 			#version 460 core
 
 			in vec3 vColor;
+			in vec2 vTexcoord;
 			out vec4 FragColor;
 
 			void main()
@@ -52,23 +65,12 @@ namespace Graphics
 			}
 		)";
 
-		if (!_testTriangleShader.Create(vertexSource, fragmentSource))
+		if (!_testShader.Create(vertexSource, fragmentSource))
 			return false;
 		
-		if (!_testTriangleShader.IsValid()) return false;
+		if (!_testShader.IsValid()) return false;
 
-		glCreateVertexArrays(1, &_testTriangleVao);
-		glCreateBuffers(1, &_testTriangleVbo);
-		glNamedBufferData(_testTriangleVbo, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glVertexArrayVertexBuffer(_testTriangleVao, 0, _testTriangleVbo, 0, 6 * sizeof(float));
-		glEnableVertexArrayAttrib(_testTriangleVao, 0);
-		glVertexArrayAttribFormat(_testTriangleVao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribBinding(_testTriangleVao, 0, 0);
-
-		glEnableVertexArrayAttrib(_testTriangleVao, 1);
-		glVertexArrayAttribFormat(_testTriangleVao, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
-		glVertexArrayAttribBinding(_testTriangleVao, 1, 0);
+		if(!_testMesh.Create(vertices,6, 8)) return false;
 
 		return true;
 	}
@@ -79,13 +81,12 @@ namespace Graphics
 		_cmds.emplace_back(cmd);
 	}
 
-	DrawCmd Renderer::GetTestTriangleCmd() const
+	DrawCmd Renderer::GetTestMeshCmd() const
 	{
 		return DrawCmd
 		{
-			_testTriangleVao,
-			&_testTriangleShader,
-			3
+			&_testMesh,
+			&_testShader
 		};
 	}
 
@@ -108,14 +109,17 @@ namespace Graphics
 		//render the image
 		for (const DrawCmd& cmd : _cmds)
 		{
-			if (!cmd.shader) continue;
+			if (!cmd.shader || !cmd.mesh) continue;
 
 			//bind shader
 			cmd.shader->Bind();
 
+			cmd.shader->SetMat4("uModel", cmd.transform);
+			cmd.shader->SetMat4("uView", _camera.GetView());
+			cmd.shader->SetMat4("uProjection", _camera.GetProjection());
+
 			//draw
-			glBindVertexArray(cmd.vao);
-			glDrawArrays(GL_TRIANGLES, 0, cmd.vertcnt);
+			cmd.mesh->Draw();
 		}
 	}
 
@@ -123,11 +127,12 @@ namespace Graphics
 	{
 		PROFILE_FUNCTION();
 
-		_testTriangleShader.Destroy();
-		glDeleteBuffers(1, &_testTriangleVbo);
-		glDeleteVertexArrays(1, &_testTriangleVao);
+		_testShader.Destroy();
+		_testMesh.Destroy();
+	}
 
-		_testTriangleVbo = 0;
-		_testTriangleVao = 0;
+	void Renderer::SetCamera(const Camera2D& camera)
+	{
+		_camera = camera;
 	}
 }

@@ -1,4 +1,6 @@
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "shader.hpp"
 #include "debug/debug.hpp"
 
@@ -83,6 +85,22 @@ namespace Graphics
 			_id = 0;
 		}
 	}
+
+	void Shader::SetMat4(const char* name, const glm::mat4& val) const
+	{
+		if (!IsValid()) return;
+
+		GLint loc = glGetUniformLocation(_id, name);
+
+		if (loc == -1)
+		{
+			Debug::LogError("Shader uniform location not found!");
+			return;
+		}
+
+		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
+	}
+
 
 	uint32_t Shader::GetId() const
 	{

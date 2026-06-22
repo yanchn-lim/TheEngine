@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <glm/glm.hpp>
 
 namespace Graphics
 {
@@ -16,6 +17,9 @@ namespace Graphics
 		bool Create(const std::string&, const std::string&);
 		void Bind() const;
 		void Destroy();
+
+		//setters
+		void SetMat4(const char*, const glm::mat4&) const;
 
 		//accessors
 		uint32_t GetId() const;

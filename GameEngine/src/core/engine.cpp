@@ -199,6 +199,13 @@ void Engine::Update()
             PROFILE_SCOPE("MainLoop");
             glfwPollEvents();
    
+            Graphics::Camera2D camera;
+            camera.position = { 0.f, 0.f };
+            camera.zoom = 1.f;
+            camera.rotation = 0.f;
+            camera.SetViewport((float)window.width, (float)window.height);
+
+            renderer.SetCamera(camera);
         }
 
         {
@@ -207,7 +214,7 @@ void Engine::Update()
 
             {
                 //for testing
-                Graphics::DrawCmd testcmd = renderer.GetTestTriangleCmd();
+                Graphics::DrawCmd testcmd = renderer.GetTestMeshCmd();
                 renderer.Submit(testcmd);
             }
 

@@ -1,16 +1,18 @@
 #pragma once
 
 #include <cstdint>
+#include <glm/glm.hpp>
 
 namespace Graphics
 {
 	class Shader;
+	class Mesh;
 
 	struct DrawCmd
 	{
-		uint32_t vao = 0;
+		const Mesh* mesh{ nullptr };
 		const Shader* shader{nullptr};
 
-		uint32_t vertcnt = 0;
+		glm::mat4 transform{ 1.0f };
 	};
 }

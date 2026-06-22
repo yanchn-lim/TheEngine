@@ -2,9 +2,12 @@
 
 #include <cstdint>
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "drawcmd.hpp"
 #include "shader.hpp"
+#include "mesh.hpp"
+#include "camera.hpp"
 
 namespace Graphics
 {
@@ -12,16 +15,25 @@ namespace Graphics
 	{
 	private:
 		std::vector<DrawCmd> _cmds;
-		uint32_t _testTriangleVao = 0;
-		uint32_t _testTriangleVbo = 0;
-		Shader _testTriangleShader;
+
+		Mesh _testMesh;
+		Shader _testShader;
+
+		//simple camera state
+		Camera2D _camera;
 
 	public:
 		bool Init();
 		void Submit(const DrawCmd&);
-		DrawCmd GetTestTriangleCmd() const;
+		DrawCmd GetTestMeshCmd() const;
 		void BeginFrame();
 		void EndFrame();
 		void Shutdown();
+
+
+		void SetCamera(const Camera2D& camera);
+
+		//draw helper
+
 	};
 }
