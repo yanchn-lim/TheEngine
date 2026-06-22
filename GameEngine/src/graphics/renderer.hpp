@@ -12,6 +12,13 @@
 
 namespace Graphics
 {
+	struct SpriteRenderResources
+	{
+		const Mesh* quadMesh{ nullptr };
+		const Shader* shader{ nullptr };
+		const Texture2D* fallbackTexture{ nullptr };
+	};
+
 	class Renderer
 	{
 	private:
@@ -28,6 +35,7 @@ namespace Graphics
 		bool Init();
 		void Submit(const DrawCmd&);
 		DrawCmd GetTestMeshCmd() const;
+		SpriteRenderResources GetSpriteRenderResources() const;
 		void BeginFrame();
 		void EndFrame();
 		void Shutdown();

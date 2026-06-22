@@ -3,11 +3,6 @@
 #include <vector>
 #include "gameobject.hpp"
 
-namespace Graphics
-{
-	class Renderer;
-}
-
 class Scene
 {
 private:
@@ -17,7 +12,7 @@ private:
 public:
 	GameObject& CreateObject();
 	void AddObject(GameObject& obj);
+	const std::vector<GameObject>& GetGameObjects() const;
 	void Update();
-	void SubmitDrawCommands(Graphics::Renderer& renderer);
 	void Draw();
 };

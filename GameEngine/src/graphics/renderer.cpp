@@ -64,6 +64,16 @@ namespace Graphics
 		};
 	}
 
+	SpriteRenderResources Renderer::GetSpriteRenderResources() const
+	{
+		return SpriteRenderResources
+		{
+			&_testMesh,
+			&_testShader,
+			&_testTexture
+		};
+	}
+
 	void Renderer::BeginFrame()
 	{
 		PROFILE_FUNCTION();

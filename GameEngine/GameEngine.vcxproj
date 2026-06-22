@@ -150,8 +150,7 @@
       </ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="src\core\file_system.cpp" />
-    <ClCompile Include="src\core\scene.cpp" />
-    <ClCompile Include="src\core\transform2d.cpp" />
+    <ClCompile Include="src\components\transform2d.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\core\engine.cpp" />
     <ClCompile Include="src\graphics\sprite_renderer.cpp" />
@@ -166,7 +165,9 @@
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\primitive2d.cpp" />
     <ClCompile Include="src\graphics\renderer.cpp" />
+    <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
+    <ClCompile Include="src\systems\sprite_render_system.cpp" />
     <ClCompile Include="src\graphics\texture2d.cpp" />
     <ClCompile Include="src\graphics\vertex_array.cpp" />
     <ClCompile Include="src\graphics\vertex_buffer.cpp" />
@@ -182,24 +183,25 @@
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="src\core\file_system.hpp" />
-    <ClInclude Include="src\core\gameobject.hpp" />
+    <ClInclude Include="src\components\sprite_component.hpp" />
+    <ClInclude Include="src\components\transform2d.hpp" />
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
     <ClInclude Include="src\graphics\sprite_renderer.hpp" />
     <ClInclude Include="src\pch.hpp" />
-    <ClInclude Include="src\core\scene.hpp" />
     <ClInclude Include="src\debug\profiler.hpp" />
     <ClInclude Include="src\debug\profiler_ui.hpp" />
-    <ClInclude Include="src\core\sprite_component.hpp" />
     <ClInclude Include="src\core\time.hpp" />
-    <ClInclude Include="src\core\transform2d.hpp" />
     <ClInclude Include="src\graphics\camera.hpp" />
     <ClInclude Include="src\graphics\drawcmd.hpp" />
     <ClInclude Include="src\graphics\mesh.hpp" />
     <ClInclude Include="src\graphics\primitive2d.hpp" />
     <ClInclude Include="src\graphics\renderer.hpp" />
     <ClInclude Include="src\core\ring_buffer.hpp" />
+    <ClInclude Include="src\scene\gameobject.hpp" />
+    <ClInclude Include="src\scene\scene.hpp" />
     <ClInclude Include="src\graphics\shader.hpp" />
+    <ClInclude Include="src\systems\sprite_render_system.hpp" />
     <ClInclude Include="src\graphics\texture2d.hpp" />
     <ClInclude Include="src\graphics\vertex_array.hpp" />
     <ClInclude Include="src\graphics\vertex_buffer.hpp" />

@@ -7,7 +7,6 @@
 #include <imgui_impl_opengl3.h>
 
 #include "engine.hpp"
-#include "transform2d.hpp"
 #include "debug/debug.hpp"
 #include "debug/profiler.hpp"
 
@@ -183,6 +182,9 @@ bool Engine::Initialize()
         return false;
     }
 
+    GameObject& testObject = scene.CreateObject();
+    testObject.transform.position = { 0.25f, 0.f };
+    testObject.transform.scale = { 0.5f, 0.5f };
 
     running = true;
 
@@ -212,17 +214,7 @@ void Engine::Update()
         {
             PROFILE_SCOPE("RendererLoop");
             renderer.BeginFrame();
-
-            {
-                //for testing
-                Transform2D testTransform;
-                testTransform.position = { 0.25f, 0.f };
-                testTransform.scale = { 0.5f, 0.5f };
-
-                Graphics::DrawCmd testcmd = renderer.GetTestMeshCmd();
-                testcmd.transform = testTransform.GetMatrix();
-                renderer.Submit(testcmd);
-            }
+            spriteRenderSystem.SubmitDrawCommands(scene, renderer, renderer.GetSpriteRenderResources());
 
             renderer.EndFrame();
 

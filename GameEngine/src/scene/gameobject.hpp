@@ -1,7 +1,7 @@
 #pragma once
 
-#include "transform2d.hpp"
-#include "sprite_component.hpp"
+#include "components/transform2d.hpp"
+#include "components/sprite_component.hpp"
 
 class GameObject
 {

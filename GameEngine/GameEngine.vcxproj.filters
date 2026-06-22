@@ -34,6 +34,15 @@
     <Filter Include="Source Files\graphics">
       <UniqueIdentifier>{9ebdb4e0-7e42-424b-bf1b-9c45f2f5a77a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{d6ee8196-0b28-4f0f-8533-d7074d4e4fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{e65eb7fa-52b8-46af-b80f-6957d4f76829}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems">
+      <UniqueIdentifier>{8291a9fd-5b30-4f80-bf9a-70fd3b8e67d0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\core">
       <UniqueIdentifier>{0a2e52c6-19d0-4f3c-a848-e231a83b65d7}</UniqueIdentifier>
     </Filter>
@@ -42,6 +51,15 @@
     </Filter>
     <Filter Include="Header Files\graphics">
       <UniqueIdentifier>{7b4aa6a8-2957-4bfb-a94f-233cfd6703eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene">
+      <UniqueIdentifier>{e33e24b6-6d2e-4bb2-88ed-8fbba5d0ab37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\components">
+      <UniqueIdentifier>{29dd3267-aa60-4f81-ab18-18db6cfacbd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\systems">
+      <UniqueIdentifier>{45c9778c-777a-4e4e-b633-1e77f55dc7d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\assets">
       <UniqueIdentifier>{cd75989d-e614-461d-9265-a5c6fc3b39bf}</UniqueIdentifier>
@@ -120,11 +138,14 @@
     <ClCompile Include="src\core\file_system.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\scene.cpp">
-      <Filter>Source Files\core</Filter>
+    <ClCompile Include="src\scene\scene.cpp">
+      <Filter>Source Files\scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\transform2d.cpp">
-      <Filter>Source Files\core</Filter>
+    <ClCompile Include="src\systems\sprite_render_system.cpp">
+      <Filter>Source Files\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\components\transform2d.cpp">
+      <Filter>Source Files\components</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\primitive2d.cpp">
       <Filter>Source Files\graphics</Filter>
@@ -170,20 +191,23 @@
     <ClInclude Include="src\core\file_system.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\gameobject.hpp">
-      <Filter>Header Files\core</Filter>
+    <ClInclude Include="src\scene\gameobject.hpp">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\scene.hpp">
-      <Filter>Header Files\core</Filter>
+    <ClInclude Include="src\scene\scene.hpp">
+      <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\sprite_component.hpp">
-      <Filter>Header Files\core</Filter>
+    <ClInclude Include="src\systems\sprite_render_system.hpp">
+      <Filter>Header Files\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\components\sprite_component.hpp">
+      <Filter>Header Files\components</Filter>
     </ClInclude>
     <ClInclude Include="src\core\time.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\transform2d.hpp">
-      <Filter>Header Files\core</Filter>
+    <ClInclude Include="src\components\transform2d.hpp">
+      <Filter>Header Files\components</Filter>
     </ClInclude>
     <ClInclude Include="src\debug\profiler_ui.hpp">
       <Filter>Header Files\debug</Filter>
