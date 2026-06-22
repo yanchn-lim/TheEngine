@@ -7,6 +7,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include "engine.hpp"
+#include "transform2d.hpp"
 #include "debug/debug.hpp"
 #include "debug/profiler.hpp"
 
@@ -214,7 +215,12 @@ void Engine::Update()
 
             {
                 //for testing
+                Transform2D testTransform;
+                testTransform.position = { 0.25f, 0.f };
+                testTransform.scale = { 0.5f, 0.5f };
+
                 Graphics::DrawCmd testcmd = renderer.GetTestMeshCmd();
+                testcmd.transform = testTransform.GetMatrix();
                 renderer.Submit(testcmd);
             }
 

@@ -17,6 +17,6 @@ namespace Graphics
 		bool Init();
 		void Shutdown();
 
-		void DrawSprite()
+		void DrawSprite();
 	};
 }

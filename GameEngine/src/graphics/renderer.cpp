@@ -3,6 +3,7 @@
 #include "debug/profiler.hpp"
 #include "debug/debug.hpp"
 #include "core/file_system.hpp"
+#include "primitive2d.hpp"
 #include "renderer.hpp"
 
 
@@ -16,18 +17,6 @@ namespace Graphics
 		
 		//reserve vector
 		_cmds.reserve(8192);
-
-		constexpr float vertices[] =
-		{
-			// position          // color
-			-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, //bl
-			 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //br
-			 0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //tr
-
-			 0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, //tr
-			-0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, //tl
-			-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f
-		};
 
 		std::string vertexSource;
 		std::string fragmentSource;
@@ -49,7 +38,8 @@ namespace Graphics
 		
 		if (!_testShader.IsValid()) return false;
 
-		if(!_testMesh.Create(vertices,6, 8)) return false;
+		const Primitive2D::MeshData quad = Primitive2D::Quad();
+		if(!_testMesh.Create(quad.vertices, quad.vertexCount, quad.floatsPerVertex)) return false;
 
 		//load texture
 		if (!_testTexture.LoadFromFile("assets/textures/steak.png"))

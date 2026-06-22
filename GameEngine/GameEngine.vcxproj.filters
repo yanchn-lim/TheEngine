@@ -114,6 +114,21 @@
     <ClCompile Include="src\graphics\texture2d.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\sprite_renderer.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\file_system.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\scene.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\transform2d.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\primitive2d.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -152,6 +167,24 @@
     <ClInclude Include="src\core\ring_buffer.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\file_system.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\gameobject.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\scene.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\sprite_component.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\time.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\transform2d.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
     <ClInclude Include="src\debug\profiler_ui.hpp">
       <Filter>Header Files\debug</Filter>
     </ClInclude>
@@ -173,6 +206,9 @@
     <ClInclude Include="src\graphics\mesh.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\primitive2d.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\graphics\vertex_array.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
@@ -183,6 +219,9 @@
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\texture2d.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\sprite_renderer.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,7 @@ namespace Graphics
 	
 	public:
 		bool Create(const float* vertices, uint32_t vertexCount, uint32_t floatsPerVertex);
+		//bool Create()
 		void Bind() const;
 		void Draw() const;
 		void Destroy();
