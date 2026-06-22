@@ -149,8 +149,10 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ForcedIncludeFiles>
     </ClCompile>
+    <ClCompile Include="src\core\file_system.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\core\engine.cpp" />
+    <ClCompile Include="src\graphics\sprite_renderer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -162,6 +164,7 @@
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\renderer.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
+    <ClCompile Include="src\graphics\texture2d.cpp" />
     <ClCompile Include="src\graphics\vertex_array.cpp" />
     <ClCompile Include="src\graphics\vertex_buffer.cpp" />
   </ItemGroup>
@@ -175,8 +178,10 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\core\file_system.hpp" />
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
+    <ClInclude Include="src\graphics\sprite_renderer.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\debug\profiler.hpp" />
     <ClInclude Include="src\debug\profiler_ui.hpp" />
@@ -186,10 +191,13 @@
     <ClInclude Include="src\graphics\renderer.hpp" />
     <ClInclude Include="src\core\ring_buffer.hpp" />
     <ClInclude Include="src\graphics\shader.hpp" />
+    <ClInclude Include="src\graphics\texture2d.hpp" />
     <ClInclude Include="src\graphics\vertex_array.hpp" />
     <ClInclude Include="src\graphics\vertex_buffer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\sprite.frag" />
+    <None Include="assets\shaders\sprite.vert" />
     <None Include="todo.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

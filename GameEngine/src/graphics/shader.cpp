@@ -86,6 +86,21 @@ namespace Graphics
 		}
 	}
 
+	void Shader::SetInt(const char* name, const int val) const
+	{
+		if (!IsValid()) return;
+
+		GLint loc = glGetUniformLocation(_id, name);
+
+		if (loc == -1)
+		{
+			Debug::LogError("Shader uniform location not found!");
+			return;
+		}
+
+		glUniform1i(loc, val);
+	}
+
 	void Shader::SetMat4(const char* name, const glm::mat4& val) const
 	{
 		if (!IsValid()) return;

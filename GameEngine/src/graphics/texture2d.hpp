@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Graphics
 {
 	class Texture2D
@@ -16,5 +18,19 @@ namespace Graphics
 		void Destroy();
 
 		bool IsValid() const;
+
+		//accessor
+		int GetWidth() const;
+		int GetHeight() const;
+		int GetChannels() const;
+
+		//ctor
+		Texture2D() = default;
+		~Texture2D();
+		Texture2D(const Texture2D&) = delete;
+		Texture2D& operator=(const Texture2D&) = delete;
+
+		Texture2D(Texture2D&&) noexcept;
+		Texture2D& operator=(Texture2D&&) noexcept;
 	};
 }

@@ -43,6 +43,12 @@
     <Filter Include="Header Files\graphics">
       <UniqueIdentifier>{7b4aa6a8-2957-4bfb-a94f-233cfd6703eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\assets">
+      <UniqueIdentifier>{cd75989d-e614-461d-9265-a5c6fc3b39bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\assets\shaders">
+      <UniqueIdentifier>{b0f11e83-6cf8-4ae3-b52e-3f56f6fed4e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -103,6 +109,9 @@
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\camera.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\texture2d.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,8 +182,17 @@
     <ClInclude Include="src\graphics\camera.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\texture2d.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\sprite.frag">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\sprite.vert">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
     <None Include="todo.md">
       <Filter>Resource Files</Filter>
     </None>

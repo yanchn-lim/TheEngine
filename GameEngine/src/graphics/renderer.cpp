@@ -1,10 +1,9 @@
 #include <glad/glad.h>
 
 #include "debug/profiler.hpp"
-#include "drawcmd.hpp"
-#include "shader.hpp"
-#include "renderer.hpp"
 #include "debug/debug.hpp"
+#include "core/file_system.hpp"
+#include "renderer.hpp"
 
 
 namespace Graphics
@@ -30,40 +29,20 @@ namespace Graphics
 			-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f
 		};
 
-		constexpr const char* vertexSource = R"(
-			#version 460 core
+		std::string vertexSource;
+		std::string fragmentSource;
 
-			layout(location = 0) in vec3 aPosition;
-			layout(location = 1) in vec3 aColor;
-			layout(location = 2) in vec2 aTexCoord;
+		if (!FileSystem::ReadTextFile("assets/shaders/sprite.vert", vertexSource))
+		{
+			Debug::LogError("Failed to read vertex shader");
+			return false;
+		}
 
-			uniform mat4 uModel;
-			uniform mat4 uView;
-			uniform mat4 uProjection;
-			
-			out vec3 vColor;
-			out vec2 vTexcoord;
-
-			void main()
-			{
-				vColor = aColor;
-				gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
-				vTexcoord = aTexcoord;		
-			}
-		)";
-
-		constexpr const char* fragmentSource = R"(
-			#version 460 core
-
-			in vec3 vColor;
-			in vec2 vTexcoord;
-			out vec4 FragColor;
-
-			void main()
-			{
-				FragColor = vec4(vColor, 1.0);
-			}
-		)";
+		if (!FileSystem::ReadTextFile("assets/shaders/sprite.frag", fragmentSource))
+		{
+			Debug::LogError("Failed to read fragment shader");
+			return false;
+		}
 
 		if (!_testShader.Create(vertexSource, fragmentSource))
 			return false;
@@ -71,6 +50,10 @@ namespace Graphics
 		if (!_testShader.IsValid()) return false;
 
 		if(!_testMesh.Create(vertices,6, 8)) return false;
+
+		//load texture
+		if (!_testTexture.LoadFromFile("assets/textures/steak.png"))
+			return false;
 
 		return true;
 	}
@@ -86,7 +69,8 @@ namespace Graphics
 		return DrawCmd
 		{
 			&_testMesh,
-			&_testShader
+			&_testShader,
+			&_testTexture
 		};
 	}
 
@@ -113,6 +97,13 @@ namespace Graphics
 
 			//bind shader
 			cmd.shader->Bind();
+
+			//bind texture
+			if (cmd.texture)
+			{
+				cmd.texture->Bind(0);
+				cmd.shader->SetInt("uTexture", 0);
+			}
 
 			cmd.shader->SetMat4("uModel", cmd.transform);
 			cmd.shader->SetMat4("uView", _camera.GetView());

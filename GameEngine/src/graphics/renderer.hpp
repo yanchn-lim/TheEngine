@@ -6,6 +6,7 @@
 
 #include "drawcmd.hpp"
 #include "shader.hpp"
+#include "texture2d.hpp"
 #include "mesh.hpp"
 #include "camera.hpp"
 
@@ -18,6 +19,7 @@ namespace Graphics
 
 		Mesh _testMesh;
 		Shader _testShader;
+		Texture2D _testTexture;
 
 		//simple camera state
 		Camera2D _camera;

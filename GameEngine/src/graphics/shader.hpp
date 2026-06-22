@@ -19,6 +19,7 @@ namespace Graphics
 		void Destroy();
 
 		//setters
+		void SetInt(const char*, const int) const;
 		void SetMat4(const char*, const glm::mat4&) const;
 
 		//accessors
