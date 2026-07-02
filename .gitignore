@@ -4,6 +4,8 @@ out/
 x64/
 Debug/
 Release/
+!GameEngine/src/debug/
+!GameEngine/src/debug/**
 
 *.ipch
 *.suo
