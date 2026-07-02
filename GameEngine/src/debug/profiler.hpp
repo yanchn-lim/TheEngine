@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "ring_buffer.hpp"
+#include "core/ring_buffer.hpp"
 
 constexpr size_t PROFILER_CAP = 1024;
 constexpr size_t MAX_SCOPE_DEPTH = 32;

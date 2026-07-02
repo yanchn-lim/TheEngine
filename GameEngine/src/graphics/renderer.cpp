@@ -1,10 +1,10 @@
 #include <glad/glad.h>
 
 #include "debug/profiler.hpp"
-#include "debug/debug.hpp"
-#include "core/file_system.hpp"
-#include "primitive2d.hpp"
+#include "mesh.hpp"
 #include "renderer.hpp"
+#include "shader.hpp"
+#include "texture2d.hpp"
 
 
 namespace Graphics
@@ -18,33 +18,6 @@ namespace Graphics
 		//reserve vector
 		_cmds.reserve(8192);
 
-		std::string vertexSource;
-		std::string fragmentSource;
-
-		if (!FileSystem::ReadTextFile("assets/shaders/sprite.vert", vertexSource))
-		{
-			Debug::LogError("Failed to read vertex shader");
-			return false;
-		}
-
-		if (!FileSystem::ReadTextFile("assets/shaders/sprite.frag", fragmentSource))
-		{
-			Debug::LogError("Failed to read fragment shader");
-			return false;
-		}
-
-		if (!_testShader.Create(vertexSource, fragmentSource))
-			return false;
-		
-		if (!_testShader.IsValid()) return false;
-
-		const Primitive2D::MeshData quad = Primitive2D::Quad();
-		if(!_testMesh.Create(quad.vertices, quad.vertexCount, quad.floatsPerVertex)) return false;
-
-		//load texture
-		if (!_testTexture.LoadFromFile("assets/textures/steak.png"))
-			return false;
-
 		return true;
 	}
 
@@ -52,26 +25,6 @@ namespace Graphics
 	{
 		PROFILE_FUNCTION();
 		_cmds.emplace_back(cmd);
-	}
-
-	DrawCmd Renderer::GetTestMeshCmd() const
-	{
-		return DrawCmd
-		{
-			&_testMesh,
-			&_testShader,
-			&_testTexture
-		};
-	}
-
-	SpriteRenderResources Renderer::GetSpriteRenderResources() const
-	{
-		return SpriteRenderResources
-		{
-			&_testMesh,
-			&_testShader,
-			&_testTexture
-		};
 	}
 
 	void Renderer::BeginFrame()
@@ -117,9 +70,6 @@ namespace Graphics
 	void Renderer::Shutdown()
 	{
 		PROFILE_FUNCTION();
-
-		_testShader.Destroy();
-		_testMesh.Destroy();
 	}
 
 	void Renderer::SetCamera(const Camera2D& camera)

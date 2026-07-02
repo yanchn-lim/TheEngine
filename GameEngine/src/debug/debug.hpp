@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "ring_buffer.hpp"
+#include "core/ring_buffer.hpp"
 
 constexpr int MAX_LOG_ENTRIES = 1024;
 

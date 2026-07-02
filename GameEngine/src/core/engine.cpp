@@ -7,8 +7,16 @@
 #include <imgui_impl_opengl3.h>
 
 #include "engine.hpp"
+#include "core/file_system.hpp"
 #include "debug/debug.hpp"
 #include "debug/profiler.hpp"
+
+#include "graphics/shader.hpp"
+#include "graphics/mesh.hpp"
+#include "graphics/texture2d.hpp"
+#include "graphics/primitive2d.hpp"
+#include "graphics/drawcmd.hpp"
+
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -87,6 +95,8 @@ void Window::Shutdown()
     glfwTerminate();
 }
 
+
+// ========= IMGUI ==========
 bool ImGuiLayer::Init(GLFWwindow* window)
 {
     Debug::CLog("Initializing ImGui...\n");
@@ -150,6 +160,15 @@ void ImGuiLayer::Shutdown()
     ImGui::DestroyContext();
 }
 
+
+
+// ========= ENGINE =========
+
+//test assets
+Graphics::Mesh testMesh;
+Graphics::Shader testShader;
+Graphics::Texture2D testTexture;
+
 int Engine::Run()
 {
     if (!Initialize())
@@ -182,11 +201,39 @@ bool Engine::Initialize()
         return false;
     }
 
-    GameObject& testObject = scene.CreateObject();
-    testObject.transform.position = { 0.25f, 0.f };
-    testObject.transform.scale = { 0.5f, 0.5f };
-
     running = true;
+
+
+    //init test assets
+    Debug::CLog("Initializing test assets...\n");
+    std::string vertexSource;
+    std::string fragmentSource;
+
+    if (!FileSystem::ReadTextFile("assets/shaders/sprite.vert", vertexSource))
+    {
+        Debug::LogError("Failed to read vertex shader");
+        return false;
+    }
+
+    if (!FileSystem::ReadTextFile("assets/shaders/sprite.frag", fragmentSource))
+    {
+        Debug::LogError("Failed to read fragment shader");
+        return false;
+    }
+
+    if (!testShader.Create(vertexSource, fragmentSource))
+        return false;
+
+    if (!testShader.IsValid()) return false;
+
+    const Graphics::Primitive2D::MeshData quad = Graphics::Primitive2D::Quad();
+    if (!testMesh.Create(quad.vertices, quad.vertexCount, quad.floatsPerVertex)) return false;
+
+    //load texture
+    if (!testTexture.LoadFromFile("assets/textures/steak.png"))
+        return false;
+
+    Debug::CLog("Successfully initialized test assets!\n");
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
     return true;
@@ -214,7 +261,14 @@ void Engine::Update()
         {
             PROFILE_SCOPE("RendererLoop");
             renderer.BeginFrame();
-            spriteRenderSystem.SubmitDrawCommands(scene, renderer, renderer.GetSpriteRenderResources());
+
+            Graphics::DrawCmd cmd;
+            cmd.mesh = &testMesh;
+            cmd.shader = &testShader;
+            cmd.texture = &testTexture;
+            //cmd.transform = transform.GetMatrix();
+
+            renderer.Submit(cmd);
 
             renderer.EndFrame();
 
@@ -241,6 +295,11 @@ void Engine::Shutdown()
     renderer.Shutdown();
     imgui.Shutdown();
     window.Shutdown();
+
+
+    testTexture.Destroy();
+    testShader.Destroy();
+    testMesh.Destroy();
 
     Debug::CLog("Engine shutdown complete\n");
 }

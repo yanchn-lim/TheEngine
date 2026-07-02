@@ -40,9 +40,6 @@
     <Filter Include="Source Files\components">
       <UniqueIdentifier>{e65eb7fa-52b8-46af-b80f-6957d4f76829}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\systems">
-      <UniqueIdentifier>{8291a9fd-5b30-4f80-bf9a-70fd3b8e67d0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\core">
       <UniqueIdentifier>{0a2e52c6-19d0-4f3c-a848-e231a83b65d7}</UniqueIdentifier>
     </Filter>
@@ -57,9 +54,6 @@
     </Filter>
     <Filter Include="Header Files\components">
       <UniqueIdentifier>{29dd3267-aa60-4f81-ab18-18db6cfacbd3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\systems">
-      <UniqueIdentifier>{45c9778c-777a-4e4e-b633-1e77f55dc7d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\assets">
       <UniqueIdentifier>{cd75989d-e614-461d-9265-a5c6fc3b39bf}</UniqueIdentifier>
@@ -132,17 +126,11 @@
     <ClCompile Include="src\graphics\texture2d.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\sprite_renderer.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\file_system.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\scene.cpp">
       <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\systems\sprite_render_system.cpp">
-      <Filter>Source Files\systems</Filter>
     </ClCompile>
     <ClCompile Include="src\components\transform2d.cpp">
       <Filter>Source Files\components</Filter>
@@ -197,9 +185,6 @@
     <ClInclude Include="src\scene\scene.hpp">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\systems\sprite_render_system.hpp">
-      <Filter>Header Files\systems</Filter>
-    </ClInclude>
     <ClInclude Include="src\components\sprite_component.hpp">
       <Filter>Header Files\components</Filter>
     </ClInclude>
@@ -243,9 +228,6 @@
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\texture2d.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\sprite_renderer.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
   </ItemGroup>
