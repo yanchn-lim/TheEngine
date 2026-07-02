@@ -10,7 +10,7 @@ namespace Graphics
 		if (!data || size == 0) return false;
 
 		glCreateBuffers(1, &_id);
-		glNamedBufferData(_id,size, data, GL_STATIC_DRAW);
+		glNamedBufferData(_id, size, data, GL_STATIC_DRAW);
 
 		return IsValid();
 	}

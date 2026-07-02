@@ -1,13 +1,14 @@
 #pragma once
 
+#include <cstdint>
 
 namespace Graphics
 {
 	class IndexBuffer
 	{
 	private:
-		uint32_t _id;
-		uint32_t _count;
+		uint32_t _id{};
+		uint32_t _count{};
 
 	public:
 		bool Create(const uint32_t* indices, uint32_t count);

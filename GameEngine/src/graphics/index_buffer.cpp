@@ -6,6 +6,7 @@ namespace Graphics
 {
 	bool IndexBuffer::Create(const uint32_t* indices, uint32_t count) 
 	{
+		Destroy();
 		if (!indices || count == 0) return false;
 
 		glCreateBuffers(1, &_id);
@@ -17,7 +18,7 @@ namespace Graphics
 
 	void IndexBuffer::Bind() const
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,_id);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id);
 	}
 
 	void IndexBuffer::Destroy()
@@ -69,4 +70,4 @@ namespace Graphics
 
 		return *this;
 	}
-};
+}
