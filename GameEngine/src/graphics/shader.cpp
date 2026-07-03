@@ -34,11 +34,16 @@ namespace Graphics
 		Destroy();
 
 		uint32_t vert = _compileshader(GL_VERTEX_SHADER, vertsrc);
-		if (0 == vert) return false;
+		if (0 == vert)
+		{
+			Debug::LogError("Shader::Create failed: vertex shader compilation failed");
+			return false;
+		}
 		
 		uint32_t frag = _compileshader(GL_FRAGMENT_SHADER, fragsrc);
 		if (0 == frag)
 		{
+			Debug::LogError("Shader::Create failed: fragment shader compilation failed");
 			glDeleteShader(vert);
 			return false;
 		}
@@ -88,7 +93,11 @@ namespace Graphics
 
 	void Shader::SetInt(const char* name, const int val) const
 	{
-		if (!IsValid()) return;
+		if (!IsValid())
+		{
+			Debug::LogError("Shader::SetInt failed: shader is invalid");
+			return;
+		}
 
 		GLint loc = glGetUniformLocation(_id, name);
 
@@ -103,7 +112,11 @@ namespace Graphics
 
 	void Shader::SetMat4(const char* name, const glm::mat4& val) const
 	{
-		if (!IsValid()) return;
+		if (!IsValid())
+		{
+			Debug::LogError("Shader::SetMat4 failed: shader is invalid");
+			return;
+		}
 
 		GLint loc = glGetUniformLocation(_id, name);
 

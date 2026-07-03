@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 
+#include "debug/debug.hpp"
 #include "debug/profiler.hpp"
 #include "mesh.hpp"
 #include "renderer.hpp"
@@ -46,7 +47,17 @@ namespace Graphics
 		//render the image
 		for (const DrawCmd& cmd : _cmds)
 		{
-			if (!cmd.shader || !cmd.mesh) continue;
+			if (!cmd.shader)
+			{
+				Debug::LogError("Renderer::EndFrame skipped draw command: shader is null");
+				continue;
+			}
+
+			if (!cmd.mesh)
+			{
+				Debug::LogError("Renderer::EndFrame skipped draw command: mesh is null");
+				continue;
+			}
 
 			//bind shader
 			cmd.shader->Bind();

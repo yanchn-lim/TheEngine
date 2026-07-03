@@ -185,11 +185,12 @@
   },
   "active": "d839fbadc6dac9c7",
   "lastOpenFiles": [
-    "Roadmap.md",
-    "Home.md",
     "Architecture/Render Submission.md",
-    "Canvases/Engine Systems.canvas",
+    "Home.md",
+    "Roadmap.md",
+    "Architecture/System Boundaries.md",
     "Architecture/Asset Manager.md",
+    "Canvases/Engine Systems.canvas",
     "Architecture/Graphics Backend.md"
   ]
 }

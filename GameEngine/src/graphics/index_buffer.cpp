@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 
+#include "debug/debug.hpp"
 #include "index_buffer.hpp"
 
 namespace Graphics
@@ -7,13 +8,29 @@ namespace Graphics
 	bool IndexBuffer::Create(const uint32_t* indices, uint32_t count) 
 	{
 		Destroy();
-		if (!indices || count == 0) return false;
+		if (!indices)
+		{
+			Debug::LogError("IndexBuffer::Create failed: indices are null");
+			return false;
+		}
+
+		if (count == 0)
+		{
+			Debug::LogError("IndexBuffer::Create failed: count is zero");
+			return false;
+		}
 
 		glCreateBuffers(1, &_id);
 		glNamedBufferData(_id, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 
 		_count = count;
-		return IsValid();
+		if (!IsValid())
+		{
+			Debug::LogError("IndexBuffer::Create failed: OpenGL buffer was not created");
+			return false;
+		}
+
+		return true;
 	}
 
 	void IndexBuffer::Bind() const

@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 
+#include "debug/debug.hpp"
 #include "vertex_buffer.hpp"
 
 namespace Graphics
@@ -7,12 +8,28 @@ namespace Graphics
 	bool VertexBuffer::Create(const void* data, size_t size)
 	{
 		Destroy();
-		if (!data || size == 0) return false;
+		if (!data)
+		{
+			Debug::LogError("VertexBuffer::Create failed: data is null");
+			return false;
+		}
+
+		if (size == 0)
+		{
+			Debug::LogError("VertexBuffer::Create failed: size is zero");
+			return false;
+		}
 
 		glCreateBuffers(1, &_id);
 		glNamedBufferData(_id, size, data, GL_STATIC_DRAW);
 
-		return IsValid();
+		if (!IsValid())
+		{
+			Debug::LogError("VertexBuffer::Create failed: OpenGL buffer was not created");
+			return false;
+		}
+
+		return true;
 	}
 
 	void VertexBuffer::Destroy()

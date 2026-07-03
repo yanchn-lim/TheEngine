@@ -1,43 +1,135 @@
 #include <glad/glad.h>
 
+#include "debug/debug.hpp"
 #include "mesh.hpp"
 
 namespace Graphics
 {
-	bool Mesh::Create(const float* vertices, uint32_t vertexCount, uint32_t floatsPerVertex)
+	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout)
 	{
 		Destroy();
 
-		if (!vertices || vertexCount == 0 || floatsPerVertex == 0) return false;
+		if (!vertexData)
+		{
+			Debug::LogError("Mesh::Create failed: vertexData is null");
+			return false;
+		}
+
+		if (vertexCount == 0)
+		{
+			Debug::LogError("Mesh::Create failed: vertexCount is zero");
+			return false;
+		}
+
+		if (!layout.IsValid())
+		{
+			Debug::LogError("Mesh::Create failed: vertex layout is invalid");
+			return false;
+		}
+
+
+		if (!_vertexArray.Create())
+		{
+			Debug::LogError("Mesh::Create failed: vertex array creation failed");
+			return false;
+		}
+
+		if (!_vertexBuffer.Create(vertexData, vertexCount * layout.stride))
+		{
+			Debug::LogError("Mesh::Create failed: vertex buffer creation failed");
+			Destroy();
+			return false;
+		}
 
 		_vertCnt = vertexCount;
-
-		_vertexArray.Create();
-		_vertexBuffer.Create(vertices, vertexCount * floatsPerVertex * sizeof(float));
-		_vertexLayout.Add(0, Graphics::ShaderDataType::FLOAT3);
-		_vertexLayout.Add(1, Graphics::ShaderDataType::FLOAT3);
-		_vertexLayout.Add(2, Graphics::ShaderDataType::FLOAT2);
-
+		_vertexLayout = layout;
 		_vertexArray.SetVertexBuffer(_vertexBuffer, _vertexLayout);
 
 		return true;
 	}
 
+	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, const uint32_t* indices, uint32_t indexCount)
+	{
+		Destroy();
+
+		if (!vertexData)
+		{
+			Debug::LogError("Mesh::Create failed: vertexData is null");
+			return false;
+		}
+
+		if (vertexCount == 0)
+		{
+			Debug::LogError("Mesh::Create failed: vertexCount is zero");
+			return false;
+		}
+
+		if (!indices)
+		{
+			Debug::LogError("Mesh::Create failed : indices is null");
+			return false;
+		}
+
+		if (indexCount == 0)
+		{
+			Debug::LogError("Mesh::Create failed: indexCount is zero");
+			return false;
+		}
+
+		if (!layout.IsValid())
+		{
+			Debug::LogError("Mesh::Create failed: vertex layout is invalid");
+			return false;
+		}
+
+
+		if (!_vertexArray.Create())
+		{
+			Debug::LogError("Mesh::Create failed: vertex array creation failed");
+			return false;
+		}
+
+		if (!_vertexBuffer.Create(vertexData, vertexCount * layout.stride))
+		{
+			Debug::LogError("Mesh::Create failed: vertex buffer creation failed");
+			Destroy();
+			return false;
+		}
+
+		if (!_indexBuffer.Create(indices, indexCount))
+		{
+			Debug::LogError("Mesh::Create failed : index buffer creation failed");
+			Destroy();
+			return false;
+		}
+
+
+		_vertCnt = vertexCount;
+		_vertexLayout = layout;
+		_vertexArray.SetVertexBuffer(_vertexBuffer, _vertexLayout);
+		_vertexArray.SetIndexBuffer(_indexBuffer);
+		return true;
+	}
+
 	void Mesh::Bind() const 
 	{
-		//glBindVertexArray(_vao);
-		glBindVertexArray(_vertexArray.GetId());
+		_vertexArray.Bind();
 	}
 
 	void Mesh::Draw() const 
 	{
 		if (!IsValid())
 		{
+			Debug::LogError("Mesh::Draw failed: mesh is invalid");
 			return;
 		}
 
 		Bind();
-		glDrawArrays(GL_TRIANGLES, 0, _vertCnt);
+
+		if (_indexBuffer.IsValid())
+			glDrawElements(GL_TRIANGLES, _indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+		else
+			glDrawArrays(GL_TRIANGLES, 0, _vertCnt);
 	}
 
 	void Mesh::Destroy() 
@@ -52,7 +144,12 @@ namespace Graphics
 			_vertexArray.Destroy();
 		}
 
+		if (_indexBuffer.IsValid())
+			_indexBuffer.Destroy();
+
 		_vertCnt = 0;
+		
+		_vertexLayout.Destroy();
 	}
 
 	uint32_t Mesh::GetVertexCount() const
@@ -62,7 +159,10 @@ namespace Graphics
 
 	bool Mesh::IsValid() const
 	{
-		return _vertexArray.IsValid() && _vertCnt != 0 && _vertexBuffer.IsValid();
+		return _vertexArray.IsValid()
+			&& _vertexBuffer.IsValid()
+			&& _vertexLayout.IsValid()
+			&& _vertCnt != 0;
 	}
 
 	Mesh::~Mesh()
@@ -70,7 +170,11 @@ namespace Graphics
 		Destroy();
 	}
 
-	Mesh::Mesh(Mesh&& oth) noexcept : _vertexArray(std::move(oth._vertexArray)), _vertexBuffer(std::move(oth._vertexBuffer)), _vertCnt(oth._vertCnt)
+	Mesh::Mesh(Mesh&& oth) noexcept : _vertCnt(oth._vertCnt), 
+		_vertexArray(std::move(oth._vertexArray)),
+		_vertexBuffer(std::move(oth._vertexBuffer)),  
+		_vertexLayout(std::move(oth._vertexLayout)),
+		_indexBuffer(std::move(oth._indexBuffer))
 	{
 		oth._vertCnt = 0;
 	}
@@ -81,11 +185,12 @@ namespace Graphics
 
 		Destroy();
 
+		_vertCnt = oth._vertCnt;
 		_vertexArray = std::move(oth._vertexArray);
 		_vertexBuffer = std::move(oth._vertexBuffer);
-		_vertCnt = oth._vertCnt;
+		_vertexLayout = std::move(oth._vertexLayout);
+		_indexBuffer = std::move(oth._indexBuffer);
 
-		oth._vertCnt = 0;
 		oth._vertCnt = 0;
 
 		return *this;

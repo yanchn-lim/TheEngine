@@ -1,6 +1,31 @@
 #include <glad/glad.h>
 
 #include "vertex_array.hpp"
+#include "debug/debug.hpp"
+
+namespace Graphics
+{
+    static GLenum ToOpenGLBaseType(ShaderDataType type)
+    {
+        switch (type)
+        {
+        case ShaderDataType::FLOAT:
+        case ShaderDataType::FLOAT2:
+        case ShaderDataType::FLOAT3:
+        case ShaderDataType::FLOAT4:
+            return GL_FLOAT;
+
+        case ShaderDataType::INT:
+        case ShaderDataType::INT2:
+        case ShaderDataType::INT3:
+        case ShaderDataType::INT4:
+            return GL_INT;
+
+        default:
+            return GL_FLOAT;
+        }
+    }
+}
 
 namespace Graphics
 {
@@ -38,21 +63,34 @@ namespace Graphics
 
     void VertexArray::SetVertexBuffer(const VertexBuffer& buffer, const VertexLayout& layout)
     {
+        if (!buffer.IsValid() || !layout.IsValid())
+        {
+            Debug::LogError("VertexArray::SetVertexBuffer failed : Buffer or Layout is invalid!\n");
+            return;
+        }
+
+        if (!IsValid())
+        {
+            Debug::LogError("VertexArray::SetVertexBuffer failed : VertexArray is invalid!\n");
+            return;
+        }
+
 		glVertexArrayVertexBuffer(_id, 0, buffer.GetId(), 0, layout.stride);
 
         for (const auto& attrib : layout.attributes)
         {
-            const auto format = GetVertexAttribFormat(attrib.type);
+            const uint32_t componentCount = GetShaderDataTypeComponentCount(attrib.type);
+            const GLenum glType = ToOpenGLBaseType(attrib.type);
 
             glEnableVertexArrayAttrib(_id, attrib.location);
 
-            if (format.integer)
+            if (IsShaderDataTypeInteger(attrib.type))
             {
                 glVertexArrayAttribIFormat(
                     _id,
                     attrib.location,
-                    format.componentCount,
-                    format.glType,
+                    componentCount,
+                    glType,
                     attrib.offset
                 );
             }
@@ -61,9 +99,9 @@ namespace Graphics
                 glVertexArrayAttribFormat(
                     _id,
                     attrib.location,
-                    format.componentCount,
-                    format.glType,
-                    format.normalized ? GL_TRUE : GL_FALSE,
+                    componentCount,
+                    glType,
+                    GL_FALSE,
                     attrib.offset
                 );
             }
@@ -75,6 +113,18 @@ namespace Graphics
 
     void VertexArray::SetIndexBuffer(const IndexBuffer& buffer)
     {
+        if (!buffer.IsValid())
+        {
+            Debug::LogError("VertexArray::SetIndexBuffer failed : Buffer is invalid!\n");
+            return;
+        }
+
+        if (!IsValid())
+        {
+            Debug::LogError("VertexArray::SetIndexBuffer failed : VertexArray is invalid!\n");
+            return;
+        }
+
         glVertexArrayElementBuffer(_id, buffer.GetId());
     }
 

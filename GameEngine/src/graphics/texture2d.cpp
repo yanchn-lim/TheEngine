@@ -67,7 +67,11 @@ namespace Graphics
 
 	void Texture2D::Bind(uint32_t slot) const
 	{
-		if (_id == 0) return;
+		if (_id == 0)
+		{
+			Debug::LogError("Texture2D::Bind failed: texture is invalid");
+			return;
+		}
 
 		glBindTextureUnit(slot, _id);
 	}
