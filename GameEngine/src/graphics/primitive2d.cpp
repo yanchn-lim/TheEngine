@@ -52,7 +52,7 @@ namespace Graphics::Primitive2D
 		layout.Add(1, Graphics::ShaderDataType::FLOAT3);
 		layout.Add(2, Graphics::ShaderDataType::FLOAT2);
 
-		return { TriangleVertices, 3, nullptr, 0, layout};
+		return { TriangleVertices, 3, nullptr, 0, layout };
 	}
 
 	Graphics::MeshData Quad()
@@ -61,7 +61,7 @@ namespace Graphics::Primitive2D
 		layout.Add(0, Graphics::ShaderDataType::FLOAT3);
 		layout.Add(1, Graphics::ShaderDataType::FLOAT3);
 		layout.Add(2, Graphics::ShaderDataType::FLOAT2);
-		return { QuadVertices, 4, QuadIndices, 6, layout};
+		return { QuadVertices, 4, QuadIndices, 6, layout };
 	}
 
 	std::vector<float> CreateCircle(uint32_t segments)

@@ -111,6 +111,14 @@ namespace Graphics
 		return true;
 	}
 
+	bool Mesh::Create(const MeshData& data)
+	{
+		if (data.indices && data.indexCount > 0)
+			return Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount);
+
+		return Create(data.vertices, data.vertexCount, data.layout);
+	}
+
 	void Mesh::Bind() const 
 	{
 		_vertexArray.Bind();

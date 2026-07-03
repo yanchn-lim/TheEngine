@@ -224,10 +224,12 @@ bool Engine::Initialize()
     if (!testShader.Create(vertexSource, fragmentSource))
         return false;
 
-    if (!testShader.IsValid()) return false;
+    if (!testShader.IsValid()) 
+        return false;
 
     const Graphics::MeshData quad = Graphics::Primitive2D::Quad();
-    if (!testMesh.Create(quad.vertices, quad.vertexCount, quad.layout, quad.indices, quad.indexCount)) return false;
+    if (!testMesh.Create(quad)) 
+        return false;
 
     //load texture
     if (!testTexture.LoadFromFile("assets/textures/steak.png"))

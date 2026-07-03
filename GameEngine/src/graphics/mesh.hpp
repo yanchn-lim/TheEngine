@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "index_buffer.hpp"
 #include "vertex_array.hpp"
+#include "mesh_data.hpp"
 
 namespace Graphics
 {
@@ -19,6 +20,7 @@ namespace Graphics
 	public:
 		bool Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout);
 		bool Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, const uint32_t* indices, uint32_t indexCount);
+		bool Create(const MeshData& data);
 
 		void Bind() const;
 		void Draw() const;
