@@ -15,13 +15,14 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Index buffer wrapper
 - [x] Vertex array wrapper
 - [x] Vertex layout abstraction
-- [ ] Finish mesh support for indexed and non-indexed drawing
+- [x] Finish mesh support for indexed and non-indexed drawing
+- [x] Add `MeshData` and `Mesh::Create(const MeshData&)`
 - [x] Remove sprite-specific renderer/system path from backend focus
 - [x] Remove renderer-owned test resources
 - [ ] Add renderer diagnostics for invalid draw commands
 - [ ] Add basic render state handling
-- [ ] Fix current mesh build issue in non-indexed `Create()` parameter naming
-- [ ] Verify indexed mesh drawing with a manual test
+- [ ] Add basic Material type for shader, texture, and render state grouping
+- [x] Verify indexed mesh drawing with a manual test
 
 ## Phase 2 - Asset Manager
 
@@ -31,6 +32,7 @@ Goal: load, cache, and retrieve assets without coupling to Scene, GameObject, or
 - [ ] Define invalid handle constants
 - [ ] Add TextureRegistry or AssetManager texture path
 - [ ] Add ShaderRegistry or AssetManager shader path
+- [ ] Add MaterialRegistry or AssetManager material path
 - [ ] Add MeshRegistry or primitive mesh cache
 - [ ] Add path-to-handle caching
 - [ ] Add handle-to-resource lookup

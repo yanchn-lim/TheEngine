@@ -19,6 +19,8 @@ namespace Graphics
 		//reserve vector
 		_cmds.reserve(8192);
 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		return true;
 	}
 
@@ -58,6 +60,26 @@ namespace Graphics
 				Debug::LogError("Renderer::EndFrame skipped draw command: mesh is null");
 				continue;
 			}
+
+			const auto& state = cmd.state;
+
+			if (state.blending)
+				glEnable(GL_BLEND);
+			else
+				glDisable(GL_BLEND);
+
+			if (state.depthTest)
+				glEnable(GL_DEPTH_TEST);
+			else
+				glDisable(GL_DEPTH_TEST);
+
+			glDepthMask(state.depthWrite ? GL_TRUE : GL_FALSE);
+
+			if (state.culling)
+				glEnable(GL_CULL_FACE);
+			else
+				glDisable(GL_CULL_FACE);
+
 
 			//bind shader
 			cmd.shader->Bind();

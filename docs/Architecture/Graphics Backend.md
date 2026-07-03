@@ -17,6 +17,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - `Graphics::VertexBuffer`
 - `Graphics::IndexBuffer`
 - `Graphics::VertexLayout`
+- `Graphics::MeshData`
 
 ## Responsibilities
 
@@ -35,10 +36,9 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 
 ## Near-Term Cleanup
 
-- Finish the current `Mesh::Create()` compile fix for the non-indexed overload
-- Verify indexed drawing through `Mesh::Draw()`
 - Add renderer diagnostics for invalid draw commands
 - Add basic render state handling
+- Add a basic Material type after render state exists
 
 ## Current Progress
 
@@ -46,4 +46,16 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Sprite-specific rendering has been removed from the backend focus for now.
 - Vertex buffer, index buffer, vertex array, and vertex layout wrappers are in place.
 - Mesh now has separate creation paths for non-indexed and indexed geometry.
-- Mesh is intended to own its GPU buffers and issue either `glDrawArrays()` or `glDrawElements()` depending on whether an index buffer exists.
+- Mesh owns its GPU buffers and issues either `glDrawArrays()` or `glDrawElements()` depending on whether an index buffer exists.
+- Primitive quads now use indexed mesh data.
+
+## Material Direction
+
+Material should group draw-time surface state:
+
+- Shader
+- Texture bindings
+- Uniform parameters
+- Render state
+
+Do not build a large material system yet. Add the first Material type after basic render state handling exists.

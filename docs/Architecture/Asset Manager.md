@@ -8,6 +8,7 @@ Load, cache, and retrieve assets through stable handles.
 
 - Textures
 - Shaders
+- Materials
 - Meshes or primitive meshes
 
 ## Handle Direction
@@ -17,6 +18,7 @@ Components and scene data should store handles instead of owning GPU resources.
 ```cpp
 using TextureHandle = uint32_t;
 using ShaderHandle = uint32_t;
+using MaterialHandle = uint32_t;
 using MeshHandle = uint32_t;
 ```
 

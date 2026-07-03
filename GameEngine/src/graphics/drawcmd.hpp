@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <glm/glm.hpp>
+#include "render_state.hpp"
 
 namespace Graphics
 {
@@ -14,6 +15,7 @@ namespace Graphics
 		const Mesh* mesh{ nullptr };
 		const Shader* shader{nullptr};
 		const Texture2D* texture{ nullptr };
+		RenderState state{};
 		glm::mat4 transform{ 1.0f };
 	};
 }
