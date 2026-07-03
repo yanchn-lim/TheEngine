@@ -38,7 +38,6 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 
 ## Near-Term Cleanup
 
-- Add simple material/manual render state test cases
 - Decide the next backend feature before asset manager
 
 ## Current Progress
@@ -52,6 +51,8 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Draw commands now reference a material instead of separate shader, texture, and render state fields.
 - Renderer validates material, shader, and mesh before drawing.
 - Renderer applies basic render state: blending, depth test, depth write, and culling.
+- Manual material test submits two draw commands with different material render states.
+- Blending test verified expected behavior: alpha respects transparency when blending is enabled, and transparent pixels render as their raw color when blending is disabled.
 
 ## Material Direction
 

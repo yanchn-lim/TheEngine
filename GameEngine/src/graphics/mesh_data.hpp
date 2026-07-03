@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vertex_layout.hpp"
+#include "primitive_topology.hpp"
 
 namespace Graphics
 {
@@ -13,5 +14,7 @@ namespace Graphics
 		uint32_t indexCount = 0;
 
 		VertexLayout layout;
+
+		PrimitiveTopology topology = PrimitiveTopology::TRIANGLES;
 	};
 }

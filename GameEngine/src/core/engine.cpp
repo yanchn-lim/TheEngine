@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "engine.hpp"
 #include "core/file_system.hpp"
@@ -167,9 +168,11 @@ void ImGuiLayer::Shutdown()
 
 //test assets
 Graphics::Mesh testMesh;
+Graphics::Mesh testLineMesh;
 Graphics::Shader testShader;
 Graphics::Texture2D testTexture;
 Graphics::Material testMaterial;
+Graphics::Material testMaterialNoBlend;
 
 int Engine::Run()
 {
@@ -233,6 +236,34 @@ bool Engine::Initialize()
     if (!testMesh.Create(quad)) 
         return false;
 
+    constexpr uint32_t lineQuadIndices[] =
+    {
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0
+    };
+
+    constexpr float lineQuadVertices[] =
+    {
+        // position          // color           // uv
+        -0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f,
+         0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f,
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f,
+        -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f
+    };
+
+    Graphics::MeshData lineQuad{};
+    lineQuad.vertices = lineQuadVertices;
+    lineQuad.vertexCount = 4;
+    lineQuad.indices = lineQuadIndices;
+    lineQuad.indexCount = 8;
+    lineQuad.layout = quad.layout;
+    lineQuad.topology = Graphics::PrimitiveTopology::LINES;
+
+    if (!testLineMesh.Create(lineQuad))
+        return false;
+
     //load texture
     if (!testTexture.LoadFromFile("assets/textures/steak.png"))
         return false;
@@ -242,6 +273,11 @@ bool Engine::Initialize()
     testMaterial.texture = &testTexture;
     testMaterial.state.blending = true;
     testMaterial.state.depthTest = false;
+
+    testMaterialNoBlend.shader = &testShader;
+    testMaterialNoBlend.texture = &testTexture;
+    testMaterialNoBlend.state.blending = false;
+    testMaterialNoBlend.state.depthTest = false;
 
 
     Debug::CLog("Successfully initialized test assets!\n");
@@ -273,12 +309,24 @@ void Engine::Update()
             PROFILE_SCOPE("RendererLoop");
             renderer.BeginFrame();
 
-            Graphics::DrawCmd cmd;
-            cmd.mesh = &testMesh;
-            cmd.material = &testMaterial;
-            //cmd.transform = transform.GetMatrix();
+            Graphics::DrawCmd leftCmd;
+            leftCmd.mesh = &testMesh;
+            leftCmd.material = &testMaterial;
+            leftCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.0f, 0.0f));
 
-            renderer.Submit(cmd);
+            Graphics::DrawCmd rightCmd;
+            rightCmd.mesh = &testMesh;
+            rightCmd.material = &testMaterialNoBlend;
+            rightCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.0f, 0.0f));
+
+            Graphics::DrawCmd lineCmd;
+            lineCmd.mesh = &testLineMesh;
+            lineCmd.material = &testMaterial;
+            lineCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.35f, 0.0f));
+
+            renderer.Submit(leftCmd);
+            renderer.Submit(rightCmd);
+            renderer.Submit(lineCmd);
 
             renderer.EndFrame();
 
@@ -309,6 +357,7 @@ void Engine::Shutdown()
 
     testTexture.Destroy();
     testShader.Destroy();
+    testLineMesh.Destroy();
     testMesh.Destroy();
 
     Debug::CLog("Engine shutdown complete\n");

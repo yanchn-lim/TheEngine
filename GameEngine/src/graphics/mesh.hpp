@@ -4,6 +4,7 @@
 #include "index_buffer.hpp"
 #include "vertex_array.hpp"
 #include "mesh_data.hpp"
+#include "primitive_topology.hpp"
 
 namespace Graphics
 {
@@ -16,6 +17,8 @@ namespace Graphics
 		VertexBuffer _vertexBuffer;
 		VertexLayout _vertexLayout;
 		IndexBuffer _indexBuffer;
+
+		PrimitiveTopology _topology = PrimitiveTopology::TRIANGLES; //default to triangle
 
 	public:
 		bool Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout);

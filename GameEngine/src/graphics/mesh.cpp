@@ -5,6 +5,20 @@
 
 namespace Graphics
 {
+	static GLenum ToOpenGLTopology(PrimitiveTopology topology)
+	{
+		switch (topology)
+		{
+		case PrimitiveTopology::TRIANGLES: return GL_TRIANGLES;
+		case PrimitiveTopology::LINES: return GL_LINES;
+		case PrimitiveTopology::POINTS: return GL_POINTS;
+		default: return GL_TRIANGLES;
+		}
+	}
+}
+
+namespace Graphics
+{
 	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout)
 	{
 		Destroy();
@@ -113,10 +127,14 @@ namespace Graphics
 
 	bool Mesh::Create(const MeshData& data)
 	{
-		if (data.indices && data.indexCount > 0)
-			return Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount);
+		const bool created = data.indices && data.indexCount > 0
+			? Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount)
+			: Create(data.vertices, data.vertexCount, data.layout);
 
-		return Create(data.vertices, data.vertexCount, data.layout);
+		if (created)
+			_topology = data.topology;
+
+		return created;
 	}
 
 	void Mesh::Bind() const 
@@ -134,10 +152,12 @@ namespace Graphics
 
 		Bind();
 
+		const GLenum mode = ToOpenGLTopology(_topology);
+
 		if (_indexBuffer.IsValid())
-			glDrawElements(GL_TRIANGLES, _indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+			glDrawElements(mode, _indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 		else
-			glDrawArrays(GL_TRIANGLES, 0, _vertCnt);
+			glDrawArrays(mode, 0, _vertCnt);
 	}
 
 	void Mesh::Destroy() 
@@ -182,7 +202,8 @@ namespace Graphics
 		_vertexArray(std::move(oth._vertexArray)),
 		_vertexBuffer(std::move(oth._vertexBuffer)),  
 		_vertexLayout(std::move(oth._vertexLayout)),
-		_indexBuffer(std::move(oth._indexBuffer))
+		_indexBuffer(std::move(oth._indexBuffer)),
+		_topology(oth._topology)
 	{
 		oth._vertCnt = 0;
 	}
@@ -198,7 +219,7 @@ namespace Graphics
 		_vertexBuffer = std::move(oth._vertexBuffer);
 		_vertexLayout = std::move(oth._vertexLayout);
 		_indexBuffer = std::move(oth._indexBuffer);
-
+		_topology = oth._topology;
 		oth._vertCnt = 0;
 
 		return *this;

@@ -190,6 +190,7 @@
     <ClInclude Include="src\graphics\index_buffer.hpp" />
     <ClInclude Include="src\graphics\material.hpp" />
     <ClInclude Include="src\graphics\mesh_data.hpp" />
+    <ClInclude Include="src\graphics\primitive_topology.hpp" />
     <ClInclude Include="src\graphics\render_state.hpp" />
     <ClInclude Include="src\graphics\vertex_layout.hpp" />
     <ClInclude Include="src\pch.hpp" />
