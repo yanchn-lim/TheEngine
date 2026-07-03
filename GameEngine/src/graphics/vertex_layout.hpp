@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <cstdint>
 #include <vector>
 
@@ -24,9 +25,22 @@ namespace Graphics
 		uint32_t offset{};
 	};
 
+	struct VertexAttribFormat
+	{
+		uint32_t componentCount;
+		GLenum glType;
+		bool normalized;
+		bool integer;
+		uint32_t componentSize;
+	};
+
 	struct VertexLayout
 	{
 		uint32_t stride{};
 		std::vector<VertexAttribute> attributes{};
+
+		void Add(uint32_t location, ShaderDataType type);
 	};
+
+	VertexAttribFormat GetVertexAttribFormat(ShaderDataType type);
 }

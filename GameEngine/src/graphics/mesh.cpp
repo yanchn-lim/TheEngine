@@ -12,38 +12,21 @@ namespace Graphics
 
 		_vertCnt = vertexCount;
 
-		//create and assign to id
-		glCreateVertexArrays(1, &_vao);
-		glCreateBuffers(1, &_vbo);
+		_vertexArray.Create();
+		_vertexBuffer.Create(vertices, vertexCount * floatsPerVertex * sizeof(float));
+		_vertexLayout.Add(0, Graphics::ShaderDataType::FLOAT3);
+		_vertexLayout.Add(1, Graphics::ShaderDataType::FLOAT3);
+		_vertexLayout.Add(2, Graphics::ShaderDataType::FLOAT2);
 
-		const size_t bufferSize = vertexCount * floatsPerVertex * sizeof(float);
-		glNamedBufferData(_vbo, bufferSize, vertices, GL_STATIC_DRAW);
-		
-		const GLsizei stride = static_cast<GLsizei>(floatsPerVertex * sizeof(float));
-
-		glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, stride);
-
-		// position
-		glEnableVertexArrayAttrib(_vao, 0);
-		glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribBinding(_vao, 0, 0);
-
-		// color
-		glEnableVertexArrayAttrib(_vao, 1);
-		glVertexArrayAttribFormat(_vao, 1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
-		glVertexArrayAttribBinding(_vao, 1, 0);
-
-		//uv
-		glEnableVertexArrayAttrib(_vao, 2);
-		glVertexArrayAttribFormat(_vao, 2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float));
-		glVertexArrayAttribBinding(_vao, 2, 0);
+		_vertexArray.SetVertexBuffer(_vertexBuffer, _vertexLayout);
 
 		return true;
 	}
 
 	void Mesh::Bind() const 
 	{
-		glBindVertexArray(_vao);
+		//glBindVertexArray(_vao);
+		glBindVertexArray(_vertexArray.GetId());
 	}
 
 	void Mesh::Draw() const 
@@ -59,16 +42,14 @@ namespace Graphics
 
 	void Mesh::Destroy() 
 	{
-		if (_vbo)
+		if (_vertexBuffer.IsValid())
 		{
-			glDeleteBuffers(1, &_vbo);
-			_vbo = 0;
+			_vertexBuffer.Destroy();
 		}
 
-		if (_vao)
+		if (_vertexArray.IsValid())
 		{
-			glDeleteVertexArrays(1, &_vao);
-			_vao = 0;
+			_vertexArray.Destroy();
 		}
 
 		_vertCnt = 0;
@@ -81,7 +62,7 @@ namespace Graphics
 
 	bool Mesh::IsValid() const
 	{
-		return _vao != 0 && _vertCnt != 0 && _vbo != 0;
+		return _vertexArray.IsValid() && _vertCnt != 0 && _vertexBuffer.IsValid();
 	}
 
 	Mesh::~Mesh()
@@ -89,10 +70,8 @@ namespace Graphics
 		Destroy();
 	}
 
-	Mesh::Mesh(Mesh&& oth) noexcept : _vao(oth._vao), _vbo(oth._vbo), _vertCnt(oth._vertCnt)
+	Mesh::Mesh(Mesh&& oth) noexcept : _vertexArray(std::move(oth._vertexArray)), _vertexBuffer(std::move(oth._vertexBuffer)), _vertCnt(oth._vertCnt)
 	{
-		oth._vao = 0;
-		oth._vbo = 0;
 		oth._vertCnt = 0;
 	}
 
@@ -102,12 +81,11 @@ namespace Graphics
 
 		Destroy();
 
-		_vao = oth._vao;
-		_vbo = oth._vbo;
+		_vertexArray = std::move(oth._vertexArray);
+		_vertexBuffer = std::move(oth._vertexBuffer);
 		_vertCnt = oth._vertCnt;
 
-		oth._vao = 0;
-		oth._vbo = 0;
+		oth._vertCnt = 0;
 		oth._vertCnt = 0;
 
 		return *this;

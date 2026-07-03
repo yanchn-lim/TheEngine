@@ -1,10 +1,9 @@
 #pragma once
 
 #include <cstdint>
-
-class VertexBuffer;
-class VertexLayout;
-class IndexBuffer;
+#include "index_buffer.hpp"
+#include "vertex_layout.hpp"
+#include "vertex_buffer.hpp"
 
 namespace Graphics
 {
@@ -20,7 +19,7 @@ namespace Graphics
         bool IsValid() const;
         uint32_t GetId() const;
 
-        //void SetVertexBuffer(const VertexBuffer& buffer, const VertexLayout& layout);
+        void SetVertexBuffer(const VertexBuffer& buffer, const VertexLayout& layout);
         void SetIndexBuffer(const IndexBuffer& buffer);
 
         VertexArray() = default;
