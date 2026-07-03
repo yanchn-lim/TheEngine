@@ -21,3 +21,7 @@ The immediate implementation goal is:
 2. Build a reusable asset manager.
 3. Integrate asset resolution with render submission.
 4. Continue higher-level scene, gameplay, and ECS/E-CS work.
+
+## Current Focus
+
+Graphics backend work is active. The current checkpoint is finishing mesh support for both indexed and non-indexed drawing, then verifying the indexed path with a small manual render test.

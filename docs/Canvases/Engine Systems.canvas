@@ -2,7 +2,7 @@
 	"nodes":[
 		{"id":"goal","type":"text","text":"TheEngine Architecture\\nReusable graphics backend + reusable asset manager before committing to ECS or E-CS.","x":-520,"y":-360,"width":420,"height":160},
 		{"id":"scene","type":"file","file":"Architecture/Render Submission.md","x":-520,"y":-120,"width":340,"height":180},
-		{"id":"submission","type":"text","text":"Render Submission\\nReads world data and produces DrawCmds. Current example: SpriteRenderSystem.","x":-80,"y":-120,"width":360,"height":180},
+		{"id":"submission","type":"text","text":"Render Submission\\nFuture layer that reads world data and produces DrawCmds. Paused until graphics backend and asset manager are stronger.","x":-80,"y":-120,"width":360,"height":180},
 		{"id":"graphics","type":"file","file":"Architecture/Graphics Backend.md","x":360,"y":-120,"width":340,"height":180},
 		{"id":"assets","type":"file","file":"Architecture/Asset Manager.md","x":-80,"y":160,"width":360,"height":180},
 		{"id":"boundaries","type":"file","file":"Architecture/System Boundaries.md","x":360,"y":160,"width":340,"height":180},

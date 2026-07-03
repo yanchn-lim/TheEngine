@@ -53,5 +53,5 @@ Asset manager should not depend on:
 
 - Scene
 - GameObject
-- SpriteRenderSystem behavior
+- Render submission behavior
 - Gameplay logic

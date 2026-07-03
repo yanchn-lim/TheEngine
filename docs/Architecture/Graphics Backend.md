@@ -15,6 +15,8 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - `Graphics::Primitive2D`
 - `Graphics::VertexArray`
 - `Graphics::VertexBuffer`
+- `Graphics::IndexBuffer`
+- `Graphics::VertexLayout`
 
 ## Responsibilities
 
@@ -33,7 +35,15 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 
 ## Near-Term Cleanup
 
-- Rename or isolate `_testMesh`, `_testShader`, and `_testTexture`
-- Replace `GetTestMeshCmd()` with real resource access
-- Add index buffer support
-- Add a vertex layout abstraction
+- Finish the current `Mesh::Create()` compile fix for the non-indexed overload
+- Verify indexed drawing through `Mesh::Draw()`
+- Add renderer diagnostics for invalid draw commands
+- Add basic render state handling
+
+## Current Progress
+
+- Renderer no longer owns hardcoded test mesh, shader, or texture resources.
+- Sprite-specific rendering has been removed from the backend focus for now.
+- Vertex buffer, index buffer, vertex array, and vertex layout wrappers are in place.
+- Mesh now has separate creation paths for non-indexed and indexed geometry.
+- Mesh is intended to own its GPU buffers and issue either `glDrawArrays()` or `glDrawElements()` depending on whether an index buffer exists.

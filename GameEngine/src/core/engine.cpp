@@ -226,12 +226,8 @@ bool Engine::Initialize()
 
     if (!testShader.IsValid()) return false;
 
-    const Graphics::Primitive2D::MeshData quad = Graphics::Primitive2D::Quad();
-    Graphics::VertexLayout layout{};
-    layout.Add(0, Graphics::ShaderDataType::FLOAT3);
-    layout.Add(1, Graphics::ShaderDataType::FLOAT3);
-    layout.Add(2, Graphics::ShaderDataType::FLOAT2);
-    if (!testMesh.Create(quad.vertices, quad.vertexCount, layout)) return false;
+    const Graphics::MeshData quad = Graphics::Primitive2D::Quad();
+    if (!testMesh.Create(quad.vertices, quad.vertexCount, quad.layout, quad.indices, quad.indexCount)) return false;
 
     //load texture
     if (!testTexture.LoadFromFile("assets/textures/steak.png"))

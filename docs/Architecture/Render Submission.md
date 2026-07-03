@@ -7,8 +7,8 @@ Convert world data into renderer-agnostic draw commands.
 ## Current Flow
 
 ```text
-Scene
-SpriteRenderSystem
+Future Scene / ECS / E-CS
+Render submission layer
 Graphics::DrawCmd
 Graphics::Renderer
 OpenGL
@@ -27,8 +27,8 @@ The submission layer can handle:
 - Asset handle resolution
 - Command creation
 
-## Current Temporary Bridge
+## Current Status
 
-`SpriteRenderSystem` uses `Graphics::SpriteRenderResources` from the renderer. This keeps the current scene rendering test working before the asset manager exists.
+The temporary `SpriteRenderSystem` bridge has been removed from the current backend direction.
 
-This should later be replaced by asset/resource manager integration.
+Render submission should stay as a future layer above graphics and assets. For now, the focus is finishing the reusable graphics backend first, then the asset manager, then connecting both through clean draw command/resource resolution.

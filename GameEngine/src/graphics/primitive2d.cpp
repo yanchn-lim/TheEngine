@@ -23,10 +23,13 @@ namespace Graphics::Primitive2D
 			-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 			 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 			 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f
+		};
 
-			 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-			-0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f
+		constexpr uint32_t QuadIndices[] =
+		{
+			0, 1, 2,
+			2, 3, 0
 		};
 
 		void AddVertex(std::vector<float>& vertices, float x, float y)
@@ -42,14 +45,23 @@ namespace Graphics::Primitive2D
 		}
 	}
 
-	MeshData Triangle()
+	Graphics::MeshData Triangle()
 	{
-		return { TriangleVertices, 3, FloatsPerVertex };
+		VertexLayout layout;
+		layout.Add(0, Graphics::ShaderDataType::FLOAT3);
+		layout.Add(1, Graphics::ShaderDataType::FLOAT3);
+		layout.Add(2, Graphics::ShaderDataType::FLOAT2);
+
+		return { TriangleVertices, 3, nullptr, 0, layout};
 	}
 
-	MeshData Quad()
+	Graphics::MeshData Quad()
 	{
-		return { QuadVertices, 6, FloatsPerVertex };
+		VertexLayout layout;
+		layout.Add(0, Graphics::ShaderDataType::FLOAT3);
+		layout.Add(1, Graphics::ShaderDataType::FLOAT3);
+		layout.Add(2, Graphics::ShaderDataType::FLOAT2);
+		return { QuadVertices, 4, QuadIndices, 6, layout};
 	}
 
 	std::vector<float> CreateCircle(uint32_t segments)

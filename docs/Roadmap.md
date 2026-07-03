@@ -11,12 +11,17 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Draw command container
 - [x] Camera2D
 - [x] Primitive2D mesh data
-- [ ] Index buffer support
-- [ ] Vertex layout abstraction
-- [ ] Renderer resource naming cleanup
-- [ ] Remove or isolate test-only renderer resources
+- [x] Vertex buffer wrapper
+- [x] Index buffer wrapper
+- [x] Vertex array wrapper
+- [x] Vertex layout abstraction
+- [ ] Finish mesh support for indexed and non-indexed drawing
+- [x] Remove sprite-specific renderer/system path from backend focus
+- [x] Remove renderer-owned test resources
 - [ ] Add renderer diagnostics for invalid draw commands
 - [ ] Add basic render state handling
+- [ ] Fix current mesh build issue in non-indexed `Create()` parameter naming
+- [ ] Verify indexed mesh drawing with a manual test
 
 ## Phase 2 - Asset Manager
 
@@ -51,7 +56,7 @@ Goal: keep world structure separate from graphics and assets.
 - [x] Scene object storage
 - [x] Transform2D
 - [x] SpriteComponent
-- [x] SpriteRenderSystem bridge
+- [x] Removed temporary SpriteRenderSystem bridge from current backend direction
 - [ ] Scene lifetime rules
 - [ ] Object creation/destruction API
 - [ ] Stable object handles or IDs

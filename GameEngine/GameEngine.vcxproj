@@ -188,6 +188,7 @@
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
     <ClInclude Include="src\graphics\index_buffer.hpp" />
+    <ClInclude Include="src\graphics\mesh_data.hpp" />
     <ClInclude Include="src\graphics\vertex_layout.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\debug\profiler.hpp" />
