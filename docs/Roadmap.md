@@ -19,10 +19,12 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Add `MeshData` and `Mesh::Create(const MeshData&)`
 - [x] Remove sprite-specific renderer/system path from backend focus
 - [x] Remove renderer-owned test resources
-- [ ] Add renderer diagnostics for invalid draw commands
-- [ ] Add basic render state handling
-- [ ] Add basic Material type for shader, texture, and render state grouping
+- [x] Add renderer diagnostics for invalid draw commands
+- [x] Add basic render state handling
+- [x] Add basic Material type for shader, texture, and render state grouping
 - [x] Verify indexed mesh drawing with a manual test
+- [ ] Add simple material/manual render state test cases
+- [ ] Decide next backend feature before asset manager
 
 ## Phase 2 - Asset Manager
 

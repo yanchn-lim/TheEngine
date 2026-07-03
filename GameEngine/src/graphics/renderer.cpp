@@ -6,7 +6,7 @@
 #include "renderer.hpp"
 #include "shader.hpp"
 #include "texture2d.hpp"
-
+#include "material.hpp"
 
 namespace Graphics
 {
@@ -49,7 +49,16 @@ namespace Graphics
 		//render the image
 		for (const DrawCmd& cmd : _cmds)
 		{
-			if (!cmd.shader)
+			if (!cmd.material)
+			{
+				Debug::LogError("Renderer::EndFrame skipped draw command: material is null");
+				continue;
+			}
+
+			const Shader* shader = cmd.material->shader;
+			const Texture2D* texture = cmd.material->texture;
+
+			if (!shader)
 			{
 				Debug::LogError("Renderer::EndFrame skipped draw command: shader is null");
 				continue;
@@ -61,7 +70,7 @@ namespace Graphics
 				continue;
 			}
 
-			const auto& state = cmd.state;
+			const auto& state = cmd.material->state;
 
 			if (state.blending)
 				glEnable(GL_BLEND);
@@ -82,18 +91,18 @@ namespace Graphics
 
 
 			//bind shader
-			cmd.shader->Bind();
+			shader->Bind();
 
 			//bind texture
-			if (cmd.texture)
+			if (texture)
 			{
-				cmd.texture->Bind(0);
-				cmd.shader->SetInt("uTexture", 0);
+				texture->Bind(0);
+				shader->SetInt("uTexture", 0);
 			}
 
-			cmd.shader->SetMat4("uModel", cmd.transform);
-			cmd.shader->SetMat4("uView", _camera.GetView());
-			cmd.shader->SetMat4("uProjection", _camera.GetProjection());
+			shader->SetMat4("uModel", cmd.transform);
+			shader->SetMat4("uView", _camera.GetView());
+			shader->SetMat4("uProjection", _camera.GetProjection());
 
 			//draw
 			cmd.mesh->Draw();

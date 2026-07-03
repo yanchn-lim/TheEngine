@@ -16,6 +16,7 @@
 #include "graphics/texture2d.hpp"
 #include "graphics/primitive2d.hpp"
 #include "graphics/drawcmd.hpp"
+#include "graphics/material.hpp"
 
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -168,6 +169,7 @@ void ImGuiLayer::Shutdown()
 Graphics::Mesh testMesh;
 Graphics::Shader testShader;
 Graphics::Texture2D testTexture;
+Graphics::Material testMaterial;
 
 int Engine::Run()
 {
@@ -235,6 +237,13 @@ bool Engine::Initialize()
     if (!testTexture.LoadFromFile("assets/textures/steak.png"))
         return false;
 
+    //test material
+    testMaterial.shader = &testShader;
+    testMaterial.texture = &testTexture;
+    testMaterial.state.blending = true;
+    testMaterial.state.depthTest = false;
+
+
     Debug::CLog("Successfully initialized test assets!\n");
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
@@ -266,8 +275,7 @@ void Engine::Update()
 
             Graphics::DrawCmd cmd;
             cmd.mesh = &testMesh;
-            cmd.shader = &testShader;
-            cmd.texture = &testTexture;
+            cmd.material = &testMaterial;
             //cmd.transform = transform.GetMatrix();
 
             renderer.Submit(cmd);

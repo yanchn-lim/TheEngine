@@ -18,12 +18,14 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - `Graphics::IndexBuffer`
 - `Graphics::VertexLayout`
 - `Graphics::MeshData`
+- `Graphics::RenderState`
+- `Graphics::Material`
 
 ## Responsibilities
 
 - Initialize graphics resources
 - Own GPU handles safely
-- Bind shaders, textures, meshes, and buffers
+- Bind materials, shaders, textures, meshes, and buffers
 - Execute submitted draw commands
 - Keep frame lifecycle clear with `BeginFrame()` and `EndFrame()`
 
@@ -36,9 +38,8 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 
 ## Near-Term Cleanup
 
-- Add renderer diagnostics for invalid draw commands
-- Add basic render state handling
-- Add a basic Material type after render state exists
+- Add simple material/manual render state test cases
+- Decide the next backend feature before asset manager
 
 ## Current Progress
 
@@ -48,14 +49,16 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Mesh now has separate creation paths for non-indexed and indexed geometry.
 - Mesh owns its GPU buffers and issues either `glDrawArrays()` or `glDrawElements()` depending on whether an index buffer exists.
 - Primitive quads now use indexed mesh data.
+- Draw commands now reference a material instead of separate shader, texture, and render state fields.
+- Renderer validates material, shader, and mesh before drawing.
+- Renderer applies basic render state: blending, depth test, depth write, and culling.
 
 ## Material Direction
 
-Material should group draw-time surface state:
+Material currently groups draw-time surface state:
 
 - Shader
 - Texture bindings
-- Uniform parameters
 - Render state
 
-Do not build a large material system yet. Add the first Material type after basic render state handling exists.
+Future material work should add uniform parameters and asset-manager ownership/lookup. Do not build a large material system until the asset manager direction is clear.

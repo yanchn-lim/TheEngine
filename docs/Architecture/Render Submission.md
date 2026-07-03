@@ -10,6 +10,7 @@ Convert world data into renderer-agnostic draw commands.
 Future Scene / ECS / E-CS
 Render submission layer
 Graphics::DrawCmd
+Graphics::Material
 Graphics::Renderer
 OpenGL
 ```
