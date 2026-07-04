@@ -18,6 +18,8 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - `Graphics::IndexBuffer`
 - `Graphics::VertexLayout`
 - `Graphics::MeshData`
+- `Graphics::PrimitiveTopology`
+- `Graphics::BlendMode`
 - `Graphics::RenderState`
 - `Graphics::Material`
 
@@ -53,6 +55,36 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Renderer applies basic render state: blending, depth test, depth write, and culling.
 - Manual material test submits two draw commands with different material render states.
 - Blending test verified expected behavior: alpha respects transparency when blending is enabled, and transparent pixels render as their raw color when blending is disabled.
+- Mesh data now carries primitive topology, and mesh drawing maps it to OpenGL draw modes.
+- Line topology was verified with a quad outline manual test.
+- Render state now uses `BlendMode` instead of a raw blending boolean.
+- Current blend modes are none, alpha, additive, premultiplied alpha, and multiply.
+
+## Primitive Topology Direction
+
+Use `PrimitiveTopology` instead of `DrawMode`.
+
+Primitive topology describes how vertices are assembled into primitives:
+
+- Triangles
+- Lines
+- Points
+
+The name avoids confusion with future mode concepts like blend mode, cull mode, depth mode, and polygon mode.
+
+## Blend Mode Direction
+
+Blend mode controls how source pixels combine with pixels already in the framebuffer.
+
+Current modes:
+
+- None
+- Alpha
+- Additive
+- Premultiplied alpha
+- Multiply
+
+Keep the exposed set small. Add more modes only when materials or tools need them.
 
 ## Material Direction
 

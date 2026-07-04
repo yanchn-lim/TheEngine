@@ -187,6 +187,7 @@
     <ClInclude Include="src\components\transform2d.hpp" />
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
+    <ClInclude Include="src\graphics\blend_mode.hpp" />
     <ClInclude Include="src\graphics\index_buffer.hpp" />
     <ClInclude Include="src\graphics\material.hpp" />
     <ClInclude Include="src\graphics\mesh_data.hpp" />

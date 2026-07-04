@@ -1,12 +1,14 @@
 #pragma once
 
+#include "blend_mode.hpp"
+
 namespace Graphics
 {
 	struct RenderState
 	{
 		bool depthTest = false;
 		bool depthWrite = false;
-		bool blending = true;
+		BlendMode blendMode = BlendMode::ALPHA;
 		bool culling = false;
 	};
 }

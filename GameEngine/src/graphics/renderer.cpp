@@ -72,10 +72,35 @@ namespace Graphics
 
 			const auto& state = cmd.material->state;
 
-			if (state.blending)
-				glEnable(GL_BLEND);
-			else
+			switch (state.blendMode)
+			{
+			case BlendMode::NONE:
 				glDisable(GL_BLEND);
+				break;
+			case BlendMode::ALPHA:
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquation(GL_FUNC_ADD);
+				break;
+			case BlendMode::ADDITIVE:
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+				glBlendEquation(GL_FUNC_ADD);
+				break;
+			case BlendMode::PREMULTIPLIED_ALPHA:
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquation(GL_FUNC_ADD);
+				break;
+			case BlendMode::MULTIPLY:
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_DST_COLOR, GL_ZERO);
+				glBlendEquation(GL_FUNC_ADD);
+				break;
+			default:
+				glDisable(GL_BLEND);
+				break;
+			}
 
 			if (state.depthTest)
 				glEnable(GL_DEPTH_TEST);

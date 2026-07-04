@@ -24,6 +24,9 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Add basic Material type for shader, texture, and render state grouping
 - [x] Verify indexed mesh drawing with a manual test
 - [x] Add simple material/manual render state test cases
+- [x] Add primitive topology support for triangles, lines, and points
+- [x] Verify line topology with a manual quad outline test
+- [x] Add BlendMode support to render state
 - [ ] Decide next backend feature before asset manager
 
 ## Phase 2 - Asset Manager

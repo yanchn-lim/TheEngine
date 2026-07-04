@@ -271,12 +271,12 @@ bool Engine::Initialize()
     //test material
     testMaterial.shader = &testShader;
     testMaterial.texture = &testTexture;
-    testMaterial.state.blending = true;
+    testMaterial.state.blendMode = Graphics::BlendMode::ALPHA;
     testMaterial.state.depthTest = false;
 
     testMaterialNoBlend.shader = &testShader;
     testMaterialNoBlend.texture = &testTexture;
-    testMaterialNoBlend.state.blending = false;
+    testMaterialNoBlend.state.blendMode = Graphics::BlendMode::NONE;
     testMaterialNoBlend.state.depthTest = false;
 
 
