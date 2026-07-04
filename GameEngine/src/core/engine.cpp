@@ -169,10 +169,6 @@ void ImGuiLayer::Shutdown()
 //test assets
 Graphics::Mesh testMesh;
 Graphics::Mesh testLineMesh;
-Graphics::Shader testShader;
-Graphics::Texture2D testTexture;
-Graphics::Material testMaterial;
-Graphics::Material testMaterialNoBlend;
 
 int Engine::Run()
 {
@@ -211,27 +207,13 @@ bool Engine::Initialize()
 
     //init test assets
     Debug::CLog("Initializing test assets...\n");
-    std::string vertexSource;
-    std::string fragmentSource;
 
-    if (!FileSystem::ReadTextFile("assets/shaders/sprite.vert", vertexSource))
-    {
-        Debug::LogError("Failed to read vertex shader");
+
+    Assets::ShaderHandle shaderHandle = assets.LoadShader("assets/shaders/sprite.vert", "assets/shaders/sprite.frag");
+
+    if (!shaderHandle)
         return false;
-    }
-
-    if (!FileSystem::ReadTextFile("assets/shaders/sprite.frag", fragmentSource))
-    {
-        Debug::LogError("Failed to read fragment shader");
-        return false;
-    }
-
-    if (!testShader.Create(vertexSource, fragmentSource))
-        return false;
-
-    if (!testShader.IsValid()) 
-        return false;
-
+   
     const Graphics::MeshData quad = Graphics::Primitive2D::Quad();
     if (!testMesh.Create(quad)) 
         return false;
@@ -265,21 +247,23 @@ bool Engine::Initialize()
         return false;
 
     //load texture
-    if (!testTexture.LoadFromFile("assets/textures/steak.png"))
+    Assets::TextureHandle steakTexture = assets.LoadTexture("assets/textures/steak.png");
+    if (!steakTexture)
         return false;
 
-    //test material
-    testMaterial.shader = &testShader;
-    testMaterial.texture = &testTexture;
-    testMaterial.state.blendMode = Graphics::BlendMode::ALPHA;
-    testMaterial.state.depthTest = false;
+    Graphics::RenderState state = { false, false, Graphics::BlendMode::ALPHA, false };
+    Graphics::RenderState stateNoBlend = { false, false, Graphics::BlendMode::NONE, false };
 
-    testMaterialNoBlend.shader = &testShader;
-    testMaterialNoBlend.texture = &testTexture;
-    testMaterialNoBlend.state.blendMode = Graphics::BlendMode::NONE;
-    testMaterialNoBlend.state.depthTest = false;
+    Assets::MaterialHandle testMat = assets.CreateMaterial("steak", shaderHandle, steakTexture, state);
+    Assets::MaterialHandle testMatNoBlend = assets.CreateMaterial("steak_noblend", shaderHandle, steakTexture, stateNoBlend);
 
+    Assets::ShaderHandle missingShader = assets.LoadShader("assets/shaders/missing.vert", "assets/shaders/missing.frag");
+    Assets::TextureHandle missingTexture = assets.LoadTexture("assets/textures/missing.png");
+    Assets::MaterialHandle fallbackMat = assets.CreateMaterial("fallback_debug", missingShader, missingTexture, state);
 
+    if (!fallbackMat)
+        return false;
+     
     Debug::CLog("Successfully initialized test assets!\n");
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
@@ -311,22 +295,28 @@ void Engine::Update()
 
             Graphics::DrawCmd leftCmd;
             leftCmd.mesh = &testMesh;
-            leftCmd.material = &testMaterial;
+            leftCmd.material = assets.Get("steak");
             leftCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.0f, 0.0f));
 
             Graphics::DrawCmd rightCmd;
             rightCmd.mesh = &testMesh;
-            rightCmd.material = &testMaterialNoBlend;
+            rightCmd.material = assets.Get("steak_noblend");
             rightCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.0f, 0.0f));
 
             Graphics::DrawCmd lineCmd;
             lineCmd.mesh = &testLineMesh;
-            lineCmd.material = &testMaterial;
+            lineCmd.material = assets.Get("steak");
             lineCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.35f, 0.0f));
+
+            Graphics::DrawCmd fallbackCmd;
+            fallbackCmd.mesh = &testMesh;
+            fallbackCmd.material = assets.Get("fallback_debug");
+            fallbackCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.45f, 0.0f));
 
             renderer.Submit(leftCmd);
             renderer.Submit(rightCmd);
             renderer.Submit(lineCmd);
+            renderer.Submit(fallbackCmd);
 
             renderer.EndFrame();
 
@@ -354,11 +344,10 @@ void Engine::Shutdown()
     imgui.Shutdown();
     window.Shutdown();
 
-
-    testTexture.Destroy();
-    testShader.Destroy();
     testLineMesh.Destroy();
     testMesh.Destroy();
+
+    assets.Clear();
 
     Debug::CLog("Engine shutdown complete\n");
 }

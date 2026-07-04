@@ -27,32 +27,44 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Add primitive topology support for triangles, lines, and points
 - [x] Verify line topology with a manual quad outline test
 - [x] Add BlendMode support to render state
-- [ ] Decide next backend feature before asset manager
+- [x] Decide next backend feature before asset manager
 
 ## Phase 2 - Asset Manager
 
 Goal: load, cache, and retrieve assets without coupling to Scene, GameObject, or ECS.
 
-- [ ] Define asset handle types
-- [ ] Define invalid handle constants
-- [ ] Add TextureRegistry or AssetManager texture path
-- [ ] Add ShaderRegistry or AssetManager shader path
-- [ ] Add MaterialRegistry or AssetManager material path
-- [ ] Add MeshRegistry or primitive mesh cache
-- [ ] Add path-to-handle caching
-- [ ] Add handle-to-resource lookup
-- [ ] Decide ownership and unload policy
-- [ ] Decide error/fallback asset policy
+- [x] Define asset handle types
+- [x] Define invalid handle constants
+- [x] Add AssetManager facade over asset registries
+- [x] Add TextureRegistry texture path
+- [x] Add ShaderRegistry shader path
+- [x] Add MaterialRegistry material path
+- [x] Add named material lookup
+- [ ] Add MeshRegistry for loaded mesh resources
+- [ ] Add engine-owned `ModelData` format using vertex streams
+- [ ] Add `VertexSemantic` and `VertexStream`
+- [ ] Add stream-to-interleaved mesh packing step
+- [ ] Add extensible model importer interface
+- [ ] Add OBJ importer using tinyobjloader
+- [ ] Keep third-party model loader types out of graphics and registries
+- [x] Add path-to-handle caching
+- [x] Add handle-to-resource lookup
+- [x] Define current registry ownership model
+- [ ] Decide full unload/reload policy
+- [x] Decide current error/fallback asset policy
 
 ## Phase 3 - Graphics and Asset Integration
 
 Goal: connect asset handles to renderable GPU resources cleanly.
 
-- [ ] Decide whether DrawCmd stores handles or resolved pointers
+- [x] Decide current DrawCmd resource shape: resolved pointers
 - [ ] Create render resource access boundary
-- [ ] Replace renderer-owned fallback test resources
+- [x] Replace renderer-owned fallback test resources
+- [x] Add fallback shader, texture, and material path
+- [x] Verify fallback resources with manual engine test
 - [ ] Let sprite submission resolve texture handles
-- [ ] Let shader and mesh resources come from asset/resource layer
+- [x] Let shader resources come from asset/resource layer
+- [ ] Let mesh resources come from asset/resource layer
 - [ ] Keep Renderer independent from Scene/GameObject/ECS
 
 ## Phase 4 - Scene and Object Layer

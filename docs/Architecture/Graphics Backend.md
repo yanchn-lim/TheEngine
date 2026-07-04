@@ -36,6 +36,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Owning Scene or GameObject data
 - Knowing about SpriteComponent
 - Loading arbitrary game assets by path long term
+- Knowing about model file formats or importer libraries
 - Deciding gameplay visibility or behavior
 
 ## Near-Term Cleanup
@@ -59,6 +60,9 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Line topology was verified with a quad outline manual test.
 - Render state now uses `BlendMode` instead of a raw blending boolean.
 - Current blend modes are none, alpha, additive, premultiplied alpha, and multiply.
+- Renderer remains independent from `Assets::AssetManager`; asset handles are resolved before draw commands reach the renderer.
+- Model importers should output engine-owned vertex streams before graphics resources are created.
+- Mesh creation still consumes interleaved vertex bytes plus `Graphics::VertexLayout`.
 
 ## Primitive Topology Direction
 
@@ -94,4 +98,6 @@ Material currently groups draw-time surface state:
 - Texture bindings
 - Render state
 
-Future material work should add uniform parameters and asset-manager ownership/lookup. Do not build a large material system until the asset manager direction is clear.
+Materials currently store resolved non-owning resource pointers. Asset handles belong on the asset/scene side until a dedicated render resource boundary exists.
+
+Future material work should add uniform parameters and file-backed material loading. Do not build a large material system until the asset manager direction is clearer.

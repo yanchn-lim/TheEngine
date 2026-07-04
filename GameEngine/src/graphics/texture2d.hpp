@@ -14,6 +14,7 @@ namespace Graphics
 
 	public:
 		bool LoadFromFile(const char* path);
+		bool CreateFromRGBA(const unsigned char* pixels, int width, int height);
 		void Bind(uint32_t slot = 0) const;
 		void Destroy();
 

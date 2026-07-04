@@ -2,6 +2,7 @@
 
 #include "debug/profiler_ui.hpp"
 #include "graphics/renderer.hpp"
+#include "assets/asset_manager.hpp"
 
 struct GLFWwindow;
 
@@ -43,6 +44,9 @@ public:
 	ImGuiLayer imgui;
 	ProfilerUI profilerUI;
 	Graphics::Renderer renderer;
+
+	//asset managers
+	Assets::AssetManager assets;
 
 	bool running = false;
 

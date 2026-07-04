@@ -40,6 +40,9 @@
     <Filter Include="Source Files\components">
       <UniqueIdentifier>{e65eb7fa-52b8-46af-b80f-6957d4f76829}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\assets">
+      <UniqueIdentifier>{30b62276-5469-4fb9-a0c3-884373c3d040}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\core">
       <UniqueIdentifier>{0a2e52c6-19d0-4f3c-a848-e231a83b65d7}</UniqueIdentifier>
     </Filter>
@@ -54,6 +57,9 @@
     </Filter>
     <Filter Include="Header Files\components">
       <UniqueIdentifier>{29dd3267-aa60-4f81-ab18-18db6cfacbd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\assets">
+      <UniqueIdentifier>{cf83a7d4-d5d6-471f-88b6-866f63a58078}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files\assets">
       <UniqueIdentifier>{cd75989d-e614-461d-9265-a5c6fc3b39bf}</UniqueIdentifier>
@@ -143,6 +149,24 @@
     </ClCompile>
     <ClCompile Include="src\graphics\vertex_layout.cpp">
       <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\texture_registry.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\shader_registry.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\material_registry.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\asset_manager.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\mesh_registry.cpp">
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\model_data.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -256,6 +280,27 @@
     </ClInclude>
     <ClInclude Include="src\graphics\blend_mode.hpp">
       <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\asset_handle.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\material_registry.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\texture_registry.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\shader_registry.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\asset_manager.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\mesh_registry.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\model_data.hpp">
+      <Filter>Header Files\assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

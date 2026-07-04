@@ -14,7 +14,7 @@ namespace Graphics
 		uint32_t _compileshader(uint32_t type, const std::string& source);
 
 	public:
-		bool Create(const std::string&, const std::string&);
+		bool Create(const std::string& vertSrc, const std::string& fragSrc);
 		void Bind() const;
 		void Destroy();
 
