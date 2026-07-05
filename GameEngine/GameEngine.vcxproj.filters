@@ -25,6 +25,9 @@
     <Filter Include="Header Files\external\imgui">
       <UniqueIdentifier>{5ce63fd0-904a-4fe0-85dd-1ddfe3102143}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\external\tinyobjloader">
+      <UniqueIdentifier>{f56c0cd1-b564-47c2-8627-2c50c619925b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{6afedc45-6cf8-42c7-b348-47b5a9c6f5f4}</UniqueIdentifier>
     </Filter>
@@ -196,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="external\imgui\imstb_truetype.h">
       <Filter>Header Files\external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\tinyobjloader\tiny_obj_loader.h">
+      <Filter>Header Files\external\tinyobjloader</Filter>
     </ClInclude>
     <ClInclude Include="src\pch.hpp">
       <Filter>Header Files</Filter>

@@ -12,7 +12,7 @@ namespace Assets
 
 	bool ModelLoader::Load(const std::string& path, MeshSourceCollection& outModel) const
 	{
-		//find the importer that support the format
+		//find the importer that supports the format
 		for (const auto& importer : _importers)
 		{
 			if (importer->CanLoad(path))

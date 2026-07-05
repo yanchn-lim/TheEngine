@@ -7,6 +7,7 @@ namespace Assets
     class ObjModelImporter : public IModelImporter
     {
     public:
-        //MeshSourceCollection 
+        bool CanLoad(const std::string& path) const override;
+        bool Load(const std::string& path, MeshSourceCollection& outModel) override;
     };
 }

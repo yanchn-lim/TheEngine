@@ -1,5 +1,6 @@
 #include "asset_manager.hpp"
 #include "debug/debug.hpp"
+#include "obj_model_importer.hpp"
 
 namespace Assets
 {
@@ -11,6 +12,24 @@ namespace Assets
 	ShaderHandle AssetManager::LoadShader(const std::string& vertexPath, const std::string& fragmentPath)
 	{
 		return _shaders.Load(vertexPath, fragmentPath);
+	}
+
+	MeshHandle AssetManager::LoadMesh(const std::string& name, const std::string& path)
+	{
+		MeshSourceCollection collection;
+		if (!_modelLoader.Load(path, collection))
+		{
+			Debug::LogError("AssetManager::LoadMesh : Failed to load mesh from ", path);
+			return MeshHandle();
+		}
+
+		if (collection.meshes.empty())
+		{
+			Debug::LogError("AssetManager::LoadMesh : No meshes found in ", path);
+			return MeshHandle();
+		}
+
+		return _meshes.Create(name, collection.meshes[0]);
 	}
 
 	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
@@ -29,7 +48,6 @@ namespace Assets
 
 	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshSourceData& data)
 	{
-
 		return _meshes.Create(name, data);
 	}
 
@@ -102,6 +120,11 @@ namespace Assets
 		_materials.Clear();
 		_shaders.Clear();
 		_textures.Clear();
+	}
+
+	AssetManager::AssetManager()
+	{
+		_modelLoader.RegisterImporter(std::make_unique<ObjModelImporter>());
 	}
 
 }
