@@ -15,9 +15,9 @@
 #include "graphics/shader.hpp"
 #include "graphics/mesh.hpp"
 #include "graphics/texture2d.hpp"
-#include "graphics/primitive2d.hpp"
 #include "graphics/drawcmd.hpp"
 #include "graphics/material.hpp"
+#include "assets/primitives/primitive_mesh2d.hpp"
 
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -167,8 +167,8 @@ void ImGuiLayer::Shutdown()
 // ========= ENGINE =========
 
 //test assets
-Graphics::Mesh testMesh;
 Graphics::Mesh testLineMesh;
+Assets::MeshHandle testQuadMesh;
 
 int Engine::Run()
 {
@@ -214,8 +214,8 @@ bool Engine::Initialize()
     if (!shaderHandle)
         return false;
    
-    const Graphics::MeshData quad = Graphics::Primitive2D::Quad();
-    if (!testMesh.Create(quad)) 
+    testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
+    if (!testQuadMesh)
         return false;
 
     constexpr uint32_t lineQuadIndices[] =
@@ -240,7 +240,7 @@ bool Engine::Initialize()
     lineQuad.vertexCount = 4;
     lineQuad.indices = lineQuadIndices;
     lineQuad.indexCount = 8;
-    lineQuad.layout = quad.layout;
+    lineQuad.layout = Assets::CreateMeshVertexLayout();
     lineQuad.topology = Graphics::PrimitiveTopology::LINES;
 
     if (!testLineMesh.Create(lineQuad))
@@ -294,12 +294,12 @@ void Engine::Update()
             renderer.BeginFrame();
 
             Graphics::DrawCmd leftCmd;
-            leftCmd.mesh = &testMesh;
+            leftCmd.mesh = assets.Get(testQuadMesh);
             leftCmd.material = assets.Get("steak");
             leftCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.0f, 0.0f));
 
             Graphics::DrawCmd rightCmd;
-            rightCmd.mesh = &testMesh;
+            rightCmd.mesh = assets.Get(testQuadMesh);
             rightCmd.material = assets.Get("steak_noblend");
             rightCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.0f, 0.0f));
 
@@ -309,7 +309,7 @@ void Engine::Update()
             lineCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.35f, 0.0f));
 
             Graphics::DrawCmd fallbackCmd;
-            fallbackCmd.mesh = &testMesh;
+            fallbackCmd.mesh = assets.Get(testQuadMesh);
             fallbackCmd.material = assets.Get("fallback_debug");
             fallbackCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.45f, 0.0f));
 
@@ -345,7 +345,6 @@ void Engine::Shutdown()
     window.Shutdown();
 
     testLineMesh.Destroy();
-    testMesh.Destroy();
 
     assets.Clear();
 

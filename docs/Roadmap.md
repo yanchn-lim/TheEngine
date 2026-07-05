@@ -10,7 +10,7 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Mesh class
 - [x] Draw command container
 - [x] Camera2D
-- [x] Primitive2D mesh data
+- [x] Remove graphics-side Primitive2D mesh data path
 - [x] Vertex buffer wrapper
 - [x] Index buffer wrapper
 - [x] Vertex array wrapper
@@ -40,10 +40,11 @@ Goal: load, cache, and retrieve assets without coupling to Scene, GameObject, or
 - [x] Add ShaderRegistry shader path
 - [x] Add MaterialRegistry material path
 - [x] Add named material lookup
-- [ ] Add MeshRegistry for loaded mesh resources
-- [ ] Add engine-owned `ModelData` format using vertex streams
-- [ ] Add `VertexSemantic` and `VertexStream`
-- [ ] Add stream-to-interleaved mesh packing step
+- [x] Add MeshRegistry for mesh resources
+- [x] Add standard engine vertex format definitions
+- [x] Add `MeshVertex` and matching `VertexLayout` builder
+- [x] Add asset-side `Primitive2D` mesh generators
+- [ ] Convert imported model data into standard mesh layouts
 - [ ] Add extensible model importer interface
 - [ ] Add OBJ importer using tinyobjloader
 - [ ] Keep third-party model loader types out of graphics and registries
@@ -64,7 +65,8 @@ Goal: connect asset handles to renderable GPU resources cleanly.
 - [x] Verify fallback resources with manual engine test
 - [ ] Let sprite submission resolve texture handles
 - [x] Let shader resources come from asset/resource layer
-- [ ] Let mesh resources come from asset/resource layer
+- [x] Let primitive quad mesh resources come from asset/resource layer
+- [ ] Let imported mesh resources come from asset/resource layer
 - [ ] Keep Renderer independent from Scene/GameObject/ECS
 
 ## Phase 4 - Scene and Object Layer

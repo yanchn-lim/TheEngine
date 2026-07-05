@@ -31,6 +31,7 @@ Handle id `0` is invalid. Handles expose validity checks so callers can write `i
 - `Assets::TextureRegistry`
 - `Assets::ShaderRegistry`
 - `Assets::MaterialRegistry`
+- `Assets::MeshRegistry`
 
 The asset manager owns the current registries and is the public facade used by engine code.
 
@@ -50,11 +51,19 @@ The material registry:
 - Returns resolved non-owning material pointers
 - Does not load material files from disk yet
 
+The mesh registry:
+
+- Stores final `Graphics::Mesh` resources by asset id
+- Creates meshes from `Assets::ModelMeshData`
+- Uses the standard `Assets::MeshVertex` layout
+- Maps mesh names to `MeshHandle`
+- Returns resolved non-owning mesh pointers
+
 Planned mesh/model path:
 
 - `Assets::MeshRegistry` owns final `Graphics::Mesh` resources.
 - `Assets::ModelLoader` chooses a format importer by file extension or capability.
-- Format importers convert third-party library output into engine-owned model data with vertex streams.
+- Format importers convert third-party library output into engine-standard mesh layouts.
 - `ObjModelImporter` will use tinyobjloader first.
 - Future importers can use glTF, Assimp, or another library without changing graphics code.
 
@@ -65,7 +74,7 @@ Planned mesh/model path:
 - `TextureRegistry` owns `Graphics::Texture2D` resources.
 - `ShaderRegistry` owns `Graphics::Shader` resources.
 - `MaterialRegistry` owns `Graphics::Material` resources.
-- `MeshRegistry` should own `Graphics::Mesh` resources once implemented.
+- `MeshRegistry` owns `Graphics::Mesh` resources.
 - `Graphics::Material` currently stores resolved non-owning pointers to shader and texture resources.
 
 Because materials point at shader and texture resources, `AssetManager` should clear materials before clearing the registries they reference.
@@ -80,9 +89,9 @@ Because materials point at shader and texture resources, `AssetManager` should c
 
 ## Current Integration
 
-The engine test now loads shader and texture resources through `Assets::AssetManager`, then creates named materials from those handles and a `Graphics::RenderState`.
+The engine test now loads shader and texture resources through `Assets::AssetManager`, creates named materials from those handles and a `Graphics::RenderState`, and creates a reusable quad mesh through `Assets::Primitive2D::Quad()`.
 
-Draw commands ask the asset manager for resolved material pointers by name, such as `assets.Get("steak")` and `assets.Get("steak_noblend")`.
+Draw commands ask the asset manager for resolved material pointers by name, such as `assets.Get("steak")` and `assets.Get("steak_noblend")`, and resolve mesh handles through `assets.Get(meshHandle)`.
 
 Fallback behavior is currently:
 
@@ -103,7 +112,7 @@ Target shape:
 ```text
 file format library
     -> format importer
-    -> engine-owned ModelData with vertex streams
+    -> engine-owned model data in a standard vertex format
     -> MeshRegistry
     -> Graphics::Mesh
 ```
@@ -119,49 +128,66 @@ tinyobjloader
 
 The importer interface should hide third-party types. No `tinyobj::` types should appear in `AssetManager`, `MeshRegistry`, `Graphics::Mesh`, `Graphics::MeshData`, scene code, or renderer code.
 
-Use vertex streams instead of a single universal vertex struct.
+Use standard engine vertex format contracts instead of arbitrary vertex streams.
 
-The model side stores what each stream means:
-
-```text
-VertexSemantic::Position
-VertexSemantic::Normal
-VertexSemantic::Tangent
-VertexSemantic::Color
-VertexSemantic::TexCoord0
-VertexSemantic::TexCoord1
-VertexSemantic::BoneIds
-VertexSemantic::BoneWeights
-```
-
-Each stream also stores its data type and byte data. `MeshRegistry` should pack those streams into interleaved vertex bytes and generate a `Graphics::VertexLayout` before creating a `Graphics::Mesh`.
-
-Target model mesh shape:
+The first supported format is `MeshVertex`:
 
 ```text
-ModelMeshData
-    vertexCount
-    streams
-    indices
-    topology
+location 0: position  float3
+location 1: color     float3
+location 2: texcoord0 float2
 ```
 
-Keep semantic and shader location separate:
+The matching shader must declare the same layout:
+
+```glsl
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aColor;
+layout(location = 2) in vec2 aTexCoord;
+```
+
+OBJ import should convert source data into this format. Missing color becomes white. Missing UV becomes `{0, 0}`. If a future shader needs normals or tangents, add a new standard format such as `LitMeshVertex` instead of making every shader accept every possible attribute.
+
+Future standard formats can be added as needed:
 
 ```text
-Semantic = what the data means
-Location = where the current shader expects that data
+MeshVertex:
+    position, color, texcoord0
+
+LitMeshVertex:
+    position, normal, tangent, texcoord0
+
+SkinnedMeshVertex:
+    position, normal, tangent, texcoord0, bone indices, bone weights
 ```
 
-Current default location convention:
+Each standard format should own:
+
+- A C++ vertex struct
+- A function that builds the matching `Graphics::VertexLayout`
+- Matching shader input layout conventions
+
+## Built-In Primitive Meshes
+
+Reusable primitive shapes live on the asset side:
 
 ```text
-Position -> location 0
-Color -> location 1
-TexCoord0 -> location 2
+Assets::Primitive2D::Triangle()
+Assets::Primitive2D::Quad()
+Assets::Primitive2D::Circle()
 ```
 
-OBJ files do not reliably provide vertex colors, so the OBJ importer can emit a default white color stream when needed. If UVs are missing, it can emit a default `{0, 0}` TexCoord0 stream until material/texture import is more complete.
+These functions return `Assets::ModelMeshData`. They do not create GPU resources directly.
+
+Expected flow:
+
+```text
+Assets::Primitive2D::Quad()
+    -> ModelMeshData
+    -> AssetManager::CreateMesh()
+    -> MeshRegistry
+    -> MeshHandle
+```
 
 ## Open Decision
 

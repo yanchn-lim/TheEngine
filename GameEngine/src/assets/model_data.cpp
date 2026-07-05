@@ -3,35 +3,13 @@
 
 namespace Assets
 {
-    bool ModelMeshData::HasStream(VertexSemantic semantic) const
-    {
-        for (const auto& stream : streams)
-        {
-            if (stream.semantic == semantic)
-                return true;
-        }
+	Graphics::VertexLayout CreateMeshVertexLayout()
+	{
+		Graphics::VertexLayout layout;
+		layout.Add(0, Graphics::ShaderDataType::FLOAT3); //position
+		layout.Add(1, Graphics::ShaderDataType::FLOAT3); //color
+		layout.Add(2, Graphics::ShaderDataType::FLOAT2); //texcoord0
 
-        return false;
-    }
-
-    const VertexStream* ModelMeshData::FindStream(VertexSemantic semantic) const
-    {
-        for (const auto& stream : streams)
-        {
-            if (stream.semantic == semantic)
-                return &stream;
-        }
-        return nullptr;
-    }
-
-    VertexStream* ModelMeshData::FindStream(VertexSemantic semantic)
-    {
-        for (auto& stream : streams)
-        {
-            if (stream.semantic == semantic)
-                return &stream;
-        }
-
-        return nullptr;
-    }
+		return layout;
+	}
 }

@@ -5,6 +5,7 @@
 #include "shader_registry.hpp"
 #include "texture_registry.hpp"
 #include "material_registry.hpp"
+#include "mesh_registry.hpp"
 
 namespace Assets
 {
@@ -21,10 +22,13 @@ namespace Assets
 			Graphics::RenderState state
 		);
 
+		MeshHandle CreateMesh(const std::string& name, const ModelMeshData& data);
+
 		const Graphics::Texture2D* Get(TextureHandle handle) const;
 		const Graphics::Shader* Get(ShaderHandle handle) const;
 		const Graphics::Material* Get(MaterialHandle handle) const;
 		const Graphics::Material* Get(const std::string& name) const;
+		const Graphics::Mesh* Get(MeshHandle handle) const;
 
 		void Clear();
 
@@ -34,6 +38,7 @@ namespace Assets
 		ShaderRegistry _shaders;
 		TextureRegistry _textures;
 		MaterialRegistry _materials;
+		MeshRegistry _meshes;
 
 		mutable Graphics::Material _fallbackMaterial;
 		mutable bool _fallbackMaterialReady = false;

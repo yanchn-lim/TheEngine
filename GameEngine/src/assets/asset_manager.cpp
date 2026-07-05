@@ -27,6 +27,12 @@ namespace Assets
 		return _materials.Create(name, shaderPtr, texturePtr, state);
 	}
 
+	MeshHandle AssetManager::CreateMesh(const std::string& name, const ModelMeshData& data)
+	{
+
+		return _meshes.Create(name, data);
+	}
+
 	const Graphics::Texture2D* AssetManager::Get(TextureHandle handle) const 
 	{
 		return _textures.Get(handle);
@@ -61,6 +67,11 @@ namespace Assets
 		return material;
 	}
 
+	const Graphics::Mesh* AssetManager::Get(MeshHandle handle) const
+	{
+		return _meshes.Get(handle);
+	}
+
 	const Graphics::Material* AssetManager::GetFallbackMaterial() const
 	{
 		if (_fallbackMaterialReady)
@@ -87,6 +98,7 @@ namespace Assets
 	{
 		_fallbackMaterial = Graphics::Material{};
 		_fallbackMaterialReady = false;
+		_meshes.Clear();
 		_materials.Clear();
 		_shaders.Clear();
 		_textures.Clear();

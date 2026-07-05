@@ -141,9 +141,6 @@
     <ClCompile Include="src\components\transform2d.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\primitive2d.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\index_buffer.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
@@ -166,7 +163,10 @@
       <Filter>Source Files\assets</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\model_data.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\primitives\primitive_mesh2d.cpp">
+      <Filter>Source Files\assets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -245,9 +245,6 @@
     <ClInclude Include="src\graphics\mesh.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\primitive2d.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\vertex_array.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
@@ -300,6 +297,9 @@
       <Filter>Header Files\assets</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\model_data.hpp">
+      <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\primitives\primitive_mesh2d.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
   </ItemGroup>

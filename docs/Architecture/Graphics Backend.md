@@ -12,7 +12,6 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - `Graphics::Texture2D`
 - `Graphics::Mesh`
 - `Graphics::Camera2D`
-- `Graphics::Primitive2D`
 - `Graphics::VertexArray`
 - `Graphics::VertexBuffer`
 - `Graphics::IndexBuffer`
@@ -36,6 +35,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Owning Scene or GameObject data
 - Knowing about SpriteComponent
 - Loading arbitrary game assets by path long term
+- Generating user-facing primitive mesh assets
 - Knowing about model file formats or importer libraries
 - Deciding gameplay visibility or behavior
 
@@ -61,8 +61,9 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Render state now uses `BlendMode` instead of a raw blending boolean.
 - Current blend modes are none, alpha, additive, premultiplied alpha, and multiply.
 - Renderer remains independent from `Assets::AssetManager`; asset handles are resolved before draw commands reach the renderer.
-- Model importers should output engine-owned vertex streams before graphics resources are created.
-- Mesh creation still consumes interleaved vertex bytes plus `Graphics::VertexLayout`.
+- Model importers should convert source data into engine-standard vertex formats before graphics resources are created.
+- Mesh creation still consumes interleaved vertex bytes plus the matching `Graphics::VertexLayout`.
+- Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::ModelMeshData`.
 
 ## Primitive Topology Direction
 
