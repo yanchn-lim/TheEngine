@@ -7,6 +7,7 @@ namespace Graphics
 {
 	bool VertexBuffer::Create(const void* data, size_t size)
 	{
+		// Upload immutable vertex data for the lifetime of this buffer.
 		Destroy();
 		if (!data)
 		{
@@ -34,6 +35,7 @@ namespace Graphics
 
 	void VertexBuffer::Destroy()
 	{
+		// Release the GL buffer if this object currently owns one.
 		if (_id)
 		{
 			glDeleteBuffers(1, &_id);
@@ -58,11 +60,13 @@ namespace Graphics
 
 	VertexBuffer::VertexBuffer(VertexBuffer&& oth) noexcept : _id(oth._id)
 	{
+		// Transfer buffer ownership and clear the source id.
 		oth._id = 0;
 	}
 
 	VertexBuffer& VertexBuffer::operator=(VertexBuffer&& oth) noexcept
 	{
+		// Replace current GL buffer ownership with another buffer's id.
 		if (&oth == this) return *this;
 
 		Destroy();

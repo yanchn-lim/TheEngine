@@ -5,6 +5,7 @@ namespace Assets
 {
 	MaterialHandle MaterialRegistry::Create(const std::string& name, const Graphics::Shader* shader, const Graphics::Texture2D* texture, Graphics::RenderState state)
 	{
+		// Materials store non-owning renderer resource pointers resolved by AssetManager.
 		const auto it = _nameToHandle.find(name);
 		if (it != _nameToHandle.end())
 			return it->second;
@@ -26,6 +27,7 @@ namespace Assets
 
 	const Graphics::Material* MaterialRegistry::Get(MaterialHandle handle) const
 	{
+		// Handle lookup keeps material ownership centralized in the registry.
 		if (!handle)
 		{
 			Debug::LogError("MaterialRegistry::Get : MaterialHandle [", handle.id, "] is invalid");
@@ -44,6 +46,7 @@ namespace Assets
 
 	const Graphics::Material* MaterialRegistry::Get(const std::string& handle) const
 	{
+		// Name lookup is a convenience path for tests and simple engine code.
 		const auto it = _nameToHandle.find(handle);
 		if (it == _nameToHandle.end())
 		{
@@ -56,6 +59,7 @@ namespace Assets
 
 	void MaterialRegistry::Clear()
 	{
+		// Clear materials before their referenced shader/texture registries are reset.
 		_nextId = 1;
 		_nameToHandle.clear();
 		_materials.clear();

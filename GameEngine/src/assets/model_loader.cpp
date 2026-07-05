@@ -4,6 +4,7 @@ namespace Assets
 {
 	void ModelLoader::RegisterImporter(std::unique_ptr<IModelImporter> importer)
 	{
+		// Importers are tried in registration order when loading model files.
 		if (!importer)
 			return;
 
@@ -12,7 +13,7 @@ namespace Assets
 
 	bool ModelLoader::Load(const std::string& path, MeshSourceCollection& outModel) const
 	{
-		//find the importer that supports the format
+		// Find the first importer that claims support for this file.
 		for (const auto& importer : _importers)
 		{
 			if (importer->CanLoad(path))

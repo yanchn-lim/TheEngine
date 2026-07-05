@@ -11,6 +11,7 @@ namespace Assets::Primitive2D
 
 		MeshVertex MakeVertex(float x, float y)
 		{
+			// Primitive vertices use the engine's standard position/color/uv layout.
 			return
 			{
 				{ x, y, 0.0f },
@@ -22,6 +23,7 @@ namespace Assets::Primitive2D
 
 	MeshSourceData Triangle()
 	{
+		// Unit triangle centered around the origin for quick renderer tests.
 		MeshSourceData data;
 		data.vertices =
 		{
@@ -37,6 +39,7 @@ namespace Assets::Primitive2D
 
 	MeshSourceData Quad()
 	{
+		// Indexed quad keeps shared corners explicit for texture and material tests.
 		MeshSourceData data;
 		data.vertices =
 		{
@@ -53,6 +56,7 @@ namespace Assets::Primitive2D
 
 	MeshSourceData Circle(uint32_t segments)
 	{
+		// Build a triangle fan with one center vertex and a configurable rim.
 		segments = std::max(segments, 3u);
 
 		MeshSourceData data;

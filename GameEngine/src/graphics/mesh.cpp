@@ -7,6 +7,7 @@ namespace Graphics
 {
 	static GLenum ToOpenGLTopology(PrimitiveTopology topology)
 	{
+		// Translate engine draw modes to the OpenGL primitive mode used at draw time.
 		switch (topology)
 		{
 		case PrimitiveTopology::TRIANGLES: return GL_TRIANGLES;
@@ -21,6 +22,7 @@ namespace Graphics
 {
 	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout)
 	{
+		// Upload non-indexed vertex data and configure a VAO for the supplied layout.
 		Destroy();
 
 		if (!vertexData)
@@ -64,6 +66,7 @@ namespace Graphics
 
 	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, const uint32_t* indices, uint32_t indexCount)
 	{
+		// Upload indexed vertex data and attach the index buffer to the VAO.
 		Destroy();
 
 		if (!vertexData)
@@ -127,6 +130,7 @@ namespace Graphics
 
 	bool Mesh::Create(const MeshData& data)
 	{
+		// MeshData is the common upload path for procedural and imported mesh sources.
 		const bool created = data.indices && data.indexCount > 0
 			? Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount)
 			: Create(data.vertices, data.vertexCount, data.layout);
@@ -144,6 +148,7 @@ namespace Graphics
 
 	void Mesh::Draw() const 
 	{
+		// Draw chooses indexed or non-indexed rendering based on stored buffers.
 		if (!IsValid())
 		{
 			Debug::LogError("Mesh::Draw failed: mesh is invalid");
@@ -162,6 +167,7 @@ namespace Graphics
 
 	void Mesh::Destroy() 
 	{
+		// Release owned GPU objects; moved-from meshes are already zeroed.
 		if (_vertexBuffer.IsValid())
 		{
 			_vertexBuffer.Destroy();
@@ -205,11 +211,13 @@ namespace Graphics
 		_indexBuffer(std::move(oth._indexBuffer)),
 		_topology(oth._topology)
 	{
+		// Transfer GL object ownership so the moved-from mesh will not delete it.
 		oth._vertCnt = 0;
 	}
 
 	Mesh& Mesh::operator=(Mesh&& oth) noexcept
 	{
+		// Destroy current GL resources before taking ownership from the source mesh.
 		if (&oth == this) return *this;
 
 		Destroy();

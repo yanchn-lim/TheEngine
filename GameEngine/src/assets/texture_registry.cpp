@@ -5,7 +5,7 @@ namespace Assets
 {
 	TextureHandle Assets::TextureRegistry::Load(const std::string& path)
 	{
-		//check if alrdy exists
+		// Reuse an existing GPU texture when the same path is loaded again.
 		const auto it = _pathToHandle.find(path);
 		if (it != _pathToHandle.end())
 			return it->second;
@@ -26,6 +26,7 @@ namespace Assets
 
 	const Graphics::Texture2D* TextureRegistry::Get(TextureHandle handle) const
 	{
+		// Invalid or missing handles resolve to the checker fallback texture.
 		if (!handle)
 		{
 			Debug::LogError("TextureRegistry::Get : TextureHandle [", handle.id, "] is invalid. Returning fallback texture.");
@@ -45,6 +46,7 @@ namespace Assets
 
 	const Graphics::Texture2D* TextureRegistry::GetFallback() const
 	{
+		// The fallback is generated in memory so missing files still render visibly.
 		if (_fallbackTextureReady && _fallbackTexture.IsValid())
 			return &_fallbackTexture;
 
@@ -66,6 +68,7 @@ namespace Assets
 
 	void TextureRegistry::Clear()
 	{
+		// Release all registry textures and force fallback recreation on demand.
 		_nextId = 1;
 		_textures.clear();
 		_pathToHandle.clear();

@@ -7,6 +7,7 @@ namespace FileSystem
 {
 	bool ReadTextFile(const char* path, std::string& out)
 	{
+		// Read the whole text file into memory for shader/source asset loading.
 		std::ifstream file(path, std::ios::in);
 
 		if (!file.is_open()) return false;

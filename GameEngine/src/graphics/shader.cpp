@@ -8,6 +8,7 @@ namespace Graphics
 {
 	uint32_t Shader::_compileshader(uint32_t type, const std::string& source)
 	{
+		// Compile one shader stage and return 0 on failure.
 		const char* src = source.c_str();
 
 		const uint32_t shader = glCreateShader(type);
@@ -31,6 +32,7 @@ namespace Graphics
 
 	bool Shader::Create(const std::string& vertsrc, const std::string& fragsrc)
 	{
+		// Compile, link, and own a complete GPU shader program.
 		Destroy();
 
 		uint32_t vert = _compileshader(GL_VERTEX_SHADER, vertsrc);
@@ -73,6 +75,7 @@ namespace Graphics
 
 	void Shader::Bind() const
 	{
+		// Binding an invalid program is skipped so renderer errors stay visible.
 		if (_id == 0)
 		{
 			Debug::LogError("Shader is invalid!");
@@ -84,6 +87,7 @@ namespace Graphics
 
 	void Shader::Destroy()
 	{
+		// Shader owns exactly one OpenGL program id.
 		if (_id != 0)
 		{
 			glDeleteProgram(_id);
@@ -93,6 +97,7 @@ namespace Graphics
 
 	void Shader::SetInt(const char* name, const int val) const
 	{
+		// Uniform setters intentionally validate lookup to catch shader mismatches.
 		if (!IsValid())
 		{
 			Debug::LogError("Shader::SetInt failed: shader is invalid");
@@ -112,6 +117,7 @@ namespace Graphics
 
 	void Shader::SetMat4(const char* name, const glm::mat4& val) const
 	{
+		// Matrices are uploaded in GLM's column-major memory layout.
 		if (!IsValid())
 		{
 			Debug::LogError("Shader::SetMat4 failed: shader is invalid");
@@ -147,11 +153,13 @@ namespace Graphics
 
 	Shader::Shader(Shader&& oth) noexcept : _id(oth._id)
 	{
+		// Transfer program ownership without duplicating the GL object.
 		oth._id = 0;
 	}
 
 	Shader& Shader::operator=(Shader&& oth) noexcept
 	{
+		// Replace the current program with ownership from another shader.
 		if (&oth == this) return *this;
 
 		Destroy();

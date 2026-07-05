@@ -7,6 +7,7 @@ namespace Graphics
 {
     static GLenum ToOpenGLBaseType(ShaderDataType type)
     {
+        // Vertex formats need the scalar GL type, not the vector width.
         switch (type)
         {
         case ShaderDataType::FLOAT:
@@ -31,6 +32,7 @@ namespace Graphics
 {
     bool VertexArray::Create()
     {
+        // VAO records how vertex/index buffers are interpreted for drawing.
         Destroy();
 
         glCreateVertexArrays(1, &_id);
@@ -63,6 +65,7 @@ namespace Graphics
 
     void VertexArray::SetVertexBuffer(const VertexBuffer& buffer, const VertexLayout& layout)
     {
+        // Configure all enabled attributes from the engine vertex layout.
         if (!buffer.IsValid() || !layout.IsValid())
         {
             Debug::LogError("VertexArray::SetVertexBuffer failed : Buffer or Layout is invalid!\n");
@@ -113,6 +116,7 @@ namespace Graphics
 
     void VertexArray::SetIndexBuffer(const IndexBuffer& buffer)
     {
+        // Index buffer binding is stored inside the VAO.
         if (!buffer.IsValid())
         {
             Debug::LogError("VertexArray::SetIndexBuffer failed : Buffer is invalid!\n");
@@ -135,6 +139,7 @@ namespace Graphics
 
 	VertexArray::VertexArray(VertexArray&& oth) noexcept : _id(oth._id)
     {
+        // Move transfers the VAO id without duplicating GL ownership.
 		oth._id = 0;
     }
 

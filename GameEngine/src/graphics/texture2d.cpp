@@ -9,6 +9,7 @@ namespace Graphics
 {
 	bool Texture2D::LoadFromFile(const char* path)
 	{
+		// Load image bytes through stb_image and upload them as an immutable GL texture.
 		Destroy(); //make sure to remove first
 
 		int width = 0;
@@ -25,7 +26,6 @@ namespace Graphics
 			return false;
 		}
 
-		//upload to gpu
 		GLenum format = GL_RGB; //default
 
 		if (channels == 4)
@@ -39,10 +39,9 @@ namespace Graphics
 			return false;
 		}
 
-		//create
 		glCreateTextures(GL_TEXTURE_2D, 1 ,&_id);
 
-		//set params
+		// Set a simple default sampler state until materials expose texture settings.
 		glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTextureParameteri(_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -67,6 +66,7 @@ namespace Graphics
 
 	bool Texture2D::CreateFromRGBA(const unsigned char* pixels, int width, int height)
 	{
+		// Create small generated textures such as fallback/debug checkers.
 		Destroy();
 
 		if (!pixels)
@@ -100,6 +100,7 @@ namespace Graphics
 
 	void Texture2D::Bind(uint32_t slot) const
 	{
+		// Direct state access binding keeps texture unit selection explicit.
 		if (_id == 0)
 		{
 			Debug::LogError("Texture2D::Bind failed: texture is invalid");
@@ -111,6 +112,7 @@ namespace Graphics
 
 	void Texture2D::Destroy()
 	{
+		// Deleting id 0 is avoided so moved-from textures stay harmless.
 		if (_id == 0)
 			return;
 		
@@ -151,6 +153,7 @@ namespace Graphics
 		_width(oth._width), _height(oth._height), 
 		_channels(oth._channels)
 	{
+		// Transfer GL texture ownership and leave the source inert.
 		oth._id = 0;
 		oth._width = 0;
 		oth._height = 0;
@@ -159,6 +162,7 @@ namespace Graphics
 
 	Texture2D& Texture2D::operator=(Texture2D&& oth) noexcept
 	{
+		// Replace current texture ownership with another texture's GL id.
 		if (&oth == this) return *this;
 
 		Destroy();

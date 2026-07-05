@@ -7,6 +7,7 @@ namespace Graphics
 {
 	bool IndexBuffer::Create(const uint32_t* indices, uint32_t count) 
 	{
+		// Upload index data used by glDrawElements.
 		Destroy();
 		if (!indices)
 		{
@@ -40,6 +41,7 @@ namespace Graphics
 
 	void IndexBuffer::Destroy()
 	{
+		// Reset count with the GL id so validity reflects drawable state.
 		if (_id)
 		{
 			glDeleteBuffers(1, &_id);
@@ -70,12 +72,14 @@ namespace Graphics
 
 	IndexBuffer::IndexBuffer(IndexBuffer&& oth) noexcept : _id(oth._id), _count(oth._count)
 	{
+		// Transfer index buffer ownership and count metadata.
 		oth._id = 0;
 		oth._count = 0;
 	}
 
 	IndexBuffer& IndexBuffer::operator=(IndexBuffer&& oth) noexcept
 	{
+		// Replace current GL buffer ownership with another index buffer.
 		if (&oth == this) return *this;
 
 		Destroy();

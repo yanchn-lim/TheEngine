@@ -1,11 +1,13 @@
 #include "debug/debug.hpp"
 #include "core/file_system.hpp"
 #include "mesh_registry.hpp"
+#include "graphics/mesh_data.hpp"
 
 namespace Assets
 {
 	MeshHandle MeshRegistry::Create(const std::string& name, const MeshSourceData& data)
 	{
+		// Mesh names act as simple deduplication keys inside the registry.
 		if (data.vertices.empty() || data.indices.empty())
 		{
 			Debug::LogError("MeshRegistry::Create : Mesh vertices or indices is empty");
@@ -23,7 +25,15 @@ namespace Assets
 		const uint32_t vertexCount = static_cast<uint32_t>(data.vertices.size());
 		const uint32_t indexCount = static_cast<uint32_t>(data.indices.size());
 
-		if (!mesh.Create(reinterpret_cast<const void*>(data.vertices.data()), vertexCount, layout, data.indices.data(), indexCount))
+		Graphics::MeshData meshData;
+		// Bridge asset-side mesh source data into the graphics backend upload format.
+		meshData.vertices = reinterpret_cast<const void*>(data.vertices.data());
+		meshData.vertexCount = vertexCount;
+		meshData.indices = data.indices.data();
+		meshData.indexCount = indexCount;
+		meshData.topology = data.topology;
+
+		if (!mesh.Create(meshData))
 		{
 			Debug::LogError("MeshRegistry::Create : Mesh creation failed");
 			return MeshHandle();
@@ -36,6 +46,7 @@ namespace Assets
 
 	const Graphics::Mesh* MeshRegistry::Get(MeshHandle handle) const
 	{
+		// Handles are lightweight ids; registry lookup is the ownership boundary.
 		if (!handle)
 		{
 			Debug::LogError("MeshRegistry::Get : MeshHandle [", handle.id, "] is invalid");
@@ -54,6 +65,7 @@ namespace Assets
 
 	void MeshRegistry::Clear()
 	{
+		// Destroy all registry-owned GPU meshes and reset handle generation.
 		_nextId = 1;
 		_nameToHandle.clear();
 		_meshes.clear();

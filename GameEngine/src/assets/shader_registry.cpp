@@ -48,6 +48,7 @@ void main()
 
 	ShaderHandle ShaderRegistry::Load(const std::string& vertexPath, const std::string& fragmentPath)
 	{
+		// A shader program is keyed by the vertex/fragment path pair.
 		std::string concatPath = vertexPath + "|" + fragmentPath;
 		const auto it = _pathToHandle.find(concatPath);
 
@@ -84,6 +85,7 @@ void main()
 
 	const Graphics::Shader* ShaderRegistry::Get(ShaderHandle handle) const
 	{
+		// Invalid or missing handles resolve to the built-in debug shader.
 		if (!handle)
 		{
 			Debug::LogError("ShaderRegistry::Get : ShaderHandle [", handle.id, "] is invalid. Returning fallback shader.");
@@ -103,6 +105,7 @@ void main()
 
 	const Graphics::Shader* ShaderRegistry::GetFallback() const
 	{
+		// Compile fallback source lazily so startup stays tied to requested assets.
 		if (_fallbackShaderReady && _fallbackShader.IsValid())
 			return &_fallbackShader;
 
@@ -118,6 +121,7 @@ void main()
 
 	void ShaderRegistry::Clear()
 	{
+		// Destroy all compiled programs and reset fallback state.
 		_nextId = 1;
 		_pathToHandle.clear();
 		_shaders.clear();

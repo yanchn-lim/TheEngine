@@ -6,16 +6,19 @@ namespace Assets
 {
 	TextureHandle AssetManager::LoadTexture(const std::string& path)
 	{
+		// Delegate file loading and fallback ownership to the texture registry.
 		return _textures.Load(path);
 	}
 
 	ShaderHandle AssetManager::LoadShader(const std::string& vertexPath, const std::string& fragmentPath)
 	{
+		// Shader registry owns compiled programs and deduplicates by source paths.
 		return _shaders.Load(vertexPath, fragmentPath);
 	}
 
 	MeshHandle AssetManager::LoadMesh(const std::string& name, const std::string& path)
 	{
+		// Imported model data is temporary; only the created GPU mesh is kept.
 		MeshSourceCollection collection;
 		if (!_modelLoader.Load(path, collection))
 		{
@@ -34,6 +37,7 @@ namespace Assets
 
 	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
 	{
+		// Resolve handles up front so materials can hold renderer-facing pointers.
 		const Graphics::Shader* shaderPtr = Get(shader);
 		const Graphics::Texture2D* texturePtr = Get(texture);
 
@@ -48,6 +52,7 @@ namespace Assets
 
 	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshSourceData& data)
 	{
+		// Procedural/source mesh data is converted into a registry-owned Graphics::Mesh.
 		return _meshes.Create(name, data);
 	}
 
@@ -92,6 +97,7 @@ namespace Assets
 
 	const Graphics::Material* AssetManager::GetFallbackMaterial() const
 	{
+		// Build the fallback lazily so shader/texture fallback resources exist first.
 		if (_fallbackMaterialReady)
 			return &_fallbackMaterial;
 
@@ -114,6 +120,7 @@ namespace Assets
 
 	void AssetManager::Clear()
 	{
+		// Clear dependent resources before shader/texture registries invalidate pointers.
 		_fallbackMaterial = Graphics::Material{};
 		_fallbackMaterialReady = false;
 		_meshes.Clear();
@@ -124,6 +131,7 @@ namespace Assets
 
 	AssetManager::AssetManager()
 	{
+		// Register format importers here so callers only talk to AssetManager.
 		_modelLoader.RegisterImporter(std::make_unique<ObjModelImporter>());
 	}
 

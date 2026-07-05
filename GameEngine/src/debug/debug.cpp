@@ -3,7 +3,7 @@
 
 void DebugConsole::PushLog(LogLevel level, std::string message)
 {
-    // Also mirror to stdout with a prefix
+    // Mirror logs to stdout while also storing them for the in-app console.
     const char* prefix = "";
     switch (level)
     {
@@ -20,11 +20,13 @@ void DebugConsole::PushLog(LogLevel level, std::string message)
 
 void DebugConsole::Clear()
 {
+    // Reset the fixed-size ring buffer by assigning a fresh instance.
     _entries = {};
 }
 
 void DebugConsole::Draw()
 {
+    // Draw a lightweight ImGui console over the ring-buffered log history.
     ImGui::SetNextWindowSize(ImVec2(600, 300), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Console"))
     {
@@ -32,15 +34,12 @@ void DebugConsole::Draw()
         return;
     }
 
-    // -- Toolbar --
+    // Keep the toolbar separate from the scrolling log region.
     if (ImGui::Button("Clear"))
         Clear();
 
-    // Future: add filter/search widgets here without restructuring anything
-
     ImGui::Separator();
 
-    // -- Log body --
     // Reserve space so the scrolling region doesn't overlap a future toolbar at bottom
     const float footerHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
     ImGui::BeginChild("ScrollRegion", ImVec2(0, -footerHeight), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -50,7 +49,7 @@ void DebugConsole::Draw()
 
     for (size_t i = 0; i < count; ++i)
     {
-        // Walk chronologically: oldest first
+        // Walk chronologically from oldest to newest despite the ring-buffer wrap.
         const LogEntry& e = _entries[((_entries.head + cap - count + i) % cap)];
 
         ImVec4 color;

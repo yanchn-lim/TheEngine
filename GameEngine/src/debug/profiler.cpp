@@ -2,6 +2,7 @@
 
 void Profiler::BeginFrame()
 {
+	// Start a new frame capture unless profiling is paused.
 	if (_paused) return;
 	_frameStart = Clock::now();
 	_scopeDepth = 0; //reset depth
@@ -12,9 +13,9 @@ void Profiler::BeginFrame()
 
 void Profiler::EndFrame()
 {
+	// Finalize frame timing and store a copy for UI/history consumers.
 	if (_paused) return;
 
-	//get time
 	auto frameMs = ToMs(Clock::now() - _frameStart);
 
 	_currentFrame.frameTimeMs = static_cast<float>(frameMs);
@@ -24,6 +25,7 @@ void Profiler::EndFrame()
 
 void Profiler::PushScope(const char* name)
 {
+	// Push a timed scope into the current frame's hierarchy.
 	if (_paused) return;
 
 	if (_scopeDepth >= MAX_SCOPE_DEPTH) return;
@@ -34,7 +36,6 @@ void Profiler::PushScope(const char* name)
 
 	ProfileSampleNode* inserted = nullptr;
 
-	//create an open scope
 	if (_scopeDepth == 0) //root node
 	{
 		_currentFrame.roots.push_back(std::move(node));
@@ -42,7 +43,7 @@ void Profiler::PushScope(const char* name)
 	}
 	else
 	{
-		//parent should exist -1 depth
+		// Children are attached to the currently open parent scope.
 		ProfileSampleNode* parent = _scopeStack[_scopeDepth - 1];
 		parent->children.push_back(std::move(node));
 		inserted = &parent->children.back();
@@ -54,17 +55,18 @@ void Profiler::PushScope(const char* name)
 
 void Profiler::PopScope()
 {
+	// Close the most recent open scope and record elapsed time.
 	if (_paused) return;
 	if (_scopeDepth == 0) return;
 
 	--_scopeDepth;
 	ProfileSampleNode* node = _scopeStack[_scopeDepth];
-	//update timing
 	node->durationMs = static_cast<float>(ToMs(Clock::now() - _frameStart) - node->startMs);
 }
 
 void Profiler::PrintFrameStatistics(size_t numFrames) const
 {
+	// Aggregate recent frame and scope timing into a console report.
 	size_t available = _frames.count;
 	if (available == 0)
 	{
@@ -182,6 +184,7 @@ void Profiler::PrintFrameStatistics(size_t numFrames) const
 
 void Profiler::PrintFrameStatisticsToFile(const std::string& filename, size_t numFrames) const
 {
+	// Write the same aggregate timing report to disk for offline inspection.
 	std::ofstream file(filename);
 	if (!file.is_open())
 	{

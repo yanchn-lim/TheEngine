@@ -14,9 +14,8 @@ namespace Graphics
 	bool Renderer::Init()
 	{
 		PROFILE_FUNCTION();
-		//init data container
 		
-		//reserve vector
+		// Reserve command storage once; frames clear but keep capacity.
 		_cmds.reserve(8192);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -26,6 +25,7 @@ namespace Graphics
 
 	void Renderer::Submit(const DrawCmd& cmd)
 	{
+		// Draw commands are copied into the frame buffer and resolved at EndFrame.
 		PROFILE_FUNCTION();
 		_cmds.emplace_back(cmd);
 	}
@@ -34,10 +34,9 @@ namespace Graphics
 	{
 		PROFILE_FUNCTION();
 
-		//clear cmds
+		// Start a fresh frame command list and clear the current framebuffer.
 		_cmds.clear();
 
-		//clear color
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
@@ -46,7 +45,7 @@ namespace Graphics
 	{
 		PROFILE_FUNCTION();
 
-		//render the image
+		// Resolve render state, resources, and camera uniforms for each command.
 		for (const DrawCmd& cmd : _cmds)
 		{
 			if (!cmd.material)
@@ -115,10 +114,9 @@ namespace Graphics
 				glDisable(GL_CULL_FACE);
 
 
-			//bind shader
 			shader->Bind();
 
-			//bind texture
+			// Texture is optional, but sprite/default shaders expect slot 0 when present.
 			if (texture)
 			{
 				texture->Bind(0);
@@ -129,7 +127,6 @@ namespace Graphics
 			shader->SetMat4("uView", _camera.GetView());
 			shader->SetMat4("uProjection", _camera.GetProjection());
 
-			//draw
 			cmd.mesh->Draw();
 		}
 	}
@@ -141,6 +138,7 @@ namespace Graphics
 
 	void Renderer::SetCamera(const Camera2D& camera)
 	{
+		// Camera is copied so callers can build it transiently each frame.
 		_camera = camera;
 	}
 }

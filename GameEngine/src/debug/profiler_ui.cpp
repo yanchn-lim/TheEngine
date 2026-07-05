@@ -4,6 +4,7 @@
 
 void ProfilerUI::DrawNode(const ProfileSampleNode& node, float parentMs)
 {
+	// Render one profiler scope and recursively show child scopes.
 	float pct = parentMs > 0.f ? (node.durationMs / parentMs) * 100.f : 0.f;
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth
@@ -32,14 +33,13 @@ void ProfilerUI::DrawNode(const ProfileSampleNode& node, float parentMs)
 
 void ProfilerUI::Draw()
 {
-	//PROFILE_FUNCTION();
+	// Main profiler window combines frame history with the scope hierarchy.
 	if (!_open) return;
 
 	ImGui::SetNextWindowSize(ImVec2(480, 400), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Profiler", &_open);
 
 	DrawFrameGraph();
-	//separator
 	DrawScopeTable();
 
 	ImGui::End();
@@ -47,6 +47,7 @@ void ProfilerUI::Draw()
 
 void ProfilerUI::DrawFrameGraph()
 {
+	// Plot recent frame times and mark the 60 FPS budget line.
 	const FrameData& display = Profiler::Get().GetDisplayFrame();
 
 	if (display.roots.empty())
@@ -57,7 +58,7 @@ void ProfilerUI::DrawFrameGraph()
 
 	const auto& frames = Profiler::Get().GetFrames();
 
-	//build timing history
+	// Copy ring-buffer data into the fixed array expected by ImGui::PlotLines.
 	static std::array<float, PROFILER_CAP> history;
 	for (size_t i = 0; i < PROFILER_CAP; ++i)
 		history[i] = frames[i].frameTimeMs;
@@ -75,13 +76,11 @@ void ProfilerUI::DrawFrameGraph()
 	ImVec2 plotPos = ImGui::GetCursorScreenPos();
 	ImVec2 plotSize = ImVec2(ImGui::GetContentRegionAvail().x, plotHeight);
 
-	//draw graph
 	ImGui::PlotLines("##FrameTime", history.data(), (int)PROFILER_CAP, (int)frames.head, nullptr, scaleMin,scaleMax,plotSize);
 
 	float t = (targetMs - scaleMin) / (scaleMax - scaleMin);         // normalize to [0,1]
-	float y = plotPos.y + plotSize.y * (1.f - t);                    // flip — y=0 is top
+	float y = plotPos.y + plotSize.y * (1.f - t);                    // flip because y=0 is top
 
-	//draw 16.66ms target line
 	ImDrawList* dl = ImGui::GetWindowDrawList();
 	dl->AddLine(
 		ImVec2(plotPos.x, y),
@@ -99,11 +98,11 @@ void ProfilerUI::DrawFrameGraph()
 
 void ProfilerUI::DrawScopeTable()
 {
+	// Show the latest frame's nested scopes as an expandable timing table.
 	const FrameData& frame = Profiler::Get().GetDisplayFrame();
 
 	if (frame.roots.empty()) return;
 
-	//rework this later on
 	constexpr ImGuiTableFlags tableFlags =
 		ImGuiTableFlags_BordersOuter |
 		ImGuiTableFlags_BordersInnerV |

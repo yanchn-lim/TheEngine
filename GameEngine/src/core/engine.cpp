@@ -22,6 +22,7 @@
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    // Global debug/runtime hotkeys are handled at the window callback level.
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         Engine::Get().running = false;
@@ -46,6 +47,7 @@ static void ErrorCallback(int error, const char* description)
 
 bool Window::Init()
 {
+    // Create the OpenGL context before initializing GLAD or renderer resources.
     if (!glfwInit()) return false;
 
     glfwSetErrorCallback(ErrorCallback);
@@ -101,6 +103,7 @@ void Window::Shutdown()
 // ========= IMGUI ==========
 bool ImGuiLayer::Init(GLFWwindow* window)
 {
+    // ImGui is configured once against the active GLFW/OpenGL context.
     Debug::CLog("Initializing ImGui...\n");
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -169,9 +172,11 @@ void ImGuiLayer::Shutdown()
 //test assets
 Graphics::Mesh testLineMesh;
 Assets::MeshHandle testQuadMesh;
+Assets::MeshHandle testObjMesh;
 
 int Engine::Run()
 {
+    // Keep the public entrypoint small: initialize, run the frame loop, then teardown.
     if (!Initialize())
         return EXIT_FAILURE;
 
@@ -183,6 +188,7 @@ int Engine::Run()
 
 bool Engine::Initialize()
 {
+    // Initialization order matters: window/context, UI, renderer, then test assets.
     Debug::CLog("========== Initializing engine... ==========\n");
     if (!window.Init())
     {
@@ -216,6 +222,10 @@ bool Engine::Initialize()
    
     testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
     if (!testQuadMesh)
+        return false;
+
+    testObjMesh = assets.LoadMesh("test_obj_triangle", "assets/models/test_triangle.obj");
+    if (!testObjMesh)
         return false;
 
     constexpr uint32_t lineQuadIndices[] =
@@ -272,6 +282,7 @@ bool Engine::Initialize()
 
 void Engine::Update()
 {
+    // Main loop owns per-frame polling, camera setup, rendering, UI, and swap.
     while (!glfwWindowShouldClose(window.handle) && running)
     {
         Profiler::Get().BeginFrame();
@@ -313,10 +324,16 @@ void Engine::Update()
             fallbackCmd.material = assets.Get("fallback_debug");
             fallbackCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.45f, 0.0f));
 
+            Graphics::DrawCmd objCmd;
+            objCmd.mesh = assets.Get(testObjMesh);
+            objCmd.material = assets.Get("steak");
+            objCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.65f, 0.0f));
+
             renderer.Submit(leftCmd);
             renderer.Submit(rightCmd);
             renderer.Submit(lineCmd);
             renderer.Submit(fallbackCmd);
+            renderer.Submit(objCmd);
 
             renderer.EndFrame();
 
@@ -338,6 +355,7 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
+    // Tear down GL-backed systems before destroying the window/context.
     Debug::CLog("========== Shutting down engine... ==========\n");
 
     renderer.Shutdown();

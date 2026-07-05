@@ -70,6 +70,9 @@
     <Filter Include="Resource Files\assets\shaders">
       <UniqueIdentifier>{b0f11e83-6cf8-4ae3-b52e-3f56f6fed4e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\assets\models">
+      <UniqueIdentifier>{7054a662-ad90-47ef-b4a6-f236e7c76f1a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -310,6 +313,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\models\test_triangle.obj">
+      <Filter>Resource Files\assets\models</Filter>
+    </None>
     <None Include="assets\shaders\sprite.frag">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
