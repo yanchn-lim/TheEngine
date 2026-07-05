@@ -2,11 +2,11 @@
 
 #include <cstdint>
 
-#include "assets/model_data.hpp"
+#include "assets/mesh_source_data.hpp"
 
 namespace Assets::Primitive2D
 {
-	ModelMeshData Triangle();
-	ModelMeshData Quad();
-	ModelMeshData Circle(uint32_t segments = 32);
+	MeshSourceData Triangle();
+	MeshSourceData Quad();
+	MeshSourceData Circle(uint32_t segments = 32);
 }

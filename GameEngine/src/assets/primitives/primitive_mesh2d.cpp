@@ -20,9 +20,9 @@ namespace Assets::Primitive2D
 		}
 	}
 
-	ModelMeshData Triangle()
+	MeshSourceData Triangle()
 	{
-		ModelMeshData data;
+		MeshSourceData data;
 		data.vertices =
 		{
 			{ {  0.0f,  0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.5f, 1.0f } },
@@ -35,9 +35,9 @@ namespace Assets::Primitive2D
 		return data;
 	}
 
-	ModelMeshData Quad()
+	MeshSourceData Quad()
 	{
-		ModelMeshData data;
+		MeshSourceData data;
 		data.vertices =
 		{
 			{ { -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
@@ -51,11 +51,11 @@ namespace Assets::Primitive2D
 		return data;
 	}
 
-	ModelMeshData Circle(uint32_t segments)
+	MeshSourceData Circle(uint32_t segments)
 	{
 		segments = std::max(segments, 3u);
 
-		ModelMeshData data;
+		MeshSourceData data;
 		data.vertices.reserve(static_cast<size_t>(segments) + 1u);
 		data.indices.reserve(static_cast<size_t>(segments) * 3u);
 

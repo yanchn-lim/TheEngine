@@ -54,7 +54,7 @@ The material registry:
 The mesh registry:
 
 - Stores final `Graphics::Mesh` resources by asset id
-- Creates meshes from `Assets::ModelMeshData`
+- Creates meshes from `Assets::MeshSourceData`
 - Uses the standard `Assets::MeshVertex` layout
 - Maps mesh names to `MeshHandle`
 - Returns resolved non-owning mesh pointers
@@ -122,7 +122,7 @@ The first implementation should be:
 ```text
 tinyobjloader
     -> ObjModelImporter
-    -> ModelData / ModelMeshData
+    -> MeshSourceCollection / MeshSourceData
     -> MeshRegistry
 ```
 
@@ -177,13 +177,13 @@ Assets::Primitive2D::Quad()
 Assets::Primitive2D::Circle()
 ```
 
-These functions return `Assets::ModelMeshData`. They do not create GPU resources directly.
+These functions return `Assets::MeshSourceData`. They do not create GPU resources directly.
 
 Expected flow:
 
 ```text
 Assets::Primitive2D::Quad()
-    -> ModelMeshData
+    -> MeshSourceData
     -> AssetManager::CreateMesh()
     -> MeshRegistry
     -> MeshHandle

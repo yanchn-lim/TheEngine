@@ -162,7 +162,7 @@
     <ClCompile Include="src\assets\mesh_registry.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\assets\model_data.cpp">
+    <ClCompile Include="src\assets\mesh_source_data.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\primitives\primitive_mesh2d.cpp">
@@ -296,7 +296,7 @@
     <ClInclude Include="src\assets\mesh_registry.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
-    <ClInclude Include="src\assets\model_data.hpp">
+    <ClInclude Include="src\assets\mesh_source_data.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\primitives\primitive_mesh2d.hpp">

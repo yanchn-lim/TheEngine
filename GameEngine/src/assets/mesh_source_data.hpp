@@ -18,7 +18,7 @@ namespace Assets
 		glm::vec2 texCoord0{};
 	};
 
-	struct ModelMeshData
+	struct MeshSourceData
 	{
 		std::vector<MeshVertex> vertices;
 		std::vector<uint32_t> indices;
@@ -27,9 +27,9 @@ namespace Assets
 
 	Graphics::VertexLayout CreateMeshVertexLayout();
 
-	struct ModelData
+	struct MeshSourceCollection
 	{
-		std::vector<ModelMeshData> meshes;
+		std::vector<MeshSourceData> meshes;
 	};
 
 }

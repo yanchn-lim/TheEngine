@@ -4,7 +4,7 @@
 
 namespace Assets
 {
-	MeshHandle MeshRegistry::Create(const std::string& name, const ModelMeshData& data)
+	MeshHandle MeshRegistry::Create(const std::string& name, const MeshSourceData& data)
 	{
 		if (data.vertices.empty() || data.indices.empty())
 		{

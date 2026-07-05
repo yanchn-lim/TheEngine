@@ -63,7 +63,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Renderer remains independent from `Assets::AssetManager`; asset handles are resolved before draw commands reach the renderer.
 - Model importers should convert source data into engine-standard vertex formats before graphics resources are created.
 - Mesh creation still consumes interleaved vertex bytes plus the matching `Graphics::VertexLayout`.
-- Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::ModelMeshData`.
+- Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::MeshSourceData`.
 
 ## Primitive Topology Direction
 

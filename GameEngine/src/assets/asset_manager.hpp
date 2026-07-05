@@ -22,7 +22,7 @@ namespace Assets
 			Graphics::RenderState state
 		);
 
-		MeshHandle CreateMesh(const std::string& name, const ModelMeshData& data);
+		MeshHandle CreateMesh(const std::string& name, const MeshSourceData& data);
 
 		const Graphics::Texture2D* Get(TextureHandle handle) const;
 		const Graphics::Shader* Get(ShaderHandle handle) const;

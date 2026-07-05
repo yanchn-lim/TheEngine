@@ -27,7 +27,7 @@ namespace Assets
 		return _materials.Create(name, shaderPtr, texturePtr, state);
 	}
 
-	MeshHandle AssetManager::CreateMesh(const std::string& name, const ModelMeshData& data)
+	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshSourceData& data)
 	{
 
 		return _meshes.Create(name, data);

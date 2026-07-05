@@ -1,14 +1,14 @@
 #pragma once
 
 #include "asset_handle.hpp"
-#include "model_data.hpp"
+#include "mesh_source_data.hpp"
 #include "graphics/mesh.hpp"
 namespace Assets
 {
 	class MeshRegistry
 	{
 	public:
-		MeshHandle Create(const std::string& name, const ModelMeshData& data);
+		MeshHandle Create(const std::string& name, const MeshSourceData& data);
 		const Graphics::Mesh* Get(MeshHandle handle) const;
 		void Clear();
 
