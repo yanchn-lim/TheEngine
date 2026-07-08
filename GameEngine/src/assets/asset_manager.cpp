@@ -35,6 +35,31 @@ namespace Assets
 		return _meshes.Create(name, collection.meshes[0]);
 	}
 
+	std::vector<MeshHandle> AssetManager::LoadModel(const std::string& name, const std::string& path)
+	{
+		MeshSourceCollection collection;
+		if (!_modelLoader.Load(path, collection))
+		{
+			Debug::LogError("AssetManager::LoadModel : Failed to load mesh from ", path);
+			return std::vector<MeshHandle>();
+		}
+
+		if (collection.meshes.empty())
+		{
+			Debug::LogError("AssetManager::LoadModel : No meshes found in ", path);
+			return std::vector<MeshHandle>();
+		}
+
+		std::vector<MeshHandle> meshHandles{};
+		for (size_t i = 0; i < collection.meshes.size(); ++i)
+		{
+			const std::string meshName = name + "_" + std::to_string(i);
+			meshHandles.push_back(_meshes.Create(meshName, collection.meshes[i]));
+		}
+
+		return meshHandles;
+	}
+
 	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
 	{
 		// Resolve handles up front so materials can hold renderer-facing pointers.

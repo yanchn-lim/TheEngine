@@ -32,6 +32,7 @@ namespace Assets
 		meshData.indices = data.indices.data();
 		meshData.indexCount = indexCount;
 		meshData.topology = data.topology;
+		meshData.layout = layout;
 
 		if (!mesh.Create(meshData))
 		{

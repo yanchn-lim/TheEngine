@@ -44,10 +44,13 @@ Goal: load, cache, and retrieve assets without coupling to Scene, GameObject, or
 - [x] Add standard engine vertex format definitions
 - [x] Add `MeshVertex` and matching `VertexLayout` builder
 - [x] Add asset-side `Primitive2D` mesh generators
-- [ ] Convert imported model data into standard mesh layouts
-- [ ] Add extensible model importer interface
-- [ ] Add OBJ importer using tinyobjloader
-- [ ] Keep third-party model loader types out of graphics and registries
+- [x] Convert imported model data into standard mesh layouts
+- [x] Add extensible model importer interface
+- [x] Add OBJ importer using tinyobjloader
+- [x] Add OBJ vertex deduplication for shared position/uv/normal index triplets
+- [x] Keep third-party model loader types out of graphics and registries
+- [ ] Add multi-mesh `LoadModel()` path for files with multiple shapes/meshes
+- [ ] Add model/material import support for OBJ/MTL
 - [x] Add path-to-handle caching
 - [x] Add handle-to-resource lookup
 - [x] Define current registry ownership model
@@ -66,7 +69,8 @@ Goal: connect asset handles to renderable GPU resources cleanly.
 - [ ] Let sprite submission resolve texture handles
 - [x] Let shader resources come from asset/resource layer
 - [x] Let primitive quad mesh resources come from asset/resource layer
-- [ ] Let imported mesh resources come from asset/resource layer
+- [x] Let imported mesh resources come from asset/resource layer
+- [ ] Keep manual imported mesh tests from becoming permanent engine startup code
 - [ ] Keep Renderer independent from Scene/GameObject/ECS
 
 ## Phase 4 - Scene and Object Layer

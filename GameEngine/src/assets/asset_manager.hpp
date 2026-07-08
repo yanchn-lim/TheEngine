@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "graphics/render_state.hpp"
 #include "asset_handle.hpp"
 #include "shader_registry.hpp"
@@ -16,6 +18,7 @@ namespace Assets
 		TextureHandle LoadTexture(const std::string& path);
 		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath);
 		MeshHandle LoadMesh(const std::string& name, const std::string& path);
+		std::vector<MeshHandle> LoadModel(const std::string& name, const std::string& path);
 
 		MaterialHandle CreateMaterial(
 			const std::string& name,

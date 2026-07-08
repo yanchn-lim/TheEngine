@@ -173,6 +173,8 @@ void ImGuiLayer::Shutdown()
 Graphics::Mesh testLineMesh;
 Assets::MeshHandle testQuadMesh;
 Assets::MeshHandle testObjMesh;
+Assets::MeshHandle testObjQuadMesh;
+std::vector<Assets::MeshHandle> testObjModelMeshes;
 
 int Engine::Run()
 {
@@ -226,6 +228,14 @@ bool Engine::Initialize()
 
     testObjMesh = assets.LoadMesh("test_obj_triangle", "assets/models/test_triangle.obj");
     if (!testObjMesh)
+        return false;
+
+    testObjQuadMesh = assets.LoadMesh("test_obj_quad", "assets/models/test_quad.obj");
+    if (!testObjQuadMesh)
+        return false;
+
+    testObjModelMeshes = assets.LoadModel("test_obj_two_shapes", "assets/models/test_two_shapes.obj");
+    if (testObjModelMeshes.size() != 2)
         return false;
 
     constexpr uint32_t lineQuadIndices[] =
@@ -327,13 +337,31 @@ void Engine::Update()
             Graphics::DrawCmd objCmd;
             objCmd.mesh = assets.Get(testObjMesh);
             objCmd.material = assets.Get("steak");
-            objCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.65f, 0.0f));
+            objCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.65f, 0.0f));
+
+            Graphics::DrawCmd objQuadCmd;
+            objQuadCmd.mesh = assets.Get(testObjQuadMesh);
+            objQuadCmd.material = assets.Get("steak");
+            objQuadCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.65f, 0.0f));
+
+            Graphics::DrawCmd modelShape0Cmd;
+            modelShape0Cmd.mesh = assets.Get(testObjModelMeshes[0]);
+            modelShape0Cmd.material = assets.Get("steak");
+            modelShape0Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, -0.75f, 0.0f));
+
+            Graphics::DrawCmd modelShape1Cmd;
+            modelShape1Cmd.mesh = assets.Get(testObjModelMeshes[1]);
+            modelShape1Cmd.material = assets.Get("steak");
+            modelShape1Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, -0.75f, 0.0f));
 
             renderer.Submit(leftCmd);
             renderer.Submit(rightCmd);
             renderer.Submit(lineCmd);
             renderer.Submit(fallbackCmd);
             renderer.Submit(objCmd);
+            renderer.Submit(objQuadCmd);
+            renderer.Submit(modelShape0Cmd);
+            renderer.Submit(modelShape1Cmd);
 
             renderer.EndFrame();
 

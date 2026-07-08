@@ -10,6 +10,35 @@
 
 namespace Assets
 {
+    namespace
+    {
+        struct ObjVertexKey
+        {
+            int vertexIndex;
+            int texcoordIndex;
+            int normalIndex;
+
+            bool operator==(const ObjVertexKey& other) const
+            {
+                return vertexIndex == other.vertexIndex
+                    && texcoordIndex == other.texcoordIndex
+                    && normalIndex == other.normalIndex;
+            }
+        };
+
+        struct ObjVertexKeyHasher
+        {
+            size_t operator()(const ObjVertexKey& key) const
+            {
+                size_t h1 = std::hash<int>{}(key.vertexIndex);
+                size_t h2 = std::hash<int>{}(key.texcoordIndex);
+                size_t h3 = std::hash<int>{}(key.normalIndex);
+
+                return h1 ^ (h2 << 1) ^ (h3 << 2);
+            }
+        };
+    }
+
 	bool ObjModelImporter::CanLoad(const std::string& path) const
 	{
 		// OBJ support is selected by file extension only for now.
@@ -48,11 +77,12 @@ namespace Assets
         if (!success)
             return false;
 
-        MeshSourceData mesh;
 
         for (const tinyobj::shape_t& shape : shapes)
         {
-            // First pass combines all OBJ shapes into one engine mesh.
+            MeshSourceData mesh;
+            std::unordered_map<ObjVertexKey, uint32_t, ObjVertexKeyHasher> uniqueVertices;
+
             for (const tinyobj::index_t& index : shape.mesh.indices)
             {
                 if (index.vertex_index < 0)
@@ -77,15 +107,36 @@ namespace Assets
                     };
                 }
 
+                //create a key to check if vertex is repeated
+                ObjVertexKey key
+                {
+                    index.vertex_index,
+                    index.texcoord_index,
+                    index.normal_index
+                };
+
+                //if vertex repeated don't push it
+                auto it = uniqueVertices.find(key);
+                if (it != uniqueVertices.end())
+                {
+                    mesh.indices.push_back(it->second);
+                    continue;
+                }
+
+                uint32_t newIndex = static_cast<uint32_t>(mesh.vertices.size());
+                uniqueVertices[key] = newIndex;
+
                 mesh.vertices.push_back(vertex);
-                mesh.indices.push_back(static_cast<uint32_t>(mesh.indices.size()));
+                mesh.indices.push_back(newIndex);
             }
+
+            Debug::Log("ObjModelImporter::Load : Imported ", path,
+                " vertices=", mesh.vertices.size(),
+                " indices=", mesh.indices.size());
+            if (!mesh.vertices.empty() && !mesh.indices.empty())
+                outModel.meshes.push_back(std::move(mesh));
         }
 
-        if (mesh.vertices.empty() || mesh.indices.empty())
-            return false;
-
-        outModel.meshes.push_back(std::move(mesh));
-        return true;
+        return !outModel.meshes.empty();
 	}
 }

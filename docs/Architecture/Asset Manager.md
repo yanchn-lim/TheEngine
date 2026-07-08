@@ -59,12 +59,12 @@ The mesh registry:
 - Maps mesh names to `MeshHandle`
 - Returns resolved non-owning mesh pointers
 
-Planned mesh/model path:
+Current mesh/model path:
 
 - `Assets::MeshRegistry` owns final `Graphics::Mesh` resources.
 - `Assets::ModelLoader` chooses a format importer by file extension or capability.
 - Format importers convert third-party library output into engine-standard mesh layouts.
-- `ObjModelImporter` will use tinyobjloader first.
+- `ObjModelImporter` uses tinyobjloader for the first supported model format.
 - Future importers can use glTF, Assimp, or another library without changing graphics code.
 
 ## Current Ownership
@@ -117,7 +117,7 @@ file format library
     -> Graphics::Mesh
 ```
 
-The first implementation should be:
+The current OBJ implementation is:
 
 ```text
 tinyobjloader
@@ -125,6 +125,22 @@ tinyobjloader
     -> MeshSourceCollection / MeshSourceData
     -> MeshRegistry
 ```
+
+The importer currently supports:
+
+- Positions
+- UVs
+- White default vertex color
+- Missing UVs as `{0, 0}`
+- One combined `MeshSourceData` from all OBJ shapes
+- Vertex deduplication by OBJ position/uv/normal index triplet
+
+The importer does not yet support:
+
+- Normals in the runtime vertex format
+- Tangents
+- OBJ material/MTL import
+- Returning multiple mesh handles for multi-shape model files
 
 The importer interface should hide third-party types. No `tinyobj::` types should appear in `AssetManager`, `MeshRegistry`, `Graphics::Mesh`, `Graphics::MeshData`, scene code, or renderer code.
 
@@ -147,6 +163,10 @@ layout(location = 2) in vec2 aTexCoord;
 ```
 
 OBJ import should convert source data into this format. Missing color becomes white. Missing UV becomes `{0, 0}`. If a future shader needs normals or tangents, add a new standard format such as `LitMeshVertex` instead of making every shader accept every possible attribute.
+
+OBJ files have separate indices for position, UV, and normal. The importer converts those triplets into the engine's single packed `MeshVertex` format. Exact repeated triplets are deduplicated into shared indexed vertices. Vertices with the same position but different UVs or normals remain separate, preserving UV seams and hard edges.
+
+`AssetManager::LoadMesh(name, path)` currently loads only the first mesh in the resulting `MeshSourceCollection`. This is sufficient for single-mesh smoke tests, but a future `LoadModel(path)` path should preserve multi-shape files by returning multiple mesh handles or a model asset handle.
 
 Future standard formats can be added as needed:
 
