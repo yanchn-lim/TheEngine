@@ -1,0 +1,24 @@
+# Multi-shape OBJ for AssetManager::LoadModel testing.
+o LeftShape
+v -0.5 -0.5 0.0
+v 0.0 -0.5 0.0
+v 0.0 0.5 0.0
+v -0.5 0.5 0.0
+vt 0.0 0.0
+vt 1.0 0.0
+vt 1.0 1.0
+vt 0.0 1.0
+f 1/1 2/2 3/3
+f 3/3 4/4 1/1
+
+o RightShape
+v 0.0 -0.5 0.0
+v 0.5 -0.5 0.0
+v 0.5 0.5 0.0
+v 0.0 0.5 0.0
+vt 0.0 0.0
+vt 1.0 0.0
+vt 1.0 1.0
+vt 0.0 1.0
+f 5/5 6/6 7/7
+f 7/7 8/8 5/5
