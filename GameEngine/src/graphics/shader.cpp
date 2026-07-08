@@ -108,7 +108,7 @@ namespace Graphics
 
 		if (loc == -1)
 		{
-			Debug::LogError("Shader uniform location not found!");
+			Debug::LogError("Shader uniform location not found! ", name);
 			return;
 		}
 
@@ -128,7 +128,7 @@ namespace Graphics
 
 		if (loc == -1)
 		{
-			Debug::LogError("Shader uniform location not found!");
+			Debug::LogError("Shader uniform location not found! ", name);
 			return;
 		}
 

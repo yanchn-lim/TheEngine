@@ -218,25 +218,32 @@ bool Engine::Initialize()
 
 
     Assets::ShaderHandle shaderHandle = assets.LoadShader("assets/shaders/sprite.vert", "assets/shaders/sprite.frag");
+    Assets::ShaderHandle bshaderHandle = assets.LoadShader("assets/shaders/bugatti.vert", "assets/shaders/bugatti.frag");
 
     if (!shaderHandle)
         return false;
    
-    testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
-    if (!testQuadMesh)
-        return false;
 
-    testObjMesh = assets.LoadMesh("test_obj_triangle", "assets/models/test_triangle.obj");
-    if (!testObjMesh)
-        return false;
+    //testQuadMesh = assets.LoadModel("test_quad_mesh", "assets/models/bugatti.obj");
+    //testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
+    //if (!testQuadMesh)
+    //    return false;
 
-    testObjQuadMesh = assets.LoadMesh("test_obj_quad", "assets/models/test_quad.obj");
-    if (!testObjQuadMesh)
-        return false;
 
-    testObjModelMeshes = assets.LoadModel("test_obj_two_shapes", "assets/models/test_two_shapes.obj");
-    if (testObjModelMeshes.size() != 2)
-        return false;
+    //testObjMesh = assets.LoadMesh("test_obj_triangle", "assets/models/test_triangle.obj");
+    //if (!testObjMesh)
+    //    return false;
+
+    //testObjQuadMesh = assets.LoadMesh("test_obj_quad", "assets/models/test_quad.obj");
+    //if (!testObjQuadMesh)
+    //    return false;
+
+    //testObjModelMeshes = assets.LoadModel("test_obj_two_shapes", "assets/models/test_two_shapes.obj");
+    //if (testObjModelMeshes.size() != 2)
+    //    return false;
+
+    testObjModelMeshes = assets.LoadModel("test_obj_two_shapes", "assets/models/human.obj");
+
 
     constexpr uint32_t lineQuadIndices[] =
     {
@@ -263,8 +270,8 @@ bool Engine::Initialize()
     lineQuad.layout = Assets::CreateMeshVertexLayout();
     lineQuad.topology = Graphics::PrimitiveTopology::LINES;
 
-    if (!testLineMesh.Create(lineQuad))
-        return false;
+    //if (!testLineMesh.Create(lineQuad))
+        //return false;
 
     //load texture
     Assets::TextureHandle steakTexture = assets.LoadTexture("assets/textures/steak.png");
@@ -281,8 +288,11 @@ bool Engine::Initialize()
     Assets::TextureHandle missingTexture = assets.LoadTexture("assets/textures/missing.png");
     Assets::MaterialHandle fallbackMat = assets.CreateMaterial("fallback_debug", missingShader, missingTexture, state);
 
-    if (!fallbackMat)
-        return false;
+    
+    Assets::MaterialHandle btestMat = assets.CreateMaterial("bugatti", bshaderHandle, steakTexture, state);
+
+    //if (!fallbackMat)
+        //return false;
      
     Debug::CLog("Successfully initialized test assets!\n");
 
@@ -314,54 +324,66 @@ void Engine::Update()
             PROFILE_SCOPE("RendererLoop");
             renderer.BeginFrame();
 
-            Graphics::DrawCmd leftCmd;
+     /*       Graphics::DrawCmd leftCmd;
             leftCmd.mesh = assets.Get(testQuadMesh);
             leftCmd.material = assets.Get("steak");
-            leftCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.0f, 0.0f));
+            leftCmd.transform = glm::scale(glm::mat4(1.f), glm::vec3(0.5f) );*/
 
-            Graphics::DrawCmd rightCmd;
-            rightCmd.mesh = assets.Get(testQuadMesh);
-            rightCmd.material = assets.Get("steak_noblend");
-            rightCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.0f, 0.0f));
+            //Graphics::DrawCmd rightCmd;
+            //rightCmd.mesh = assets.Get(testQuadMesh);
+            //rightCmd.material = assets.Get("steak_noblend");
+            //rightCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.0f, 0.0f));
 
-            Graphics::DrawCmd lineCmd;
-            lineCmd.mesh = &testLineMesh;
-            lineCmd.material = assets.Get("steak");
-            lineCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.35f, 0.0f));
+            //Graphics::DrawCmd lineCmd;
+            //lineCmd.mesh = &testLineMesh;
+            //lineCmd.material = assets.Get("steak");
+            //lineCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.35f, 0.0f));
 
-            Graphics::DrawCmd fallbackCmd;
-            fallbackCmd.mesh = assets.Get(testQuadMesh);
-            fallbackCmd.material = assets.Get("fallback_debug");
-            fallbackCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.45f, 0.0f));
+            //Graphics::DrawCmd fallbackCmd;
+            //fallbackCmd.mesh = assets.Get(testQuadMesh);
+            //fallbackCmd.material = assets.Get("fallback_debug");
+            //fallbackCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.45f, 0.0f));
 
-            Graphics::DrawCmd objCmd;
-            objCmd.mesh = assets.Get(testObjMesh);
-            objCmd.material = assets.Get("steak");
-            objCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.65f, 0.0f));
+            //Graphics::DrawCmd objCmd;
+            //objCmd.mesh = assets.Get(testObjMesh);
+            //objCmd.material = assets.Get("steak");
+            //objCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.65f, 0.0f));
 
-            Graphics::DrawCmd objQuadCmd;
-            objQuadCmd.mesh = assets.Get(testObjQuadMesh);
-            objQuadCmd.material = assets.Get("steak");
-            objQuadCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.65f, 0.0f));
+            //Graphics::DrawCmd objQuadCmd;
+            //objQuadCmd.mesh = assets.Get(testObjQuadMesh);
+            //objQuadCmd.material = assets.Get("steak");
+            //objQuadCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.65f, 0.0f));
 
-            Graphics::DrawCmd modelShape0Cmd;
-            modelShape0Cmd.mesh = assets.Get(testObjModelMeshes[0]);
-            modelShape0Cmd.material = assets.Get("steak");
-            modelShape0Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, -0.75f, 0.0f));
+            //Graphics::DrawCmd modelShape0Cmd;
+            //modelShape0Cmd.mesh = assets.Get(testObjModelMeshes[0]);
+            //modelShape0Cmd.material = assets.Get("steak");
+            //modelShape0Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, -0.75f, 0.0f));
 
-            Graphics::DrawCmd modelShape1Cmd;
-            modelShape1Cmd.mesh = assets.Get(testObjModelMeshes[1]);
-            modelShape1Cmd.material = assets.Get("steak");
-            modelShape1Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, -0.75f, 0.0f));
+            //Graphics::DrawCmd modelShape1Cmd;
+            //modelShape1Cmd.mesh = assets.Get(testObjModelMeshes[1]);
+            //modelShape1Cmd.material = assets.Get("steak");
+            //modelShape1Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, -0.75f, 0.0f));
 
-            renderer.Submit(leftCmd);
-            renderer.Submit(rightCmd);
-            renderer.Submit(lineCmd);
-            renderer.Submit(fallbackCmd);
-            renderer.Submit(objCmd);
-            renderer.Submit(objQuadCmd);
-            renderer.Submit(modelShape0Cmd);
-            renderer.Submit(modelShape1Cmd);
+            //renderer.Submit(leftCmd);
+            //renderer.Submit(rightCmd);
+            //renderer.Submit(lineCmd);
+            //renderer.Submit(fallbackCmd);
+            //renderer.Submit(objCmd);
+            //renderer.Submit(objQuadCmd);
+            //renderer.Submit(modelShape0Cmd);
+            //renderer.Submit(modelShape1Cmd);
+            static glm::float32 rot = 0.f;
+
+            for (const auto& mesh : testObjModelMeshes)
+            {
+                Graphics::DrawCmd modelShapeCmd;
+                modelShapeCmd.mesh = assets.Get(mesh);
+                modelShapeCmd.material = assets.Get("bugatti");
+                modelShapeCmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f,-0.75f,0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(0.075f)) * glm::rotate(glm::mat4(1.f), rot, glm::vec3(0.f, 1.f, 0.f));
+				renderer.Submit(modelShapeCmd);
+            }
+            
+            rot += 0.005;
 
             renderer.EndFrame();
 

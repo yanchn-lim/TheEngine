@@ -4,8 +4,6 @@ out/
 x64/
 Debug/
 Release/
-!GameEngine/src/debug/
-!GameEngine/src/debug/**
 
 *.ipch
 *.suo
@@ -23,6 +21,10 @@ Release/
 *.iobj
 *.ipdb
 
+#folders to ignore
+!GameEngine/src/debug/
+!GameEngine/src/debug/**
+!GameEngine/assets/**
 
 # third_party binaries (keep headers/source, ignore precompiled libs)
 # third_party/glfw/lib-vc2022/
