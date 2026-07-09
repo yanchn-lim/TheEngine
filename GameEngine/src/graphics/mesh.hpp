@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "index_buffer.hpp"
 #include "vertex_array.hpp"
-#include "mesh_data.hpp"
+#include "mesh_upload_data.hpp"
 #include "primitive_topology.hpp"
 
 namespace Graphics
@@ -23,7 +23,7 @@ namespace Graphics
 	public:
 		bool Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout);
 		bool Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, const uint32_t* indices, uint32_t indexCount);
-		bool Create(const MeshData& data);
+		bool Create(const MeshUploadData& data);
 
 		void Bind() const;
 		void Draw() const;

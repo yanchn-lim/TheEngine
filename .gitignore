@@ -21,6 +21,10 @@ Release/
 *.iobj
 *.ipdb
 
+# Generated local UI/editor state
+GameEngine/imgui.ini
+docs/.obsidian/workspace.json
+
 #folders to ignore
 !GameEngine/src/debug/
 !GameEngine/src/debug/**

@@ -2,11 +2,11 @@
 
 Use this as the short working checklist after the current OBJ importer progress.
 
-## 1. Add a Runtime Model Asset
+## 1. Runtime Model Asset
 
-Goal: stop treating a loaded model as a loose `std::vector<MeshHandle>`.
+Status: done.
 
-Add:
+Current shape:
 
 ```cpp
 struct ModelHandle
@@ -17,7 +17,7 @@ struct ModelHandle
     explicit operator bool() const;
 };
 
-struct Model
+struct ModelAsset
 {
     std::vector<MeshHandle> meshes;
 };
@@ -31,64 +31,60 @@ Why:
 - Later, the model can also hold material slots, mesh names, and node transforms.
 - Callers should ask for one model asset instead of manually owning a mesh handle vector.
 
-## 2. Add `ModelRegistry`
+## 2. `ModelRegistry`
+
+Status: done.
 
 Goal: give model assets the same registry pattern as textures, shaders, materials, and meshes.
 
 Expected responsibilities:
 
-- Own `Model` objects.
+- Own `ModelAsset` objects.
 - Return `ModelHandle`.
-- Look up `Model` by handle.
+- Look up `ModelAsset` by handle.
 - Optionally cache by name or path.
 - Clear models before clearing meshes, because models reference mesh handles.
 
-Suggested shape:
+Current shape:
 
 ```cpp
 class ModelRegistry
 {
 public:
     ModelHandle Create(const std::string& name, std::vector<MeshHandle> meshes);
-    const Model* Get(ModelHandle handle) const;
+    const ModelAsset* Get(ModelHandle handle) const;
     void Clear();
 
 private:
     AssetId _nextId = 1;
-    std::unordered_map<AssetId, Model> _models;
+    std::unordered_map<AssetId, ModelAsset> _models;
     std::unordered_map<std::string, ModelHandle> _nameToHandle;
 };
 ```
 
 Keep this registry independent from OBJ/tinyobjloader.
 
-## 3. Change `AssetManager::LoadModel()` Direction
+## 3. `AssetManager::LoadModel()` Direction
 
-Goal: make model loading return a model asset, not raw mesh handles.
-
-Current temporary shape:
-
-```cpp
-std::vector<MeshHandle> LoadModel(const std::string& name, const std::string& path);
-```
-
-Target shape:
+Status: done.
 
 ```cpp
 ModelHandle LoadModel(const std::string& name, const std::string& path);
-const Model* Get(ModelHandle handle) const;
+const ModelAsset* Get(ModelHandle handle) const;
 ```
 
-Implementation idea:
+Current flow:
 
-1. Use `ModelLoader` to load `MeshSourceCollection`.
-2. Convert each `MeshSourceData` into a `MeshHandle` through `MeshRegistry`.
+1. Use `ModelImporterRegistry` to load `ModelImportData`.
+2. Convert each `MeshImportData` into a `MeshHandle` through `MeshRegistry`.
 3. Store the resulting mesh handles in `ModelRegistry`.
 4. Return the `ModelHandle`.
 
 Keep `LoadMesh(name, path)` as a convenience function that loads only the first mesh.
 
 ## 4. Move Manual OBJ Tests Out of Permanent Startup Flow
+
+Status: next.
 
 Goal: keep `engine.cpp` from becoming a pile of one-off tests.
 

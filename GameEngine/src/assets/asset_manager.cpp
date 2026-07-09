@@ -1,6 +1,6 @@
 #include "asset_manager.hpp"
 #include "debug/debug.hpp"
-#include "obj_model_importer.hpp"
+#include "obj_importer.hpp"
 
 namespace Assets
 {
@@ -19,8 +19,8 @@ namespace Assets
 	MeshHandle AssetManager::LoadMesh(const std::string& name, const std::string& path)
 	{
 		// Imported model data is temporary; only the created GPU mesh is kept.
-		MeshSourceCollection collection;
-		if (!_modelLoader.Load(path, collection))
+		ModelImportData collection;
+		if (!_modelImporters.Import(path, collection))
 		{
 			Debug::LogError("AssetManager::LoadMesh : Failed to load mesh from ", path);
 			return MeshHandle();
@@ -37,8 +37,8 @@ namespace Assets
 
 	ModelHandle AssetManager::LoadModel(const std::string& name, const std::string& path)
 	{
-		MeshSourceCollection collection;
-		if (!_modelLoader.Load(path, collection))
+		ModelImportData collection;
+		if (!_modelImporters.Import(path, collection))
 		{
 			Debug::LogError("AssetManager::LoadModel : Failed to load mesh from ", path);
 			return ModelHandle();
@@ -75,7 +75,7 @@ namespace Assets
 		return _materials.Create(name, shaderPtr, texturePtr, state);
 	}
 
-	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshSourceData& data)
+	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshImportData& data)
 	{
 		// Procedural/source mesh data is converted into a registry-owned Graphics::Mesh.
 		return _meshes.Create(name, data);
@@ -120,7 +120,7 @@ namespace Assets
 		return _meshes.Get(handle);
 	}
 
-	const Model* AssetManager::Get(ModelHandle handle) const
+	const ModelAsset* AssetManager::Get(ModelHandle handle) const
 	{
 		return _models.Get(handle);
 	}
@@ -154,6 +154,7 @@ namespace Assets
 		// Clear dependent resources before shader/texture registries invalidate pointers.
 		_fallbackMaterial = Graphics::Material{};
 		_fallbackMaterialReady = false;
+		_models.Clear();
 		_meshes.Clear();
 		_materials.Clear();
 		_shaders.Clear();
@@ -163,7 +164,7 @@ namespace Assets
 	AssetManager::AssetManager()
 	{
 		// Register format importers here so callers only talk to AssetManager.
-		_modelLoader.RegisterImporter(std::make_unique<ObjModelImporter>());
+		_modelImporters.RegisterImporter(std::make_unique<ObjImporter>());
 	}
 
 }

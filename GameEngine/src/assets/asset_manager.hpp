@@ -8,8 +8,8 @@
 #include "texture_registry.hpp"
 #include "material_registry.hpp"
 #include "mesh_registry.hpp"
-#include "model_loader.hpp"
-#include "model.hpp"
+#include "model_importer_registry.hpp"
+#include "model_asset.hpp"
 #include "model_registry.hpp"
 
 
@@ -30,14 +30,14 @@ namespace Assets
 			Graphics::RenderState state
 		);
 
-		MeshHandle CreateMesh(const std::string& name, const MeshSourceData& data);
+		MeshHandle CreateMesh(const std::string& name, const MeshImportData& data);
 
 		const Graphics::Texture2D* Get(TextureHandle handle) const;
 		const Graphics::Shader* Get(ShaderHandle handle) const;
 		const Graphics::Material* Get(MaterialHandle handle) const;
 		const Graphics::Material* Get(const std::string& name) const;
 		const Graphics::Mesh* Get(MeshHandle handle) const;
-		const Model* Get(ModelHandle handle) const;
+		const ModelAsset* Get(ModelHandle handle) const;
 
 		void Clear();
 
@@ -51,7 +51,7 @@ namespace Assets
 		MaterialRegistry _materials;
 		MeshRegistry _meshes;
 		ModelRegistry _models;
-		ModelLoader _modelLoader;
+		ModelImporterRegistry _modelImporters;
 
 		mutable Graphics::Material _fallbackMaterial;
 		mutable bool _fallbackMaterialReady = false;

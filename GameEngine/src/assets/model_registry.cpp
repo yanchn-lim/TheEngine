@@ -1,12 +1,11 @@
 #include "model_registry.hpp"
-#include "model.hpp"
+#include "model_asset.hpp"
 #include "debug/debug.hpp"
 
 namespace Assets
 {
 	ModelHandle ModelRegistry::Create(const std::string& name, std::vector<MeshHandle> handles)
 	{
-		// Materials store non-owning renderer resource pointers resolved by AssetManager.
 		const auto it = _nameToHandle.find(name);
 		if (it != _nameToHandle.end())
 			return it->second;
@@ -19,14 +18,14 @@ namespace Assets
 
 		ModelHandle handle{ _nextId++ };
 
-		Model model{std::move(handles)};
+		ModelAsset model{std::move(handles)};
 		_nameToHandle[name] = handle;
 		_models[handle.id] = model;
 
 		return handle;
 	}
 
-	const Model* ModelRegistry::Get(ModelHandle handle) const
+	const ModelAsset* ModelRegistry::Get(ModelHandle handle) const
 	{
 		if (!handle)
 		{
@@ -44,7 +43,7 @@ namespace Assets
 		return &it->second;
 	}
 
-	const Model* ModelRegistry::Get(const std::string& handle) const
+	const ModelAsset* ModelRegistry::Get(const std::string& handle) const
 	{
 		const auto it = _nameToHandle.find(handle);
 		if (it == _nameToHandle.end())

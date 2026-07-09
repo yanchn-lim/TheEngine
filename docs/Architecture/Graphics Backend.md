@@ -16,7 +16,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - `Graphics::VertexBuffer`
 - `Graphics::IndexBuffer`
 - `Graphics::VertexLayout`
-- `Graphics::MeshData`
+- `Graphics::MeshUploadData`
 - `Graphics::PrimitiveTopology`
 - `Graphics::BlendMode`
 - `Graphics::RenderState`
@@ -63,8 +63,8 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Renderer remains independent from `Assets::AssetManager`; asset handles are resolved before draw commands reach the renderer.
 - Model importers should convert source data into engine-standard vertex formats before graphics resources are created.
 - Mesh creation still consumes interleaved vertex bytes plus the matching `Graphics::VertexLayout`.
-- Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::MeshSourceData`.
-- Imported OBJ meshes are now converted by the asset layer into `Assets::MeshSourceData`, then uploaded through `MeshRegistry`.
+- Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::MeshImportData`.
+- Imported OBJ meshes are now converted by the asset layer into `Assets::MeshImportData`, then uploaded through `MeshRegistry`.
 - Imported OBJ geometry has been validated with public OBJ model files.
 - The graphics backend remains unaware of tinyobjloader, OBJ files, and model importer details.
 

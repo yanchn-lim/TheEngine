@@ -1,11 +1,11 @@
 #include "debug/debug.hpp"
 #include "core/file_system.hpp"
 #include "mesh_registry.hpp"
-#include "graphics/mesh_data.hpp"
+#include "graphics/mesh_upload_data.hpp"
 
 namespace Assets
 {
-	MeshHandle MeshRegistry::Create(const std::string& name, const MeshSourceData& data)
+	MeshHandle MeshRegistry::Create(const std::string& name, const MeshImportData& data)
 	{
 		// Mesh names act as simple deduplication keys inside the registry.
 		if (data.vertices.empty() || data.indices.empty())
@@ -25,16 +25,16 @@ namespace Assets
 		const uint32_t vertexCount = static_cast<uint32_t>(data.vertices.size());
 		const uint32_t indexCount = static_cast<uint32_t>(data.indices.size());
 
-		Graphics::MeshData meshData;
+		Graphics::MeshUploadData meshUploadData;
 		// Bridge asset-side mesh source data into the graphics backend upload format.
-		meshData.vertices = reinterpret_cast<const void*>(data.vertices.data());
-		meshData.vertexCount = vertexCount;
-		meshData.indices = data.indices.data();
-		meshData.indexCount = indexCount;
-		meshData.topology = data.topology;
-		meshData.layout = layout;
+		meshUploadData.vertices = reinterpret_cast<const void*>(data.vertices.data());
+		meshUploadData.vertexCount = vertexCount;
+		meshUploadData.indices = data.indices.data();
+		meshUploadData.indexCount = indexCount;
+		meshUploadData.topology = data.topology;
+		meshUploadData.layout = layout;
 
-		if (!mesh.Create(meshData))
+		if (!mesh.Create(meshUploadData))
 		{
 			Debug::LogError("MeshRegistry::Create : Mesh creation failed");
 			return MeshHandle();

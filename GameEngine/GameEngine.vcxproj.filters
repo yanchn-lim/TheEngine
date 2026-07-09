@@ -168,16 +168,16 @@
     <ClCompile Include="src\assets\mesh_registry.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\assets\mesh_source_data.cpp">
+    <ClCompile Include="src\assets\mesh_import_data.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\primitives\primitive_mesh2d.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\assets\model_loader.cpp">
+    <ClCompile Include="src\assets\model_importer_registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\assets\obj_model_importer.cpp">
+    <ClCompile Include="src\assets\obj_importer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\model_registry.cpp">
@@ -281,7 +281,7 @@
     <ClInclude Include="src\graphics\index_buffer.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\mesh_data.hpp">
+    <ClInclude Include="src\graphics\mesh_upload_data.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\render_state.hpp">
@@ -314,22 +314,22 @@
     <ClInclude Include="src\assets\mesh_registry.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
-    <ClInclude Include="src\assets\mesh_source_data.hpp">
+    <ClInclude Include="src\assets\mesh_import_data.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\primitives\primitive_mesh2d.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
-    <ClInclude Include="src\assets\model_loader.hpp">
+    <ClInclude Include="src\assets\model_importer_registry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\assets\obj_model_importer.hpp">
+    <ClInclude Include="src\assets\obj_importer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\model_registry.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
-    <ClInclude Include="src\assets\model.hpp">
+    <ClInclude Include="src\assets\model_asset.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
   </ItemGroup>

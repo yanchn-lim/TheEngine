@@ -1,24 +1,26 @@
 #pragma once
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 #include "asset_handle.hpp"
-#include <unordered_map>
 
 namespace Assets
 {
-	struct Model;
+	struct ModelAsset;
 
 	struct ModelRegistry
 	{
 	public:
 		ModelHandle Create(const std::string& name, std::vector<MeshHandle> handles);
-		const Model* Get(ModelHandle handle) const;
-		const Model* Get(const std::string& handle) const;
+		const ModelAsset* Get(ModelHandle handle) const;
+		const ModelAsset* Get(const std::string& handle) const;
 		void Clear();
 
 	private:
 		AssetId _nextId = 1;
 
 		std::unordered_map<std::string, ModelHandle> _nameToHandle;
-		std::unordered_map<AssetId, Model> _models;
+		std::unordered_map<AssetId, ModelAsset> _models;
 	};
 }

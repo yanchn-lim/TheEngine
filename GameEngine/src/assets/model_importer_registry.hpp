@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "mesh_source_data.hpp"
+#include "mesh_import_data.hpp"
 
 namespace Assets
 {
@@ -12,15 +12,15 @@ namespace Assets
     {
     public:
         virtual ~IModelImporter() = default;
-        virtual bool CanLoad(const std::string& path) const = 0;
-        virtual bool Load(const std::string& path, MeshSourceCollection& outModel) = 0;
+        virtual bool CanImport(const std::string& path) const = 0;
+        virtual bool Import(const std::string& path, ModelImportData& outModel) = 0;
     };
 
-    class ModelLoader
+    class ModelImporterRegistry
     {
     public:
         void RegisterImporter(std::unique_ptr<IModelImporter> importer);
-        bool Load(const std::string& path, MeshSourceCollection& outModel) const;
+        bool Import(const std::string& path, ModelImportData& outModel) const;
     private:
         std::vector<std::unique_ptr<IModelImporter>> _importers;
     };

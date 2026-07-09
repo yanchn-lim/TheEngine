@@ -5,7 +5,7 @@
 
 namespace Graphics
 {
-	struct MeshData
+	struct MeshUploadData
 	{
 		const void* vertices = nullptr;
 		uint32_t vertexCount = 0;

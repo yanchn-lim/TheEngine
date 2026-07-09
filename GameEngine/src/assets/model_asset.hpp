@@ -1,10 +1,12 @@
 #pragma once
 
 #include "asset_handle.hpp"
+
 #include <vector>
+
 namespace Assets
 {
-	struct Model
+	struct ModelAsset
 	{
 		std::vector<MeshHandle> meshes;
 	};

@@ -1,8 +1,8 @@
-#include "model_loader.hpp"
+#include "model_importer_registry.hpp"
 
 namespace Assets
 {
-	void ModelLoader::RegisterImporter(std::unique_ptr<IModelImporter> importer)
+	void ModelImporterRegistry::RegisterImporter(std::unique_ptr<IModelImporter> importer)
 	{
 		// Importers are tried in registration order when loading model files.
 		if (!importer)
@@ -11,13 +11,13 @@ namespace Assets
 		_importers.push_back(std::move(importer));
 	}
 
-	bool ModelLoader::Load(const std::string& path, MeshSourceCollection& outModel) const
+	bool ModelImporterRegistry::Import(const std::string& path, ModelImportData& outModel) const
 	{
 		// Find the first importer that claims support for this file.
 		for (const auto& importer : _importers)
 		{
-			if (importer->CanLoad(path))
-				return importer->Load(path, outModel);
+			if (importer->CanImport(path))
+				return importer->Import(path, outModel);
 		}
 
 		return false;

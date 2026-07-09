@@ -128,9 +128,9 @@ namespace Graphics
 		return true;
 	}
 
-	bool Mesh::Create(const MeshData& data)
+	bool Mesh::Create(const MeshUploadData& data)
 	{
-		// MeshData is the common upload path for procedural and imported mesh sources.
+		// MeshUploadData is the common upload path for procedural and imported mesh sources.
 		const bool created = data.indices && data.indexCount > 0
 			? Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount)
 			: Create(data.vertices, data.vertexCount, data.layout);

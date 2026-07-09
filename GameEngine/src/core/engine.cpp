@@ -244,7 +244,8 @@ bool Engine::Initialize()
     //    return false;
 
     testModel = assets.LoadModel("testModel", "assets/models/maxwell.obj");
-
+    if (!testModel)
+        return false;
 
     constexpr uint32_t lineQuadIndices[] =
     {
@@ -263,7 +264,7 @@ bool Engine::Initialize()
         -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f
     };
 
-    Graphics::MeshData lineQuad{};
+    Graphics::MeshUploadData lineQuad{};
     lineQuad.vertices = lineQuadVertices;
     lineQuad.vertexCount = 4;
     lineQuad.indices = lineQuadIndices;
@@ -298,18 +299,24 @@ bool Engine::Initialize()
      
     Debug::CLog("Successfully initialized test assets!\n");
 
+
     Debug::CLog("========== Initialization Success! ==========\n\n");
     return true;
 }
 
 void Engine::Update()
 {
+    //set time
+    time.totalTime = glfwGetTime();
+    time.deltaTime = 0.0;
+
     // Main loop owns per-frame polling, camera setup, rendering, UI, and swap.
     while (!glfwWindowShouldClose(window.handle) && running)
     {
         Profiler::Get().BeginFrame();
-        time.deltaTime = glfwGetTime() - time.totalTime;
-        time.totalTime = glfwGetTime();
+        double currentTime = glfwGetTime();
+        time.deltaTime = currentTime - time.totalTime;
+        time.totalTime = currentTime;
 
         {
             PROFILE_SCOPE("MainLoop");
@@ -383,11 +390,11 @@ void Engine::Update()
                 Graphics::DrawCmd modelShapeCmd;
                 modelShapeCmd.mesh = assets.Get(mesh);
                 modelShapeCmd.material = assets.Get("bugatti");
-                modelShapeCmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f,-0.75f,0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(0.002f)) * glm::rotate(glm::mat4(1.f), rot, glm::vec3(0.f, 1.f, 0.f));
+                modelShapeCmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f,-0.1f,0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(0.002f)) * glm::rotate(glm::mat4(1.f), rot, glm::vec3(0.f, 1.f, 0.f));
 				renderer.Submit(modelShapeCmd);
             }
             
-            rot += 2 * time.deltaTime;
+            rot += 2 * static_cast<glm::float32>(time.deltaTime);
 
             renderer.EndFrame();
 

@@ -16,7 +16,7 @@ Goal: own GPU-facing rendering code behind reusable graphics types.
 - [x] Vertex array wrapper
 - [x] Vertex layout abstraction
 - [x] Finish mesh support for indexed and non-indexed drawing
-- [x] Add `MeshData` and `Mesh::Create(const MeshData&)`
+- [x] Add `MeshUploadData` and `Mesh::Create(const MeshUploadData&)`
 - [x] Remove sprite-specific renderer/system path from backend focus
 - [x] Remove renderer-owned test resources
 - [x] Add renderer diagnostics for invalid draw commands

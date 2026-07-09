@@ -54,7 +54,7 @@ The material registry:
 The mesh registry:
 
 - Stores final `Graphics::Mesh` resources by asset id
-- Creates meshes from `Assets::MeshSourceData`
+- Creates meshes from `Assets::MeshImportData`
 - Uses the standard `Assets::MeshVertex` layout
 - Maps mesh names to `MeshHandle`
 - Returns resolved non-owning mesh pointers
@@ -62,9 +62,9 @@ The mesh registry:
 Current mesh/model path:
 
 - `Assets::MeshRegistry` owns final `Graphics::Mesh` resources.
-- `Assets::ModelLoader` chooses a format importer by file extension or capability.
+- `Assets::ModelImporterRegistry` chooses a format importer by file extension or capability.
 - Format importers convert third-party library output into engine-standard mesh layouts.
-- `ObjModelImporter` uses tinyobjloader for the first supported model format.
+- `ObjImporter` uses tinyobjloader for the first supported model format.
 - Future importers can use glTF, Assimp, or another library without changing graphics code.
 
 ## Current Ownership
@@ -105,7 +105,7 @@ The renderer still receives resolved `Graphics::DrawCmd` data and does not depen
 
 ## Model Loading Direction
 
-`ModelLoader` should be extensible and should not be tied directly to tinyobjloader.
+`ModelImporterRegistry` should be extensible and should not be tied directly to tinyobjloader.
 
 Target shape:
 
@@ -121,8 +121,8 @@ The current OBJ implementation is:
 
 ```text
 tinyobjloader
-    -> ObjModelImporter
-    -> MeshSourceCollection / MeshSourceData
+    -> ObjImporter
+    -> ModelImportData / MeshImportData
     -> MeshRegistry
 ```
 
@@ -132,7 +132,7 @@ The importer currently supports:
 - UVs
 - White default vertex color
 - Missing UVs as `{0, 0}`
-- One `MeshSourceData` per OBJ shape
+- One `MeshImportData` per OBJ shape
 - Vertex deduplication by OBJ position/uv/normal index triplet
 - Multi-mesh `AssetManager::LoadModel(name, path)` loading
 - Public OBJ model geometry import validation
@@ -143,7 +143,7 @@ The importer does not yet support:
 - Tangents
 - OBJ material/MTL import
 
-The importer interface should hide third-party types. No `tinyobj::` types should appear in `AssetManager`, `MeshRegistry`, `Graphics::Mesh`, `Graphics::MeshData`, scene code, or renderer code.
+The importer interface should hide third-party types. No `tinyobj::` types should appear in `AssetManager`, `MeshRegistry`, `Graphics::Mesh`, `Graphics::MeshUploadData`, scene code, or renderer code.
 
 Use standard engine vertex format contracts instead of arbitrary vertex streams.
 
@@ -167,7 +167,7 @@ OBJ import should convert source data into this format. Missing color becomes wh
 
 OBJ files have separate indices for position, UV, and normal. The importer converts those triplets into the engine's single packed `MeshVertex` format. Exact repeated triplets are deduplicated into shared indexed vertices. Vertices with the same position but different UVs or normals remain separate, preserving UV seams and hard edges.
 
-`AssetManager::LoadMesh(name, path)` remains a convenience path that creates one mesh from the first entry in the resulting `MeshSourceCollection`. `AssetManager::LoadModel(name, path)` preserves multi-shape files by creating one mesh handle per `MeshSourceData` entry using generated child names.
+`AssetManager::LoadMesh(name, path)` remains a convenience path that creates one mesh from the first entry in the resulting `ModelImportData`. `AssetManager::LoadModel(name, path)` preserves multi-shape files by creating one mesh handle per `MeshImportData` entry using generated child names.
 
 Successful OBJ import logs are condensed into a single verbose summary per file with mesh, vertex, and index counts. Import warnings and errors remain normal warning/error logs.
 
@@ -200,13 +200,13 @@ Assets::Primitive2D::Quad()
 Assets::Primitive2D::Circle()
 ```
 
-These functions return `Assets::MeshSourceData`. They do not create GPU resources directly.
+These functions return `Assets::MeshImportData`. They do not create GPU resources directly.
 
 Expected flow:
 
 ```text
 Assets::Primitive2D::Quad()
-    -> MeshSourceData
+    -> MeshImportData
     -> AssetManager::CreateMesh()
     -> MeshRegistry
     -> MeshHandle

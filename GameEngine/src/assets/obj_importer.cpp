@@ -1,4 +1,4 @@
-#include "obj_model_importer.hpp"
+#include "obj_importer.hpp"
 
 #include <filesystem>
 #include <algorithm>
@@ -39,7 +39,7 @@ namespace Assets
         };
     }
 
-	bool ObjModelImporter::CanLoad(const std::string& path) const
+	bool ObjImporter::CanImport(const std::string& path) const
 	{
 		// OBJ support is selected by file extension only for now.
 		std::string ext = std::filesystem::path(path).extension().string();
@@ -50,7 +50,7 @@ namespace Assets
 		return ext == ".obj";
 	}
 
-	bool ObjModelImporter::Load(const std::string& path, MeshSourceCollection& outModel)
+	bool ObjImporter::Import(const std::string& path, ModelImportData& outModel)
 	{
         // tinyobj stores shared attribute arrays plus per-face index triplets.
         tinyobj::attrib_t attrib;
@@ -83,7 +83,7 @@ namespace Assets
 
         for (const tinyobj::shape_t& shape : shapes)
         {
-            MeshSourceData mesh;
+            MeshImportData mesh;
             std::unordered_map<ObjVertexKey, uint32_t, ObjVertexKeyHasher> uniqueVertices;
 
             for (const tinyobj::index_t& index : shape.mesh.indices)
@@ -143,7 +143,7 @@ namespace Assets
 
         if (!outModel.meshes.empty())
         {
-            Debug::LogVerbose("ObjModelImporter::Load : Imported ", path,
+            Debug::LogVerbose("ObjImporter::Import : Imported ", path,
                 " meshes=", outModel.meshes.size(),
                 " vertices=", totalVertices,
                 " indices=", totalIndices);
