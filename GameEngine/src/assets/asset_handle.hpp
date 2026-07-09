@@ -67,4 +67,19 @@ namespace Assets
 			return IsValid();
 		}
 	};
+
+	struct ModelHandle
+	{
+		AssetId id = InvalidAssetId;
+
+		bool IsValid() const
+		{
+			return id != InvalidAssetId;
+		}
+
+		explicit operator bool() const
+		{
+			return IsValid();
+		}
+	};
 }

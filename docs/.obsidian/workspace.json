@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Roadmap.md",
-                "mode": "source",
+                "file": "Next Steps TODO.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Roadmap"
+              "title": "Next Steps TODO"
             }
           }
         ]
@@ -185,11 +185,11 @@
   },
   "active": "d839fbadc6dac9c7",
   "lastOpenFiles": [
+    "Home.md",
+    "Roadmap.md",
     "Architecture/System Boundaries.md",
     "Architecture/Asset Manager.md",
-    "Roadmap.md",
     "Canvases/Engine Systems.canvas",
-    "Home.md",
     "Architecture/Render Submission.md",
     "Architecture/Graphics Backend.md"
   ]

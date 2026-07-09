@@ -175,6 +175,7 @@ Assets::MeshHandle testQuadMesh;
 Assets::MeshHandle testObjMesh;
 Assets::MeshHandle testObjQuadMesh;
 std::vector<Assets::MeshHandle> testObjModelMeshes;
+Assets::ModelHandle testModel;
 
 int Engine::Run()
 {
@@ -225,9 +226,9 @@ bool Engine::Initialize()
    
 
     //testQuadMesh = assets.LoadModel("test_quad_mesh", "assets/models/bugatti.obj");
-    //testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
-    //if (!testQuadMesh)
-    //    return false;
+    testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
+    if (!testQuadMesh)
+        return false;
 
 
     //testObjMesh = assets.LoadMesh("test_obj_triangle", "assets/models/test_triangle.obj");
@@ -242,7 +243,7 @@ bool Engine::Initialize()
     //if (testObjModelMeshes.size() != 2)
     //    return false;
 
-    testObjModelMeshes = assets.LoadModel("test_obj_two_shapes", "assets/models/human.obj");
+    testModel = assets.LoadModel("testModel", "assets/models/maxwell.obj");
 
 
     constexpr uint32_t lineQuadIndices[] =
@@ -277,6 +278,7 @@ bool Engine::Initialize()
     Assets::TextureHandle steakTexture = assets.LoadTexture("assets/textures/steak.png");
     if (!steakTexture)
         return false;
+    Assets::TextureHandle maxwellTexture = assets.LoadTexture("assets/textures/maxwell.png");
 
     Graphics::RenderState state = { false, false, Graphics::BlendMode::ALPHA, false };
     Graphics::RenderState stateNoBlend = { false, false, Graphics::BlendMode::NONE, false };
@@ -288,8 +290,8 @@ bool Engine::Initialize()
     Assets::TextureHandle missingTexture = assets.LoadTexture("assets/textures/missing.png");
     Assets::MaterialHandle fallbackMat = assets.CreateMaterial("fallback_debug", missingShader, missingTexture, state);
 
-    
-    Assets::MaterialHandle btestMat = assets.CreateMaterial("bugatti", bshaderHandle, steakTexture, state);
+    Graphics::RenderState stateAdditive = { true, true, Graphics::BlendMode::NONE, true };
+    Assets::MaterialHandle btestMat = assets.CreateMaterial("bugatti", bshaderHandle, maxwellTexture, stateAdditive);
 
     //if (!fallbackMat)
         //return false;
@@ -306,6 +308,8 @@ void Engine::Update()
     while (!glfwWindowShouldClose(window.handle) && running)
     {
         Profiler::Get().BeginFrame();
+        time.deltaTime = glfwGetTime() - time.totalTime;
+        time.totalTime = glfwGetTime();
 
         {
             PROFILE_SCOPE("MainLoop");
@@ -324,11 +328,11 @@ void Engine::Update()
             PROFILE_SCOPE("RendererLoop");
             renderer.BeginFrame();
 
-     /*       Graphics::DrawCmd leftCmd;
+            Graphics::DrawCmd leftCmd;
             leftCmd.mesh = assets.Get(testQuadMesh);
-            leftCmd.material = assets.Get("steak");
-            leftCmd.transform = glm::scale(glm::mat4(1.f), glm::vec3(0.5f) );*/
-
+            leftCmd.material = assets.Get("bugatti");
+            leftCmd.transform = glm::scale(glm::mat4(1.f), glm::vec3(0.5f) );
+            
             //Graphics::DrawCmd rightCmd;
             //rightCmd.mesh = assets.Get(testQuadMesh);
             //rightCmd.material = assets.Get("steak_noblend");
@@ -374,16 +378,16 @@ void Engine::Update()
             //renderer.Submit(modelShape1Cmd);
             static glm::float32 rot = 0.f;
 
-            for (const auto& mesh : testObjModelMeshes)
+            for (const auto& mesh : assets.Get(testModel)->meshes)
             {
                 Graphics::DrawCmd modelShapeCmd;
                 modelShapeCmd.mesh = assets.Get(mesh);
                 modelShapeCmd.material = assets.Get("bugatti");
-                modelShapeCmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f,-0.75f,0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(0.075f)) * glm::rotate(glm::mat4(1.f), rot, glm::vec3(0.f, 1.f, 0.f));
+                modelShapeCmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f,-0.75f,0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(0.002f)) * glm::rotate(glm::mat4(1.f), rot, glm::vec3(0.f, 1.f, 0.f));
 				renderer.Submit(modelShapeCmd);
             }
             
-            rot += 0.005;
+            rot += 2 * time.deltaTime;
 
             renderer.EndFrame();
 

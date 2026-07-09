@@ -9,6 +9,9 @@
 #include "material_registry.hpp"
 #include "mesh_registry.hpp"
 #include "model_loader.hpp"
+#include "model.hpp"
+#include "model_registry.hpp"
+
 
 namespace Assets
 {
@@ -18,7 +21,7 @@ namespace Assets
 		TextureHandle LoadTexture(const std::string& path);
 		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath);
 		MeshHandle LoadMesh(const std::string& name, const std::string& path);
-		std::vector<MeshHandle> LoadModel(const std::string& name, const std::string& path);
+		ModelHandle LoadModel(const std::string& name, const std::string& path);
 
 		MaterialHandle CreateMaterial(
 			const std::string& name,
@@ -34,6 +37,7 @@ namespace Assets
 		const Graphics::Material* Get(MaterialHandle handle) const;
 		const Graphics::Material* Get(const std::string& name) const;
 		const Graphics::Mesh* Get(MeshHandle handle) const;
+		const Model* Get(ModelHandle handle) const;
 
 		void Clear();
 
@@ -46,6 +50,7 @@ namespace Assets
 		TextureRegistry _textures;
 		MaterialRegistry _materials;
 		MeshRegistry _meshes;
+		ModelRegistry _models;
 		ModelLoader _modelLoader;
 
 		mutable Graphics::Material _fallbackMaterial;

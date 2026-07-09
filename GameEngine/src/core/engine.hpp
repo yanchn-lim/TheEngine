@@ -3,6 +3,7 @@
 #include "debug/profiler_ui.hpp"
 #include "graphics/renderer.hpp"
 #include "assets/asset_manager.hpp"
+#include "time.hpp"
 
 struct GLFWwindow;
 
@@ -40,6 +41,7 @@ public:
 
 	int Run();
 
+	Time time;
 	Window window;
 	ImGuiLayer imgui;
 	ProfilerUI profilerUI;

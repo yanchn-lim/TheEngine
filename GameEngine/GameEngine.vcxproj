@@ -154,6 +154,7 @@
     <ClCompile Include="src\assets\mesh_registry.cpp" />
     <ClCompile Include="src\assets\mesh_source_data.cpp" />
     <ClCompile Include="src\assets\model_loader.cpp" />
+    <ClCompile Include="src\assets\model_registry.cpp" />
     <ClCompile Include="src\assets\obj_model_importer.cpp" />
     <ClCompile Include="src\assets\primitives\primitive_mesh2d.cpp" />
     <ClCompile Include="src\assets\shader_registry.cpp" />
@@ -196,7 +197,9 @@
     <ClInclude Include="src\assets\material_registry.hpp" />
     <ClInclude Include="src\assets\mesh_registry.hpp" />
     <ClInclude Include="src\assets\mesh_source_data.hpp" />
+    <ClInclude Include="src\assets\model.hpp" />
     <ClInclude Include="src\assets\model_loader.hpp" />
+    <ClInclude Include="src\assets\model_registry.hpp" />
     <ClInclude Include="src\assets\obj_model_importer.hpp" />
     <ClInclude Include="src\assets\primitives\primitive_mesh2d.hpp" />
     <ClInclude Include="src\assets\shader_registry.hpp" />

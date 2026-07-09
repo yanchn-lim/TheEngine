@@ -2,6 +2,6 @@
 
 struct Time
 {
-	float deltaTime;
-	float totalTime;
+	double deltaTime;
+	double totalTime;
 };

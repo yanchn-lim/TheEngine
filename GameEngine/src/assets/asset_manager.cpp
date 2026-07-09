@@ -35,19 +35,19 @@ namespace Assets
 		return _meshes.Create(name, collection.meshes[0]);
 	}
 
-	std::vector<MeshHandle> AssetManager::LoadModel(const std::string& name, const std::string& path)
+	ModelHandle AssetManager::LoadModel(const std::string& name, const std::string& path)
 	{
 		MeshSourceCollection collection;
 		if (!_modelLoader.Load(path, collection))
 		{
 			Debug::LogError("AssetManager::LoadModel : Failed to load mesh from ", path);
-			return std::vector<MeshHandle>();
+			return ModelHandle();
 		}
 
 		if (collection.meshes.empty())
 		{
 			Debug::LogError("AssetManager::LoadModel : No meshes found in ", path);
-			return std::vector<MeshHandle>();
+			return ModelHandle();
 		}
 
 		std::vector<MeshHandle> meshHandles{};
@@ -57,7 +57,7 @@ namespace Assets
 			meshHandles.push_back(_meshes.Create(meshName, collection.meshes[i]));
 		}
 
-		return meshHandles;
+		return _models.Create(name, std::move(meshHandles));
 	}
 
 	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
@@ -119,6 +119,12 @@ namespace Assets
 	{
 		return _meshes.Get(handle);
 	}
+
+	const Model* AssetManager::Get(ModelHandle handle) const
+	{
+		return _models.Get(handle);
+	}
+
 
 	const Graphics::Material* AssetManager::GetFallbackMaterial() const
 	{
