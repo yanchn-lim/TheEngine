@@ -17,7 +17,6 @@
 #include "graphics/texture2d.hpp"
 #include "graphics/drawcmd.hpp"
 #include "graphics/material.hpp"
-#include "assets/primitives/primitive_mesh2d.hpp"
 
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -169,13 +168,51 @@ void ImGuiLayer::Shutdown()
 
 // ========= ENGINE =========
 
-//test assets
-Graphics::Mesh testLineMesh;
-Assets::MeshHandle testQuadMesh;
-Assets::MeshHandle testObjMesh;
-Assets::MeshHandle testObjQuadMesh;
-std::vector<Assets::MeshHandle> testObjModelMeshes;
-Assets::ModelHandle testModel;
+bool ManualRenderTest::Initialize(Assets::AssetManager& assets)
+{
+    // Keep temporary visual checks contained while backend and asset APIs settle.
+    Assets::ShaderHandle shader = assets.LoadShader("assets/shaders/bugatti.vert", "assets/shaders/bugatti.frag");
+    if (!shader)
+        return false;
+
+    Assets::TextureHandle texture = assets.LoadTexture("assets/textures/maxwell.png");
+    if (!texture)
+        return false;
+
+    Graphics::RenderState state = { true, true, Graphics::BlendMode::NONE, true };
+    material = assets.CreateMaterial("manual_model_test", shader, texture, state);
+    if (!material)
+        return false;
+
+    model = assets.LoadModel("manual_model_test", "assets/models/maxwell.obj");
+    if (!model)
+        return false;
+
+    return true;
+}
+
+void ManualRenderTest::Submit(Graphics::Renderer& renderer, const Assets::AssetManager& assets, double deltaTime)
+{
+    const Assets::ModelAsset* modelAsset = assets.Get(model);
+    const Graphics::Material* modelMaterial = assets.Get(material);
+
+    if (!modelAsset || !modelMaterial)
+        return;
+
+    for (const Assets::MeshHandle mesh : modelAsset->meshes)
+    {
+        Graphics::DrawCmd cmd;
+        cmd.mesh = assets.Get(mesh);
+        cmd.material = modelMaterial;
+        cmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f, -0.1f, 0.f))
+            * glm::scale(glm::mat4(1.f), glm::vec3(0.002f))
+            * glm::rotate(glm::mat4(1.f), rotation, glm::vec3(0.f, 1.f, 0.f));
+
+        renderer.Submit(cmd);
+    }
+
+    rotation += 2.0f * static_cast<float>(deltaTime);
+}
 
 int Engine::Run()
 {
@@ -191,7 +228,7 @@ int Engine::Run()
 
 bool Engine::Initialize()
 {
-    // Initialization order matters: window/context, UI, renderer, then test assets.
+    // Initialization order matters: window/context, UI, renderer, then manual test assets.
     Debug::CLog("========== Initializing engine... ==========\n");
     if (!window.Init())
     {
@@ -214,90 +251,11 @@ bool Engine::Initialize()
     running = true;
 
 
-    //init test assets
-    Debug::CLog("Initializing test assets...\n");
-
-
-    Assets::ShaderHandle shaderHandle = assets.LoadShader("assets/shaders/sprite.vert", "assets/shaders/sprite.frag");
-    Assets::ShaderHandle bshaderHandle = assets.LoadShader("assets/shaders/bugatti.vert", "assets/shaders/bugatti.frag");
-
-    if (!shaderHandle)
+    Debug::CLog("Initializing manual render test...\n");
+    if (!manualRenderTest.Initialize(assets))
         return false;
-   
-
-    //testQuadMesh = assets.LoadModel("test_quad_mesh", "assets/models/bugatti.obj");
-    testQuadMesh = assets.CreateMesh("test_quad_mesh", Assets::Primitive2D::Quad());
-    if (!testQuadMesh)
-        return false;
-
-
-    //testObjMesh = assets.LoadMesh("test_obj_triangle", "assets/models/test_triangle.obj");
-    //if (!testObjMesh)
-    //    return false;
-
-    //testObjQuadMesh = assets.LoadMesh("test_obj_quad", "assets/models/test_quad.obj");
-    //if (!testObjQuadMesh)
-    //    return false;
-
-    //testObjModelMeshes = assets.LoadModel("test_obj_two_shapes", "assets/models/test_two_shapes.obj");
-    //if (testObjModelMeshes.size() != 2)
-    //    return false;
-
-    testModel = assets.LoadModel("testModel", "assets/models/maxwell.obj");
-    if (!testModel)
-        return false;
-
-    constexpr uint32_t lineQuadIndices[] =
-    {
-        0, 1,
-        1, 2,
-        2, 3,
-        3, 0
-    };
-
-    constexpr float lineQuadVertices[] =
-    {
-        // position          // color           // uv
-        -0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f,
-         0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f,
-        -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 1.0f, 0.5f, 0.5f
-    };
-
-    Graphics::MeshUploadData lineQuad{};
-    lineQuad.vertices = lineQuadVertices;
-    lineQuad.vertexCount = 4;
-    lineQuad.indices = lineQuadIndices;
-    lineQuad.indexCount = 8;
-    lineQuad.layout = Assets::CreateMeshVertexLayout();
-    lineQuad.topology = Graphics::PrimitiveTopology::LINES;
-
-    //if (!testLineMesh.Create(lineQuad))
-        //return false;
-
-    //load texture
-    Assets::TextureHandle steakTexture = assets.LoadTexture("assets/textures/steak.png");
-    if (!steakTexture)
-        return false;
-    Assets::TextureHandle maxwellTexture = assets.LoadTexture("assets/textures/maxwell.png");
-
-    Graphics::RenderState state = { false, false, Graphics::BlendMode::ALPHA, false };
-    Graphics::RenderState stateNoBlend = { false, false, Graphics::BlendMode::NONE, false };
-
-    Assets::MaterialHandle testMat = assets.CreateMaterial("steak", shaderHandle, steakTexture, state);
-    Assets::MaterialHandle testMatNoBlend = assets.CreateMaterial("steak_noblend", shaderHandle, steakTexture, stateNoBlend);
-
-    Assets::ShaderHandle missingShader = assets.LoadShader("assets/shaders/missing.vert", "assets/shaders/missing.frag");
-    Assets::TextureHandle missingTexture = assets.LoadTexture("assets/textures/missing.png");
-    Assets::MaterialHandle fallbackMat = assets.CreateMaterial("fallback_debug", missingShader, missingTexture, state);
-
-    Graphics::RenderState stateAdditive = { true, true, Graphics::BlendMode::NONE, true };
-    Assets::MaterialHandle btestMat = assets.CreateMaterial("bugatti", bshaderHandle, maxwellTexture, stateAdditive);
-
-    //if (!fallbackMat)
-        //return false;
      
-    Debug::CLog("Successfully initialized test assets!\n");
+    Debug::CLog("Successfully initialized manual render test!\n");
 
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
@@ -335,66 +293,7 @@ void Engine::Update()
             PROFILE_SCOPE("RendererLoop");
             renderer.BeginFrame();
 
-            Graphics::DrawCmd leftCmd;
-            leftCmd.mesh = assets.Get(testQuadMesh);
-            leftCmd.material = assets.Get("bugatti");
-            leftCmd.transform = glm::scale(glm::mat4(1.f), glm::vec3(0.5f) );
-            
-            //Graphics::DrawCmd rightCmd;
-            //rightCmd.mesh = assets.Get(testQuadMesh);
-            //rightCmd.material = assets.Get("steak_noblend");
-            //rightCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.0f, 0.0f));
-
-            //Graphics::DrawCmd lineCmd;
-            //lineCmd.mesh = &testLineMesh;
-            //lineCmd.material = assets.Get("steak");
-            //lineCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.35f, 0.0f));
-
-            //Graphics::DrawCmd fallbackCmd;
-            //fallbackCmd.mesh = assets.Get(testQuadMesh);
-            //fallbackCmd.material = assets.Get("fallback_debug");
-            //fallbackCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.45f, 0.0f));
-
-            //Graphics::DrawCmd objCmd;
-            //objCmd.mesh = assets.Get(testObjMesh);
-            //objCmd.material = assets.Get("steak");
-            //objCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, 0.65f, 0.0f));
-
-            //Graphics::DrawCmd objQuadCmd;
-            //objQuadCmd.mesh = assets.Get(testObjQuadMesh);
-            //objQuadCmd.material = assets.Get("steak");
-            //objQuadCmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, 0.65f, 0.0f));
-
-            //Graphics::DrawCmd modelShape0Cmd;
-            //modelShape0Cmd.mesh = assets.Get(testObjModelMeshes[0]);
-            //modelShape0Cmd.material = assets.Get("steak");
-            //modelShape0Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.35f, -0.75f, 0.0f));
-
-            //Graphics::DrawCmd modelShape1Cmd;
-            //modelShape1Cmd.mesh = assets.Get(testObjModelMeshes[1]);
-            //modelShape1Cmd.material = assets.Get("steak");
-            //modelShape1Cmd.transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.35f, -0.75f, 0.0f));
-
-            //renderer.Submit(leftCmd);
-            //renderer.Submit(rightCmd);
-            //renderer.Submit(lineCmd);
-            //renderer.Submit(fallbackCmd);
-            //renderer.Submit(objCmd);
-            //renderer.Submit(objQuadCmd);
-            //renderer.Submit(modelShape0Cmd);
-            //renderer.Submit(modelShape1Cmd);
-            static glm::float32 rot = 0.f;
-
-            for (const auto& mesh : assets.Get(testModel)->meshes)
-            {
-                Graphics::DrawCmd modelShapeCmd;
-                modelShapeCmd.mesh = assets.Get(mesh);
-                modelShapeCmd.material = assets.Get("bugatti");
-                modelShapeCmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f,-0.1f,0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(0.002f)) * glm::rotate(glm::mat4(1.f), rot, glm::vec3(0.f, 1.f, 0.f));
-				renderer.Submit(modelShapeCmd);
-            }
-            
-            rot += 2 * static_cast<glm::float32>(time.deltaTime);
+            manualRenderTest.Submit(renderer, assets, time.deltaTime);
 
             renderer.EndFrame();
 
@@ -420,12 +319,9 @@ void Engine::Shutdown()
     Debug::CLog("========== Shutting down engine... ==========\n");
 
     renderer.Shutdown();
+    assets.Clear();
     imgui.Shutdown();
     window.Shutdown();
-
-    testLineMesh.Destroy();
-
-    assets.Clear();
 
     Debug::CLog("Engine shutdown complete\n");
 }

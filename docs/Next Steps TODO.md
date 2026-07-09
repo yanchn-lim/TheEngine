@@ -84,7 +84,7 @@ Keep `LoadMesh(name, path)` as a convenience function that loads only the first 
 
 ## 4. Move Manual OBJ Tests Out of Permanent Startup Flow
 
-Status: next.
+Status: done.
 
 Goal: keep `engine.cpp` from becoming a pile of one-off tests.
 

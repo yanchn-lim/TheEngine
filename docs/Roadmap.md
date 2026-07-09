@@ -71,7 +71,7 @@ Goal: connect asset handles to renderable GPU resources cleanly.
 - [x] Let shader resources come from asset/resource layer
 - [x] Let primitive quad mesh resources come from asset/resource layer
 - [x] Let imported mesh resources come from asset/resource layer
-- [ ] Keep manual imported mesh tests from becoming permanent engine startup code
+- [x] Keep manual imported mesh tests from becoming permanent engine startup code
 - [ ] Keep Renderer independent from Scene/GameObject/ECS
 
 ## Phase 4 - Scene and Object Layer

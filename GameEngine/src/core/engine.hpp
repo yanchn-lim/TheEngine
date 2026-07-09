@@ -27,6 +27,16 @@ struct ImGuiLayer
 	void Shutdown();
 };
 
+struct ManualRenderTest
+{
+	Assets::ModelHandle model;
+	Assets::MaterialHandle material;
+	float rotation = 0.0f;
+
+	bool Initialize(Assets::AssetManager& assets);
+	void Submit(Graphics::Renderer& renderer, const Assets::AssetManager& assets, double deltaTime);
+};
+
 class Engine
 {
 public:
@@ -46,6 +56,7 @@ public:
 	ImGuiLayer imgui;
 	ProfilerUI profilerUI;
 	Graphics::Renderer renderer;
+	ManualRenderTest manualRenderTest;
 
 	//asset managers
 	Assets::AssetManager assets;
