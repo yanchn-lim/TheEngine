@@ -132,15 +132,16 @@ The importer currently supports:
 - UVs
 - White default vertex color
 - Missing UVs as `{0, 0}`
-- One combined `MeshSourceData` from all OBJ shapes
+- One `MeshSourceData` per OBJ shape
 - Vertex deduplication by OBJ position/uv/normal index triplet
+- Multi-mesh `AssetManager::LoadModel(name, path)` loading
+- Public OBJ model geometry import validation
 
 The importer does not yet support:
 
 - Normals in the runtime vertex format
 - Tangents
 - OBJ material/MTL import
-- Returning multiple mesh handles for multi-shape model files
 
 The importer interface should hide third-party types. No `tinyobj::` types should appear in `AssetManager`, `MeshRegistry`, `Graphics::Mesh`, `Graphics::MeshData`, scene code, or renderer code.
 
@@ -166,7 +167,9 @@ OBJ import should convert source data into this format. Missing color becomes wh
 
 OBJ files have separate indices for position, UV, and normal. The importer converts those triplets into the engine's single packed `MeshVertex` format. Exact repeated triplets are deduplicated into shared indexed vertices. Vertices with the same position but different UVs or normals remain separate, preserving UV seams and hard edges.
 
-`AssetManager::LoadMesh(name, path)` currently loads only the first mesh in the resulting `MeshSourceCollection`. This is sufficient for single-mesh smoke tests, but a future `LoadModel(path)` path should preserve multi-shape files by returning multiple mesh handles or a model asset handle.
+`AssetManager::LoadMesh(name, path)` remains a convenience path that creates one mesh from the first entry in the resulting `MeshSourceCollection`. `AssetManager::LoadModel(name, path)` preserves multi-shape files by creating one mesh handle per `MeshSourceData` entry using generated child names.
+
+Successful OBJ import logs are condensed into a single verbose summary per file with mesh, vertex, and index counts. Import warnings and errors remain normal warning/error logs.
 
 Future standard formats can be added as needed:
 

@@ -49,7 +49,8 @@ Goal: load, cache, and retrieve assets without coupling to Scene, GameObject, or
 - [x] Add OBJ importer using tinyobjloader
 - [x] Add OBJ vertex deduplication for shared position/uv/normal index triplets
 - [x] Keep third-party model loader types out of graphics and registries
-- [ ] Add multi-mesh `LoadModel()` path for files with multiple shapes/meshes
+- [x] Add multi-mesh `LoadModel()` path for files with multiple shapes/meshes
+- [x] Validate OBJ importer with public OBJ model files
 - [ ] Add model/material import support for OBJ/MTL
 - [x] Add path-to-handle caching
 - [x] Add handle-to-resource lookup

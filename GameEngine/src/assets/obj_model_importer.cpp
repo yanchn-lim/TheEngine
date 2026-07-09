@@ -78,6 +78,9 @@ namespace Assets
             return false;
 
 
+        size_t totalVertices = 0;
+        size_t totalIndices = 0;
+
         for (const tinyobj::shape_t& shape : shapes)
         {
             MeshSourceData mesh;
@@ -107,7 +110,7 @@ namespace Assets
                     };
                 }
 
-                //create a key to check if vertex is repeated
+                // Use the full OBJ index triplet so UV seams and hard normals stay split.
                 ObjVertexKey key
                 {
                     index.vertex_index,
@@ -115,7 +118,7 @@ namespace Assets
                     index.normal_index
                 };
 
-                //if vertex repeated don't push it
+                // Reuse an engine vertex only when this exact triplet was already converted.
                 auto it = uniqueVertices.find(key);
                 if (it != uniqueVertices.end())
                 {
@@ -130,11 +133,20 @@ namespace Assets
                 mesh.indices.push_back(newIndex);
             }
 
-            Debug::Log("ObjModelImporter::Load : Imported ", path,
-                " vertices=", mesh.vertices.size(),
-                " indices=", mesh.indices.size());
             if (!mesh.vertices.empty() && !mesh.indices.empty())
+            {
+                totalVertices += mesh.vertices.size();
+                totalIndices += mesh.indices.size();
                 outModel.meshes.push_back(std::move(mesh));
+            }
+        }
+
+        if (!outModel.meshes.empty())
+        {
+            Debug::LogVerbose("ObjModelImporter::Load : Imported ", path,
+                " meshes=", outModel.meshes.size(),
+                " vertices=", totalVertices,
+                " indices=", totalIndices);
         }
 
         return !outModel.meshes.empty();

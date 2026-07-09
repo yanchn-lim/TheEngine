@@ -65,6 +65,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Mesh creation still consumes interleaved vertex bytes plus the matching `Graphics::VertexLayout`.
 - Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::MeshSourceData`.
 - Imported OBJ meshes are now converted by the asset layer into `Assets::MeshSourceData`, then uploaded through `MeshRegistry`.
+- Imported OBJ geometry has been validated with public OBJ model files.
 - The graphics backend remains unaware of tinyobjloader, OBJ files, and model importer details.
 
 ## Primitive Topology Direction

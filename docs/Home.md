@@ -5,6 +5,7 @@ This vault tracks engine architecture, implementation order, and system boundari
 ## Start Here
 
 - [[Roadmap]]
+- [[Next Steps TODO]]
 - [[Architecture/System Boundaries]]
 - [[Architecture/Graphics Backend]]
 - [[Architecture/Asset Manager]]
@@ -24,4 +25,4 @@ The immediate implementation goal is:
 
 ## Current Focus
 
-Graphics backend work is active. The current checkpoint is finishing mesh support for both indexed and non-indexed drawing, then verifying the indexed path with a small manual render test.
+Asset manager work is active. The current checkpoint is turning loaded multi-mesh model results into a proper runtime model asset with `ModelHandle` and `ModelRegistry`, then cleaning manual OBJ tests out of permanent startup flow.
