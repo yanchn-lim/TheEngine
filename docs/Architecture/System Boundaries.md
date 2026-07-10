@@ -55,3 +55,9 @@ Asset manager should not depend on:
 - GameObject
 - Render submission behavior
 - Gameplay logic
+
+## Current Temporary Test Boundary
+
+`ManualRenderTest` currently lives at the app/engine level. It is allowed to depend on both `Assets::AssetManager` and `Graphics::Renderer` because it is a temporary manual verification harness, not a reusable backend service.
+
+It should not grow into the final render submission architecture. Future scene or ECS rendering should replace it with a dedicated submission layer that resolves asset handles before commands reach `Graphics::Renderer`.

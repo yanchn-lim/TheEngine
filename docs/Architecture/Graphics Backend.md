@@ -66,7 +66,9 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 - Primitive mesh generation now lives under `Assets::Primitive2D` and returns `Assets::MeshImportData`.
 - Imported OBJ meshes are now converted by the asset layer into `Assets::MeshImportData`, then uploaded through `MeshRegistry`.
 - Imported OBJ geometry has been validated with public OBJ model files.
+- Manual imported model rendering now goes through `ManualRenderTest`, which resolves model/material/mesh handles before submitting `Graphics::DrawCmd`.
 - The graphics backend remains unaware of tinyobjloader, OBJ files, and model importer details.
+- The renderer remains unaware of `Assets::AssetManager`; it only receives resolved draw command data.
 
 ## Primitive Topology Direction
 

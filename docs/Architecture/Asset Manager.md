@@ -75,9 +75,12 @@ Current mesh/model path:
 - `ShaderRegistry` owns `Graphics::Shader` resources.
 - `MaterialRegistry` owns `Graphics::Material` resources.
 - `MeshRegistry` owns `Graphics::Mesh` resources.
+- `ModelRegistry` owns `ModelAsset` resources.
 - `Graphics::Material` currently stores resolved non-owning pointers to shader and texture resources.
 
 Because materials point at shader and texture resources, `AssetManager` should clear materials before clearing the registries they reference.
+
+Because models store mesh handles, `AssetManager` should clear models before clearing meshes.
 
 ## Responsibilities
 
@@ -89,9 +92,26 @@ Because materials point at shader and texture resources, `AssetManager` should c
 
 ## Current Integration
 
-The engine test now loads shader and texture resources through `Assets::AssetManager`, creates named materials from those handles and a `Graphics::RenderState`, and creates a reusable quad mesh through `Assets::Primitive2D::Quad()`.
+The current manual render test loads shader, texture, material, and model resources through `Assets::AssetManager`.
 
-Draw commands ask the asset manager for resolved material pointers by name, such as `assets.Get("steak")` and `assets.Get("steak_noblend")`, and resolve mesh handles through `assets.Get(meshHandle)`.
+Current manual flow:
+
+```text
+ManualRenderTest::Initialize()
+    -> LoadShader()
+    -> LoadTexture()
+    -> CreateMaterial()
+    -> LoadModel()
+
+ManualRenderTest::Submit()
+    -> Get(ModelHandle)
+    -> Get(MaterialHandle)
+    -> Get(MeshHandle)
+    -> Graphics::DrawCmd
+    -> Graphics::Renderer
+```
+
+This keeps asset lookup outside `Graphics::Renderer` while preserving a simple visual smoke test for imported models.
 
 Fallback behavior is currently:
 
@@ -124,6 +144,7 @@ tinyobjloader
     -> ObjImporter
     -> ModelImportData / MeshImportData
     -> MeshRegistry
+    -> ModelRegistry
 ```
 
 The importer currently supports:

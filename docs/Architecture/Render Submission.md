@@ -7,12 +7,13 @@ Convert world data into renderer-agnostic draw commands.
 ## Current Flow
 
 ```text
-Future Scene / ECS / E-CS
-Render submission layer
-Graphics::DrawCmd
-Graphics::Material
-Graphics::Renderer
-OpenGL
+ManualRenderTest / future Scene / ECS / E-CS
+    -> render submission layer
+    -> asset handle resolution
+    -> Graphics::DrawCmd
+    -> Graphics::Material
+    -> Graphics::Renderer
+    -> OpenGL
 ```
 
 ## Why This Layer Exists
@@ -32,4 +33,16 @@ The submission layer can handle:
 
 The temporary `SpriteRenderSystem` bridge has been removed from the current backend direction.
 
-Render submission should stay as a future layer above graphics and assets. For now, the focus is finishing the reusable graphics backend first, then the asset manager, then connecting both through clean draw command/resource resolution.
+Manual imported mesh rendering has been moved out of the main engine loop into `ManualRenderTest`. This keeps visual smoke testing available without making `engine.cpp` the permanent render submission layer.
+
+`ManualRenderTest` is not final architecture. It is a temporary app-level harness that loads a model asset, resolves the model's mesh handles and material, and submits `Graphics::DrawCmd` objects to the renderer.
+
+The next architectural step is a render resource access boundary. That boundary should let future Scene, GameObject, ECS, or E-CS code submit renderable data without giving `Graphics::Renderer` direct knowledge of `Assets::AssetManager`.
+
+Current rule:
+
+```text
+Renderer receives resolved DrawCmd data.
+Renderer does not resolve asset handles.
+Renderer does not know about Scene, GameObject, ECS, or AssetManager.
+```
