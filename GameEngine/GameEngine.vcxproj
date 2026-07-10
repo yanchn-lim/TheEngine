@@ -175,6 +175,7 @@
     <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\renderer.cpp" />
+    <ClCompile Include="src\rendering\render_resource_resolver.cpp" />
     <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\texture2d.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="src\graphics\mesh.hpp" />
     <ClInclude Include="src\graphics\renderer.hpp" />
     <ClInclude Include="src\core\ring_buffer.hpp" />
+    <ClInclude Include="src\rendering\render_resource_resolver.hpp" />
     <ClInclude Include="src\scene\gameobject.hpp" />
     <ClInclude Include="src\scene\scene.hpp" />
     <ClInclude Include="src\graphics\shader.hpp" />
