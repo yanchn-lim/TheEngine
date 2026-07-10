@@ -17,6 +17,7 @@
 #include "graphics/texture2d.hpp"
 #include "graphics/drawcmd.hpp"
 #include "graphics/material.hpp"
+#include "rendering/render_resource_resolver.hpp"
 
 
 static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -191,24 +192,27 @@ bool ManualRenderTest::Initialize(Assets::AssetManager& assets)
     return true;
 }
 
-void ManualRenderTest::Submit(Graphics::Renderer& renderer, const Assets::AssetManager& assets, double deltaTime)
+void ManualRenderTest::Submit(Graphics::OpenGLRenderer& renderer, const Assets::AssetManager& assets, double deltaTime)
 {
-    const Assets::ModelAsset* modelAsset = assets.Get(model);
-    const Graphics::Material* modelMaterial = assets.Get(material);
-
-    if (!modelAsset || !modelMaterial)
+    Rendering::RenderResourceResolver resources(assets);
+    const Assets::ModelAsset* modelAsset = resources.Resolve(model);
+    if (!modelAsset)
         return;
+
+    const glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f, -0.1f, 0.f))
+        * glm::scale(glm::mat4(1.f), glm::vec3(0.002f))
+        * glm::rotate(glm::mat4(1.f), rotation, glm::vec3(0.f, 1.f, 0.f));
 
     for (const Assets::MeshHandle mesh : modelAsset->meshes)
     {
-        Graphics::DrawCmd cmd;
-        cmd.mesh = assets.Get(mesh);
-        cmd.material = modelMaterial;
-        cmd.transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f, -0.1f, 0.f))
-            * glm::scale(glm::mat4(1.f), glm::vec3(0.002f))
-            * glm::rotate(glm::mat4(1.f), rotation, glm::vec3(0.f, 1.f, 0.f));
+        Rendering::RenderItem item;
+        item.mesh = mesh;
+        item.material = material;
+        item.transform = transform;
 
-        renderer.Submit(cmd);
+        Graphics::DrawCmd cmd;
+        if (resources.TryResolve(item, cmd))
+            renderer.Submit(cmd);
     }
 
     rotation += 2.0f * static_cast<float>(deltaTime);

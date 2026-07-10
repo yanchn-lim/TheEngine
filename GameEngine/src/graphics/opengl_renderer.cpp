@@ -3,7 +3,7 @@
 #include "debug/debug.hpp"
 #include "debug/profiler.hpp"
 #include "mesh.hpp"
-#include "renderer.hpp"
+#include "opengl_renderer.hpp"
 #include "shader.hpp"
 #include "texture2d.hpp"
 #include "material.hpp"
@@ -11,7 +11,7 @@
 namespace Graphics
 {
 	
-	bool Renderer::Init()
+	bool OpenGLRenderer::Init()
 	{
 		PROFILE_FUNCTION();
 		
@@ -29,14 +29,14 @@ namespace Graphics
 		return true;
 	}
 
-	void Renderer::Submit(const DrawCmd& cmd)
+	void OpenGLRenderer::Submit(const DrawCmd& cmd)
 	{
 		// Draw commands are copied into the frame buffer and resolved at EndFrame.
 		PROFILE_FUNCTION();
 		_cmds.emplace_back(cmd);
 	}
 
-	void Renderer::BeginFrame()
+	void OpenGLRenderer::BeginFrame()
 	{
 		PROFILE_FUNCTION();
 
@@ -47,7 +47,7 @@ namespace Graphics
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void Renderer::EndFrame()
+	void OpenGLRenderer::EndFrame()
 	{
 		PROFILE_FUNCTION();
 
@@ -56,7 +56,7 @@ namespace Graphics
 		{
 			if (!cmd.material)
 			{
-				Debug::LogError("Renderer::EndFrame skipped draw command: material is null");
+				Debug::LogError("OpenGLRenderer::EndFrame skipped draw command: material is null");
 				continue;
 			}
 
@@ -65,13 +65,13 @@ namespace Graphics
 
 			if (!shader)
 			{
-				Debug::LogError("Renderer::EndFrame skipped draw command: shader is null");
+				Debug::LogError("OpenGLRenderer::EndFrame skipped draw command: shader is null");
 				continue;
 			}
 
 			if (!cmd.mesh)
 			{
-				Debug::LogError("Renderer::EndFrame skipped draw command: mesh is null");
+				Debug::LogError("OpenGLRenderer::EndFrame skipped draw command: mesh is null");
 				continue;
 			}
 
@@ -137,12 +137,12 @@ namespace Graphics
 		}
 	}
 
-	void Renderer::Shutdown()
+	void OpenGLRenderer::Shutdown()
 	{
 		PROFILE_FUNCTION();
 	}
 
-	void Renderer::SetCamera(const Camera2D& camera)
+	void OpenGLRenderer::SetCamera(const Camera2D& camera)
 	{
 		// Camera is copied so callers can build it transiently each frame.
 		_camera = camera;

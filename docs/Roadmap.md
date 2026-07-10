@@ -1,8 +1,33 @@
 # Roadmap
 
-## Phase 1 - Graphics Backend
+## Current Focus - Vulkan Backend
+
+Vulkan backend implementation is the main engine focus until this track is complete. OpenGL remains the working reference backend while Vulkan is added alongside it.
+
+Detailed design: [[Architecture/Vulkan Backend]]
+
+- [ ] Establish backend-neutral `IRenderer` and GPU-resource factory contracts while keeping the OpenGL path working.
+- [ ] Move OpenGL implementation behind the backend seam without changing `DrawCmd` submission behavior.
+- [ ] Create Vulkan 1.3 instance, GLFW surface, validation layer, and debug messenger.
+- [ ] Select a physical device and create graphics/present queues with dynamic rendering and Synchronization 2 enabled.
+- [ ] Create and safely recreate the swapchain.
+- [ ] Render a clear-color frame through dynamic rendering and Synchronization 2.
+- [ ] Render a SPIR-V triangle.
+- [ ] Add staged vertex/index buffer uploads and indexed drawing.
+- [ ] Add shader modules, pipeline layouts, and graphics-pipeline creation.
+- [ ] Add camera uniform data and per-object transform push constants.
+- [ ] Add descriptor layouts, pools, and per-frame/material descriptor binding.
+- [ ] Add image upload, sampled textures, and texture descriptors.
+- [ ] Add depth image creation, depth testing, and depth-aware pipelines.
+- [ ] Render existing `MeshUploadData`, imported OBJ meshes, and basic materials through Vulkan.
+- [ ] Add Vulkan ImGui integration and swapchain-recreation support.
+- [ ] Verify both backends preserve the same asset-to-`DrawCmd` submission boundary.
+
+## Phase 1 - OpenGL Graphics Backend
 
 Goal: own GPU-facing rendering code behind reusable graphics types.
+
+Status: complete as the reference implementation. It remains supported while the Vulkan backend is built.
 
 - [x] Basic window and OpenGL initialization
 - [x] Shader class

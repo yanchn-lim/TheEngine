@@ -14,7 +14,8 @@ Scene or ECS
 Render Submission
 Asset Manager
 Graphics Backend
-Platform / OpenGL
+OpenGL or Vulkan Backend
+Platform / Windowing
 ```
 
 Lower-level services should not depend upward.
@@ -41,6 +42,12 @@ Renderer may depend on:
 - Buffers
 - DrawCmd
 - Graphics state
+
+Backend implementations may depend on:
+
+- Their API-specific GPU resource types
+- Platform presentation integration
+- Backend-specific synchronization and command-recording types
 
 Renderer should not depend on:
 

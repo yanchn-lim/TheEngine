@@ -7,6 +7,7 @@ This vault tracks engine architecture, implementation order, and system boundari
 - [[Roadmap]]
 - [[Architecture/System Boundaries]]
 - [[Architecture/Graphics Backend]]
+- [[Architecture/Vulkan Backend]]
 - [[Architecture/Asset Manager]]
 - [[Architecture/Render Submission]]
 - [[To Do/Render Resource Resolver|Render Resource Resolver To-Do]]
@@ -25,4 +26,4 @@ The immediate implementation goal is:
 
 ## Current Focus
 
-Graphics and asset integration work is active. The current checkpoint is defining a clean render resource access boundary so draw submission can resolve asset handles without making `Graphics::Renderer` depend on `Assets::AssetManager`, Scene, GameObject, or ECS.
+Vulkan backend implementation is the active focus until complete. The first checkpoint is establishing a backend-neutral renderer/resource seam while preserving the working OpenGL path and the existing `DrawCmd` render-submission boundary. See [[Architecture/Vulkan Backend]] and [[Roadmap]].

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "debug/profiler_ui.hpp"
-#include "graphics/renderer.hpp"
+#include "graphics/opengl_renderer.hpp"
 #include "assets/asset_manager.hpp"
 #include "time.hpp"
 
@@ -34,7 +34,7 @@ struct ManualRenderTest
 	float rotation = 0.0f;
 
 	bool Initialize(Assets::AssetManager& assets);
-	void Submit(Graphics::Renderer& renderer, const Assets::AssetManager& assets, double deltaTime);
+	void Submit(Graphics::OpenGLRenderer& renderer, const Assets::AssetManager& assets, double deltaTime);
 };
 
 class Engine
@@ -55,7 +55,7 @@ public:
 	Window window;
 	ImGuiLayer imgui;
 	ProfilerUI profilerUI;
-	Graphics::Renderer renderer;
+	Graphics::OpenGLRenderer renderer;
 	ManualRenderTest manualRenderTest;
 
 	//asset managers

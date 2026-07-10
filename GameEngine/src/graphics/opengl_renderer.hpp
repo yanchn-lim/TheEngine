@@ -9,7 +9,7 @@
 
 namespace Graphics
 {
-	class Renderer
+	class OpenGLRenderer
 	{
 	private:
 		std::vector<DrawCmd> _cmds;

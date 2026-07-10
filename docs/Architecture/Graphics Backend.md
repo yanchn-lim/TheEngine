@@ -4,6 +4,8 @@
 
 Provide reusable GPU-facing rendering primitives and execute draw commands.
 
+The current implementation is the OpenGL reference backend. It remains operational while a Vulkan backend is added behind backend-neutral graphics contracts. See [[Vulkan Backend]].
+
 ## Current Types
 
 - `Graphics::Renderer`
@@ -41,7 +43,7 @@ Provide reusable GPU-facing rendering primitives and execute draw commands.
 
 ## Near-Term Cleanup
 
-- Decide the next backend feature before asset manager
+- Establish the renderer/resource backend seam required for Vulkan.
 
 ## Current Progress
 
