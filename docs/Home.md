@@ -9,6 +9,7 @@ This vault tracks engine architecture, implementation order, and system boundari
 - [[Architecture/Graphics Backend]]
 - [[Architecture/Asset Manager]]
 - [[Architecture/Render Submission]]
+- [[To Do/Render Resource Resolver|Render Resource Resolver To-Do]]
 - [[Canvases/Engine Systems.canvas|Engine Systems Canvas]]
 
 ## Current Direction
