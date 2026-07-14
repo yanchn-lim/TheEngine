@@ -37,6 +37,9 @@
     <Filter Include="Source Files\graphics">
       <UniqueIdentifier>{9ebdb4e0-7e42-424b-bf1b-9c45f2f5a77a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\graphics\vulkan">
+      <UniqueIdentifier>{5d69f380-b20b-4f97-b417-58d331decc2f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\scene">
       <UniqueIdentifier>{d6ee8196-0b28-4f0f-8533-d7074d4e4fa4}</UniqueIdentifier>
     </Filter>
@@ -54,6 +57,9 @@
     </Filter>
     <Filter Include="Header Files\graphics">
       <UniqueIdentifier>{7b4aa6a8-2957-4bfb-a94f-233cfd6703eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\vulkan">
+      <UniqueIdentifier>{3ccfc5d9-f4e2-4f41-b6f3-1903e4d475c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\scene">
       <UniqueIdentifier>{e33e24b6-6d2e-4bb2-88ed-8fbba5d0ab37}</UniqueIdentifier>
@@ -194,6 +200,9 @@
     </ClCompile>
     <ClCompile Include="src\rendering\render_resource_resolver.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\vulkan\vulkan_context.cpp">
+      <Filter>Source Files\graphics\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -358,6 +367,9 @@
     </ClInclude>
     <ClInclude Include="src\graphics\renderer_backend.hpp">
       <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\vulkan\vulkan_context.hpp">
+      <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
