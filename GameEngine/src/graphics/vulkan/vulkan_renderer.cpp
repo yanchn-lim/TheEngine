@@ -4,12 +4,7 @@ namespace Graphics
 {
 	bool VulkanRenderer::Init(GLFWwindow* window)
 	{
-		if (!_context.Init(window))
-		{
-			return false;
-		}
-
-		return true;
+		return _context.Init(window);
 	}
 
 	void VulkanRenderer::Submit(const DrawCmd&)
@@ -24,15 +19,21 @@ namespace Graphics
 	{
 	}
 
-	void VulkanRenderer::SetCamera(const Camera2D& camera)
+	void VulkanRenderer::Present()
 	{
 	}
 
-	void VulkanRenderer::OnResize(uint32_t width, uint32_t height)
+	void VulkanRenderer::SetCamera(const Camera2D&)
+	{
+	}
+
+	void VulkanRenderer::OnResize(uint32_t, uint32_t)
 	{
 	}
 
 	void VulkanRenderer::Shutdown()
 	{
+		_context.Shutdown();
 	}
+	
 }

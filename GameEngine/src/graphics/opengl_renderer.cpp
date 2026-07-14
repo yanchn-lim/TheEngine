@@ -144,7 +144,10 @@ namespace Graphics
 
 			cmd.mesh->Draw();
 		}
+	}
 
+	void OpenGLRenderer::Present()
+	{
 		glfwSwapBuffers(_window);
 	}
 

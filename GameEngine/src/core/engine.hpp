@@ -29,6 +29,10 @@ struct ImGuiLayer
 	void Begin();
 	void End();
 	void Shutdown();
+	bool IsInitialized() const { return _initialized; }
+
+private:
+	bool _initialized{ false };
 };
 
 struct ManualRenderTest
@@ -64,6 +68,7 @@ public:
 
 	//engine settings
 	Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;
+	//Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
 
 
 	//asset managers

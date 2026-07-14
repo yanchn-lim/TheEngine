@@ -8,17 +8,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "engine.hpp"
-#include "core/file_system.hpp"
 #include "debug/debug.hpp"
 #include "debug/memory_tracker.hpp"
 #include "debug/profiler.hpp"
 
-#include "graphics/shader.hpp"
-#include "graphics/mesh.hpp"
-#include "graphics/texture2d.hpp"
+#include "graphics/camera.hpp"
 #include "graphics/drawcmd.hpp"
 #include "graphics/material.hpp"
 #include "graphics/opengl_renderer.hpp"
+#include "graphics/vulkan/vulkan_renderer.hpp"
 #include "rendering/render_resource_resolver.hpp"
 
 
@@ -149,6 +147,7 @@ bool ImGuiLayer::Init(GLFWwindow* window)
         return false;
     }
 
+    _initialized = true;
     Debug::CLog("ImGui initialized successfully\n");
     return true;
 }
@@ -177,9 +176,13 @@ void ImGuiLayer::End()
 
 void ImGuiLayer::Shutdown()
 {
+    if (!_initialized)
+        return;
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+    _initialized = false;
 }
 
 
@@ -263,19 +266,12 @@ bool Engine::Initialize()
         renderer = std::make_unique<Graphics::OpenGLRenderer>();
         break;
     case Graphics::RendererBackend::VULKAN:
-        return false;
+        renderer = std::make_unique<Graphics::VulkanRenderer>();
         break;
     default:
         return false;
         break;
     }
-
-    if (!imgui.Init(window.handle))
-    {
-        Debug::CLog("Failed to initialize ImGui\n");
-        return false;
-    }
-
 
     if (!renderer->Init(window.handle))
     {
@@ -283,17 +279,29 @@ bool Engine::Initialize()
         return false;
     }
 
+    if (renderbackend == Graphics::RendererBackend::OPENGL && !imgui.Init(window.handle))
+    {
+        Debug::CLog("Failed to initialize ImGui\n");
+        return false;
+    }
+
+
+
+
     renderer->OnResize(
         static_cast<uint32_t>(window.width),
         static_cast<uint32_t>(window.height));
 
     running = true;
 
-    Debug::CLog("Initializing manual render test...\n");
-    if (!manualRenderTest.Initialize(assets))
-        return false;
-     
-    Debug::CLog("Successfully initialized manual render test!\n");
+    if (renderbackend == Graphics::RendererBackend::OPENGL)
+    {
+        Debug::CLog("Initializing manual render test...\n");
+        if (!manualRenderTest.Initialize(assets))
+            return false;
+
+        Debug::CLog("Successfully initialized manual render test!\n");
+    }
 
 
     Debug::CLog("========== Initialization Success! ==========\n\n");
@@ -341,11 +349,13 @@ void Engine::Update()
             PROFILE_SCOPE("RendererLoop");
             renderer->BeginFrame();
 
-            manualRenderTest.Submit(*renderer, assets, time.deltaTime);
+            if (renderbackend == Graphics::RendererBackend::OPENGL)
+                manualRenderTest.Submit(*renderer, assets, time.deltaTime);
+
 
 			renderer->EndFrame();
-			Memory::EndFrame();
 
+            if (imgui.IsInitialized())
             {
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
@@ -364,8 +374,11 @@ void Engine::Update()
                 DebugConsole::Get().Draw();
                 imgui.End();
             }
+
+            renderer->Present();
         }
 
+		Memory::EndFrame();
         Profiler::Get().EndFrame();
     }
 }
@@ -375,7 +388,8 @@ void Engine::Shutdown()
     // Tear down GL-backed systems before destroying the window/context.
     Debug::CLog("========== Shutting down engine... ==========\n");
 
-    renderer->Shutdown();
+    if (renderer)
+        renderer->Shutdown();
     assets.Clear();
     imgui.Shutdown();
     window.Shutdown();
