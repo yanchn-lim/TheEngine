@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
+
+#include "debug/memory_tracker.hpp"
 
 namespace Graphics
 {
@@ -11,10 +14,11 @@ namespace Graphics
 		int _width{};
 		int _height{};
 		int _channels{};
+		Memory::ResourceUsage _memoryUsage;
 
 	public:
-		bool LoadFromFile(const char* path);
-		bool CreateFromRGBA(const unsigned char* pixels, int width, int height);
+		bool LoadFromFile(const char* path, std::string_view label = {});
+		bool CreateFromRGBA(const unsigned char* pixels, int width, int height, std::string_view label = "Generated Texture");
 		void Bind(uint32_t slot = 0) const;
 		void Destroy();
 

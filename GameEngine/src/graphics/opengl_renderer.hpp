@@ -4,28 +4,29 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "drawcmd.hpp"
-#include "camera.hpp"
+#include "irenderer.hpp"
 
 namespace Graphics
 {
-	class OpenGLRenderer
+	class OpenGLRenderer : public IRenderer
 	{
 	private:
+		GLFWwindow* _window{ nullptr };
 		std::vector<DrawCmd> _cmds;
 
 		//simple camera state
 		Camera2D _camera;
 
 	public:
-		bool Init();
-		void Submit(const DrawCmd&);
-		void BeginFrame();
-		void EndFrame();
-		void Shutdown();
+		bool Init(GLFWwindow*) override;
+		void Submit(const DrawCmd&) override;
+		void BeginFrame() override;
+		void EndFrame() override;
+		void SetCamera(const Camera2D& camera) override;
+		void OnResize(uint32_t width, uint32_t height) override;
+		void Shutdown() override;
 
 
-		void SetCamera(const Camera2D& camera);
 
 		//draw helper
 

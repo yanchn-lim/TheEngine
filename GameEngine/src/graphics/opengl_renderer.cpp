@@ -1,6 +1,8 @@
 #include <glad/glad.h>
 
 #include "debug/debug.hpp"
+#include "GLFW/glfw3.h"
+
 #include "debug/profiler.hpp"
 #include "mesh.hpp"
 #include "opengl_renderer.hpp"
@@ -10,11 +12,18 @@
 
 namespace Graphics
 {
-	
-	bool OpenGLRenderer::Init()
+	bool OpenGLRenderer::Init(GLFWwindow* window)
 	{
 		PROFILE_FUNCTION();
 		
+		_window = window;
+
+		if (!_window)
+		{
+			Debug::LogError("OpenGLRenderer::Init failed: window is null");
+			return false;
+		}
+
 		// Reserve command storage once; frames clear but keep capacity.
 		_cmds.reserve(8192);
 
@@ -135,6 +144,8 @@ namespace Graphics
 
 			cmd.mesh->Draw();
 		}
+
+		glfwSwapBuffers(_window);
 	}
 
 	void OpenGLRenderer::Shutdown()
@@ -146,5 +157,10 @@ namespace Graphics
 	{
 		// Camera is copied so callers can build it transiently each frame.
 		_camera = camera;
+	}
+
+	void OpenGLRenderer::OnResize(uint32_t width, uint32_t height)
+	{
+		glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 	}
 }

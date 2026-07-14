@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
+
+#include "debug/memory_tracker.hpp"
 
 namespace Graphics
 {
@@ -9,9 +12,10 @@ namespace Graphics
 	private:
 		uint32_t _id{};
 		uint32_t _count{};
+		Memory::ResourceUsage _memoryUsage;
 
 	public:
-		bool Create(const uint32_t* indices, uint32_t count);
+		bool Create(const uint32_t* indices, uint32_t count, std::string_view label = "Index Buffer");
 		void Bind() const;
 		void Destroy();
 		bool IsValid() const;

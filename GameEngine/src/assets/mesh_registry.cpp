@@ -34,7 +34,7 @@ namespace Assets
 		meshUploadData.topology = data.topology;
 		meshUploadData.layout = layout;
 
-		if (!mesh.Create(meshUploadData))
+		if (!mesh.Create(meshUploadData, name))
 		{
 			Debug::LogError("MeshRegistry::Create : Mesh creation failed");
 			return MeshHandle();

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "debug/profiler_ui.hpp"
-#include "graphics/opengl_renderer.hpp"
+#include "graphics/renderer_backend.hpp"
+#include "graphics/irenderer.hpp"
 #include "assets/asset_manager.hpp"
 #include "time.hpp"
+
+#include <memory>
 
 struct GLFWwindow;
 
@@ -14,8 +17,9 @@ struct Window
 	int height{ 900 };
 	const char* title{ "Engine" };
 	bool vsync = false;
+	bool resizePending{ false };
 
-	bool Init();
+	bool Init(Graphics::RendererBackend renderbackend);
 	void Shutdown();
 };
 
@@ -34,7 +38,7 @@ struct ManualRenderTest
 	float rotation = 0.0f;
 
 	bool Initialize(Assets::AssetManager& assets);
-	void Submit(Graphics::OpenGLRenderer& renderer, const Assets::AssetManager& assets, double deltaTime);
+	void Submit(Graphics::IRenderer& renderer, const Assets::AssetManager& assets, double deltaTime);
 };
 
 class Engine
@@ -55,8 +59,12 @@ public:
 	Window window;
 	ImGuiLayer imgui;
 	ProfilerUI profilerUI;
-	Graphics::OpenGLRenderer renderer;
+	std::unique_ptr<Graphics::IRenderer> renderer;
 	ManualRenderTest manualRenderTest;
+
+	//engine settings
+	Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;
+
 
 	//asset managers
 	Assets::AssetManager assets;

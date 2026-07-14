@@ -6,6 +6,7 @@ Vulkan backend implementation is the main engine focus until this track is compl
 
 Detailed design: [[Architecture/Vulkan Backend]]
 
+- [x] Build the tagged memory profiler: global C++ heap counters, named OpenGL storage estimates, and existing-profiler UI output. [[Architecture/Memory Profiler]]
 - [ ] Establish backend-neutral `IRenderer` and GPU-resource factory contracts while keeping the OpenGL path working.
 - [ ] Move OpenGL implementation behind the backend seam without changing `DrawCmd` submission behavior.
 - [ ] Create Vulkan 1.3 instance, GLFW surface, validation layer, and debug messenger.
@@ -22,6 +23,8 @@ Detailed design: [[Architecture/Vulkan Backend]]
 - [ ] Render existing `MeshUploadData`, imported OBJ meshes, and basic materials through Vulkan.
 - [ ] Add Vulkan ImGui integration and swapchain-recreation support.
 - [ ] Verify both backends preserve the same asset-to-`DrawCmd` submission boundary.
+
+Do not add driver-level OpenGL telemetry or Vulkan GPU-allocation telemetry until a Vulkan buffer/image ownership path exists. The current profiler is complete for this stage: it includes a frame-analysis workspace, hierarchical scope inspection, CPU heap churn, and named OpenGL storage estimates.
 
 ## Phase 1 - OpenGL Graphics Backend
 

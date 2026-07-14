@@ -21,14 +21,22 @@ void DebugConsole::PushLog(LogLevel level, std::string message)
 void DebugConsole::Clear()
 {
     // Reset the fixed-size ring buffer by assigning a fresh instance.
-    _entries = {};
+	_entries = {};
+}
+
+bool& DebugConsole::IsOpen()
+{
+    return _open;
 }
 
 void DebugConsole::Draw()
 {
-    // Draw a lightweight ImGui console over the ring-buffered log history.
-    ImGui::SetNextWindowSize(ImVec2(600, 300), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Console"))
+	if (!_open)
+		return;
+
+	// Draw a lightweight ImGui console over the ring-buffered log history.
+	ImGui::SetNextWindowSize(ImVec2(600, 300), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Console", &_open))
     {
         ImGui::End();
         return;

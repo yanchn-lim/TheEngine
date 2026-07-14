@@ -2,16 +2,20 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string_view>
+
+#include "debug/memory_tracker.hpp"
 
 namespace Graphics
 {
     class VertexBuffer
     {
-    private:
+	private:
 	    uint32_t _id{ 0 };
+		Memory::ResourceUsage _memoryUsage;
 
-    public:
-        bool Create(const void* data, size_t size);
+	public:
+        bool Create(const void* data, size_t size, std::string_view label = "Vertex Buffer");
         void Destroy();
         uint32_t GetId() const;
         bool IsValid() const;

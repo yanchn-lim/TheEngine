@@ -1,5 +1,7 @@
 #include <glad/glad.h>
 
+#include <string>
+
 #include "debug/debug.hpp"
 #include "mesh.hpp"
 
@@ -20,7 +22,7 @@ namespace Graphics
 
 namespace Graphics
 {
-	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout)
+	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, std::string_view label)
 	{
 		// Upload non-indexed vertex data and configure a VAO for the supplied layout.
 		Destroy();
@@ -50,7 +52,8 @@ namespace Graphics
 			return false;
 		}
 
-		if (!_vertexBuffer.Create(vertexData, vertexCount * layout.stride))
+		const std::string vertexLabel = std::string(label) + " Vertex Buffer";
+		if (!_vertexBuffer.Create(vertexData, vertexCount * layout.stride, vertexLabel))
 		{
 			Debug::LogError("Mesh::Create failed: vertex buffer creation failed");
 			Destroy();
@@ -64,7 +67,7 @@ namespace Graphics
 		return true;
 	}
 
-	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, const uint32_t* indices, uint32_t indexCount)
+	bool Mesh::Create(const void* vertexData, uint32_t vertexCount, const VertexLayout& layout, const uint32_t* indices, uint32_t indexCount, std::string_view label)
 	{
 		// Upload indexed vertex data and attach the index buffer to the VAO.
 		Destroy();
@@ -106,14 +109,16 @@ namespace Graphics
 			return false;
 		}
 
-		if (!_vertexBuffer.Create(vertexData, vertexCount * layout.stride))
+		const std::string vertexLabel = std::string(label) + " Vertex Buffer";
+		if (!_vertexBuffer.Create(vertexData, vertexCount * layout.stride, vertexLabel))
 		{
 			Debug::LogError("Mesh::Create failed: vertex buffer creation failed");
 			Destroy();
 			return false;
 		}
 
-		if (!_indexBuffer.Create(indices, indexCount))
+		const std::string indexLabel = std::string(label) + " Index Buffer";
+		if (!_indexBuffer.Create(indices, indexCount, indexLabel))
 		{
 			Debug::LogError("Mesh::Create failed : index buffer creation failed");
 			Destroy();
@@ -128,12 +133,12 @@ namespace Graphics
 		return true;
 	}
 
-	bool Mesh::Create(const MeshUploadData& data)
+	bool Mesh::Create(const MeshUploadData& data, std::string_view label)
 	{
 		// MeshUploadData is the common upload path for procedural and imported mesh sources.
 		const bool created = data.indices && data.indexCount > 0
-			? Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount)
-			: Create(data.vertices, data.vertexCount, data.layout);
+			? Create(data.vertices, data.vertexCount, data.layout, data.indices, data.indexCount, label)
+			: Create(data.vertices, data.vertexCount, data.layout, label);
 
 		if (created)
 			_topology = data.topology;

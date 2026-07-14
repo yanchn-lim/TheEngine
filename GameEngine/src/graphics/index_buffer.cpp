@@ -5,7 +5,7 @@
 
 namespace Graphics
 {
-	bool IndexBuffer::Create(const uint32_t* indices, uint32_t count) 
+	bool IndexBuffer::Create(const uint32_t* indices, uint32_t count, std::string_view label)
 	{
 		// Upload index data used by glDrawElements.
 		Destroy();
@@ -31,6 +31,8 @@ namespace Graphics
 			return false;
 		}
 
+		_memoryUsage.Set(Memory::ResourceMemoryDomain::GpuEstimated, label, count * sizeof(uint32_t));
+
 		return true;
 	}
 
@@ -48,6 +50,7 @@ namespace Graphics
 			_id = 0;
 			_count = 0;
 		}
+		_memoryUsage.Reset();
 	}
 
 	bool IndexBuffer::IsValid() const
@@ -70,7 +73,8 @@ namespace Graphics
 		Destroy();
 	}
 
-	IndexBuffer::IndexBuffer(IndexBuffer&& oth) noexcept : _id(oth._id), _count(oth._count)
+	IndexBuffer::IndexBuffer(IndexBuffer&& oth) noexcept
+		: _id(oth._id), _count(oth._count), _memoryUsage(std::move(oth._memoryUsage))
 	{
 		// Transfer index buffer ownership and count metadata.
 		oth._id = 0;
@@ -86,6 +90,7 @@ namespace Graphics
 
 		_id = oth._id;
 		_count = oth._count;
+		_memoryUsage = std::move(oth._memoryUsage);
 		oth._id = 0;
 		oth._count = 0;
 

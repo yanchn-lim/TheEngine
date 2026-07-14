@@ -7,7 +7,7 @@
 
 namespace Graphics
 {
-	bool Texture2D::LoadFromFile(const char* path)
+	bool Texture2D::LoadFromFile(const char* path, std::string_view label)
 	{
 		// Load image bytes through stb_image and upload them as an immutable GL texture.
 		Destroy(); //make sure to remove first
@@ -40,6 +40,12 @@ namespace Graphics
 		}
 
 		glCreateTextures(GL_TEXTURE_2D, 1 ,&_id);
+		if (!IsValid())
+		{
+			Debug::LogError("Texture2D::LoadFromFile failed: OpenGL texture was not created");
+			stbi_image_free(data);
+			return false;
+		}
 
 		// Set a simple default sampler state until materials expose texture settings.
 		glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -58,13 +64,17 @@ namespace Graphics
 		_width = width;
 		_height = height;
 		_channels = channels; // 1 = grayscale, 3 = rgb, 4 = rgba
+		_memoryUsage.Set(
+			Memory::ResourceMemoryDomain::GpuEstimated,
+			label.empty() ? std::string_view(path) : label,
+			static_cast<size_t>(width) * static_cast<size_t>(height) * static_cast<size_t>(channels));
 
 		stbi_image_free(data);
 
 		return true;
 	}
 
-	bool Texture2D::CreateFromRGBA(const unsigned char* pixels, int width, int height)
+	bool Texture2D::CreateFromRGBA(const unsigned char* pixels, int width, int height, std::string_view label)
 	{
 		// Create small generated textures such as fallback/debug checkers.
 		Destroy();
@@ -82,6 +92,11 @@ namespace Graphics
 		}
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &_id);
+		if (!IsValid())
+		{
+			Debug::LogError("Texture2D::CreateFromRGBA failed: OpenGL texture was not created");
+			return false;
+		}
 
 		glTextureParameteri(_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTextureParameteri(_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -94,6 +109,10 @@ namespace Graphics
 		_width = width;
 		_height = height;
 		_channels = 4;
+		_memoryUsage.Set(
+			Memory::ResourceMemoryDomain::GpuEstimated,
+			label,
+			static_cast<size_t>(width) * static_cast<size_t>(height) * 4);
 
 		return true;
 	}
@@ -121,6 +140,7 @@ namespace Graphics
 		_width = 0;
 		_height = 0;
 		_channels = 0;
+		_memoryUsage.Reset();
 	}
 
 	bool Texture2D::IsValid() const
@@ -151,7 +171,8 @@ namespace Graphics
 	Texture2D::Texture2D(Texture2D&& oth) noexcept : 
 		_id(oth._id), 
 		_width(oth._width), _height(oth._height), 
-		_channels(oth._channels)
+		_channels(oth._channels),
+		_memoryUsage(std::move(oth._memoryUsage))
 	{
 		// Transfer GL texture ownership and leave the source inert.
 		oth._id = 0;
@@ -171,6 +192,7 @@ namespace Graphics
 		_width = oth._width;
 		_height = oth._height;
 		_channels = oth._channels;
+		_memoryUsage = std::move(oth._memoryUsage);
 
 		oth._id = 0;
 		oth._width = 0;

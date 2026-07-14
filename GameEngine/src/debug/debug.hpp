@@ -38,10 +38,12 @@ public:
 	void PushLog(LogLevel level, std::string message);
 	void Draw();
 	void Clear();
+	bool& IsOpen();
 
 private:
 	DebugConsole() = default;
 	RingBuffer<LogEntry, MAX_LOG_ENTRIES> _entries{};
+	bool _open{ true };
 	bool _scrollToBottom{ false };
 };
 

@@ -8,6 +8,7 @@ This vault tracks engine architecture, implementation order, and system boundari
 - [[Architecture/System Boundaries]]
 - [[Architecture/Graphics Backend]]
 - [[Architecture/Vulkan Backend]]
+- [[Architecture/Memory Profiler]]
 - [[Architecture/Asset Manager]]
 - [[Architecture/Render Submission]]
 - [[To Do/Render Resource Resolver|Render Resource Resolver To-Do]]
@@ -26,4 +27,4 @@ The immediate implementation goal is:
 
 ## Current Focus
 
-Vulkan backend implementation is the active focus until complete. The first checkpoint is establishing a backend-neutral renderer/resource seam while preserving the working OpenGL path and the existing `DrawCmd` render-submission boundary. See [[Architecture/Vulkan Backend]] and [[Roadmap]].
+Vulkan backend implementation is the active focus until complete. The bounded CPU/OpenGL estimated-memory profiler is complete, so work now returns to the backend-neutral renderer/resource seam. See [[Architecture/Memory Profiler]], [[Architecture/Vulkan Backend]], and [[Roadmap]].

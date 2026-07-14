@@ -6,6 +6,8 @@ This is the engine's active implementation focus until the Vulkan backend roadma
 
 OpenGL remains the working reference backend during the transition. The target is two selectable backends that share render submission, asset import data, and backend-neutral graphics contracts. Only one backend is active for an engine instance.
 
+Before the backend seam, complete the bounded CPU memory-profiler milestone in [[Memory Profiler]]. It supplies CPU allocation telemetry without delaying Vulkan for a broad allocator or GPU profiling system.
+
 ## Target API
 
 Require Vulkan 1.3 with:

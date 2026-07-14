@@ -11,7 +11,7 @@ namespace Assets
 			return it->second;
 
 		Graphics::Texture2D tex;
-		if (!tex.LoadFromFile(path.c_str()))
+		if (!tex.LoadFromFile(path.c_str(), path))
 		{
 			Debug::LogError("TextureRegistry::Load : Failed to load texture from ", path, ". Using fallback texture for invalid lookups.");
 			return TextureHandle(); //defaults to invalid
@@ -56,7 +56,7 @@ namespace Assets
 			  0,   0,   0, 255, 255,   0, 255, 255
 		};
 
-		if (!_fallbackTexture.CreateFromRGBA(pixels, 2, 2))
+		if (!_fallbackTexture.CreateFromRGBA(pixels, 2, 2, "Fallback Texture"))
 		{
 			Debug::LogError("TextureRegistry::GetFallback : Failed to create fallback texture");
 			return nullptr;

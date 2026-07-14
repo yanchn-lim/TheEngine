@@ -10,6 +10,7 @@
 #include "engine.hpp"
 #include "core/file_system.hpp"
 #include "debug/debug.hpp"
+#include "debug/memory_tracker.hpp"
 #include "debug/profiler.hpp"
 
 #include "graphics/shader.hpp"
@@ -17,6 +18,7 @@
 #include "graphics/texture2d.hpp"
 #include "graphics/drawcmd.hpp"
 #include "graphics/material.hpp"
+#include "graphics/opengl_renderer.hpp"
 #include "rendering/render_resource_resolver.hpp"
 
 
@@ -45,16 +47,27 @@ static void ErrorCallback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-bool Window::Init()
+bool Window::Init(Graphics::RendererBackend renderbackend)
 {
     // Create the OpenGL context before initializing GLAD or renderer resources.
     if (!glfwInit()) return false;
 
     glfwSetErrorCallback(ErrorCallback);
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    switch (renderbackend)
+    {
+    case Graphics::RendererBackend::OPENGL:
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        break;
+    case Graphics::RendererBackend::VULKAN:
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        break;
+    default:
+        break;
+    }
+
 
     Debug::CLog("Creating window...\n");
     handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -65,26 +78,30 @@ bool Window::Init()
         return false;
     }
 
-    glfwMakeContextCurrent(handle);
-    glfwSwapInterval(vsync ? 1 : 0);
-
-    Debug::CLog("Initializing GLAD...\n");
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (renderbackend == Graphics::RendererBackend::OPENGL)
     {
-        Debug::CLog("Failed to initialize GLAD\n");
-        return false;
+        glfwMakeContextCurrent(handle);
+        glfwSwapInterval(vsync ? 1 : 0);
+
+        Debug::CLog("Initializing GLAD...\n");
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            Debug::CLog("Failed to initialize GLAD\n");
+            return false;
+        }
+
+        //set debug
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     }
 
-    //set debug
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     //glDebugMessageCallback();
 
     glfwSetFramebufferSizeCallback(handle, [](GLFWwindow*, int w, int h)
         {
             Engine::Get().window.width = w;
             Engine::Get().window.height = h;
-            glViewport(0, 0, w, h);
+            Engine::Get().window.resizePending = true;
         });
 
     glfwSetKeyCallback(handle, ProcessInput);
@@ -192,7 +209,7 @@ bool ManualRenderTest::Initialize(Assets::AssetManager& assets)
     return true;
 }
 
-void ManualRenderTest::Submit(Graphics::OpenGLRenderer& renderer, const Assets::AssetManager& assets, double deltaTime)
+void ManualRenderTest::Submit(Graphics::IRenderer& renderer, const Assets::AssetManager& assets, double deltaTime)
 {
     Rendering::RenderResourceResolver resources(assets);
     const Assets::ModelAsset* modelAsset = resources.Resolve(model);
@@ -234,10 +251,23 @@ bool Engine::Initialize()
 {
     // Initialization order matters: window/context, UI, renderer, then manual test assets.
     Debug::CLog("========== Initializing engine... ==========\n");
-    if (!window.Init())
+    if (!window.Init(renderbackend))
     {
         Debug::CLog("Failed to initialize window\n");
         return false;
+    }
+
+    switch (renderbackend)
+    {
+    case Graphics::RendererBackend::OPENGL:
+        renderer = std::make_unique<Graphics::OpenGLRenderer>();
+        break;
+    case Graphics::RendererBackend::VULKAN:
+        return false;
+        break;
+    default:
+        return false;
+        break;
     }
 
     if (!imgui.Init(window.handle))
@@ -246,14 +276,18 @@ bool Engine::Initialize()
         return false;
     }
 
-    if (!renderer.Init())
+
+    if (!renderer->Init(window.handle))
     {
         Debug::CLog("Failed to initialize renderer\n");
         return false;
     }
 
-    running = true;
+    renderer->OnResize(
+        static_cast<uint32_t>(window.width),
+        static_cast<uint32_t>(window.height));
 
+    running = true;
 
     Debug::CLog("Initializing manual render test...\n");
     if (!manualRenderTest.Initialize(assets))
@@ -273,9 +307,10 @@ void Engine::Update()
     time.deltaTime = 0.0;
 
     // Main loop owns per-frame polling, camera setup, rendering, UI, and swap.
-    while (!glfwWindowShouldClose(window.handle) && running)
-    {
-        Profiler::Get().BeginFrame();
+	while (!glfwWindowShouldClose(window.handle) && running)
+	{
+		Profiler::Get().BeginFrame();
+		Memory::BeginFrame();
         double currentTime = glfwGetTime();
         time.deltaTime = currentTime - time.totalTime;
         time.totalTime = currentTime;
@@ -284,33 +319,51 @@ void Engine::Update()
             PROFILE_SCOPE("MainLoop");
             glfwPollEvents();
    
+            if (window.resizePending)
+            {
+                renderer->OnResize(
+                    static_cast<uint32_t>(window.width),
+                    static_cast<uint32_t>(window.height));
+
+                window.resizePending = false;
+            }
+
             Graphics::Camera2D camera;
             camera.position = { 0.f, 0.f };
             camera.zoom = 1.f;
             camera.rotation = 0.f;
             camera.SetViewport((float)window.width, (float)window.height);
 
-            renderer.SetCamera(camera);
+            renderer->SetCamera(camera);
         }
 
         {
             PROFILE_SCOPE("RendererLoop");
-            renderer.BeginFrame();
+            renderer->BeginFrame();
 
-            manualRenderTest.Submit(renderer, assets, time.deltaTime);
+            manualRenderTest.Submit(*renderer, assets, time.deltaTime);
 
-            renderer.EndFrame();
+			renderer->EndFrame();
+			Memory::EndFrame();
 
             {
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
+                if (ImGui::BeginMainMenuBar())
+                {
+                    if (ImGui::BeginMenu("Tools"))
+                    {
+                        ImGui::MenuItem("Profiler", nullptr, &profilerUI.IsOpen());
+                        ImGui::MenuItem("Console", nullptr, &DebugConsole::Get().IsOpen());
+                        ImGui::EndMenu();
+                    }
+                    ImGui::EndMainMenuBar();
+                }
                 ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
                 profilerUI.Draw();
                 DebugConsole::Get().Draw();
                 imgui.End();
             }
-
-            glfwSwapBuffers(window.handle);
         }
 
         Profiler::Get().EndFrame();
@@ -322,7 +375,7 @@ void Engine::Shutdown()
     // Tear down GL-backed systems before destroying the window/context.
     Debug::CLog("========== Shutting down engine... ==========\n");
 
-    renderer.Shutdown();
+    renderer->Shutdown();
     assets.Clear();
     imgui.Shutdown();
     window.Shutdown();

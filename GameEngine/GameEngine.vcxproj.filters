@@ -73,6 +73,9 @@
     <Filter Include="Resource Files\assets\models">
       <UniqueIdentifier>{7054a662-ad90-47ef-b4a6-f236e7c76f1a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\rendering">
+      <UniqueIdentifier>{59e84e8c-f369-48a1-8d83-eece00ec775e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -115,6 +118,12 @@
       <Filter>Source Files\debug</Filter>
     </ClCompile>
     <ClCompile Include="src\debug\debug.cpp">
+      <Filter>Source Files\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\memory_overrides.cpp">
+      <Filter>Source Files\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\memory_tracker.cpp">
       <Filter>Source Files\debug</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\opengl_renderer.cpp">
@@ -183,6 +192,9 @@
     <ClCompile Include="src\assets\model_registry.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
+    <ClCompile Include="src\rendering\render_resource_resolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -215,9 +227,6 @@
     <ClInclude Include="external\tinyobjloader\tiny_obj_loader.h">
       <Filter>Header Files\external\tinyobjloader</Filter>
     </ClInclude>
-    <ClInclude Include="src\pch.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\engine.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
@@ -249,6 +258,9 @@
       <Filter>Header Files\debug</Filter>
     </ClInclude>
     <ClInclude Include="src\debug\debug.hpp">
+      <Filter>Header Files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\memory_tracker.hpp">
       <Filter>Header Files\debug</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\drawcmd.hpp">
@@ -331,6 +343,21 @@
     </ClInclude>
     <ClInclude Include="src\assets\model_asset.hpp">
       <Filter>Header Files\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rendering\render_item.hpp">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rendering\render_resource_resolver.hpp">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\irenderer.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\renderer_backend.hpp">
+      <Filter>Header Files\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

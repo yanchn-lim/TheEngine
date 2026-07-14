@@ -5,7 +5,7 @@
 
 namespace Graphics
 {
-	bool VertexBuffer::Create(const void* data, size_t size)
+	bool VertexBuffer::Create(const void* data, size_t size, std::string_view label)
 	{
 		// Upload immutable vertex data for the lifetime of this buffer.
 		Destroy();
@@ -30,6 +30,8 @@ namespace Graphics
 			return false;
 		}
 
+		_memoryUsage.Set(Memory::ResourceMemoryDomain::GpuEstimated, label, size);
+
 		return true;
 	}
 
@@ -41,6 +43,7 @@ namespace Graphics
 			glDeleteBuffers(1, &_id);
 			_id = 0;
 		}
+		_memoryUsage.Reset();
 	}
 
 	uint32_t VertexBuffer::GetId() const
@@ -58,7 +61,8 @@ namespace Graphics
 		Destroy();
 	}
 
-	VertexBuffer::VertexBuffer(VertexBuffer&& oth) noexcept : _id(oth._id)
+	VertexBuffer::VertexBuffer(VertexBuffer&& oth) noexcept
+		: _id(oth._id), _memoryUsage(std::move(oth._memoryUsage))
 	{
 		// Transfer buffer ownership and clear the source id.
 		oth._id = 0;
@@ -72,6 +76,7 @@ namespace Graphics
 		Destroy();
 
 		_id = oth._id;
+		_memoryUsage = std::move(oth._memoryUsage);
 		oth._id = 0;
 
 		return *this;
