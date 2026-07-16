@@ -170,6 +170,7 @@
     <ClCompile Include="src\graphics\vulkan\vulkan_context.cpp" />
     <ClCompile Include="src\graphics\vulkan\vulkan_device.cpp" />
     <ClCompile Include="src\graphics\vulkan\vulkan_renderer.cpp" />
+    <ClCompile Include="src\graphics\vulkan\vulkan_swapchain.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -227,8 +228,10 @@
     <ClInclude Include="src\graphics\vertex_layout.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_context.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_device.hpp" />
+    <ClInclude Include="src\graphics\vulkan\vulkan_frameresources.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_include.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_renderer.hpp" />
+    <ClInclude Include="src\graphics\vulkan\vulkan_swapchain.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="src\debug\profiler.hpp" />
     <ClInclude Include="src\debug\profiler_ui.hpp" />

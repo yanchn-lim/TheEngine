@@ -14,24 +14,32 @@ namespace Graphics
         constexpr const char* VALIDATION_LAYER = "VK_LAYER_KHRONOS_validation";
 
         //log validation messages
-        VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-            VkDebugUtilsMessageTypeFlagsEXT,
-            const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+        VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(
+            vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+            vk::DebugUtilsMessageTypeFlagsEXT,
+            const vk::DebugUtilsMessengerCallbackDataEXT* callbackData,
             void*)
         {
-            const char* message = callbackData && callbackData->pMessage
+            const char* message =
+                callbackData && callbackData->pMessage
                 ? callbackData->pMessage
                 : "Unknown Vulkan validation message";
 
-            if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+            if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError)
+            {
                 Debug::LogError("Vulkan validation: ", message);
-            else if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+            }
+            else if (severity &
+                vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning)
+            {
                 Debug::LogWarning("Vulkan validation: ", message);
+            }
             else
+            {
                 Debug::LogVerbose("Vulkan validation: ", message);
+            }
 
-            return VK_FALSE;
+            return vk::False;
         }
 
         vk::DebugUtilsMessengerCreateInfoEXT MakeDebugMessengerInfo()
@@ -177,6 +185,6 @@ namespace Graphics
         if (result != VK_SUCCESS)
             throw std::runtime_error("glfwCreateWindowSurface failed");
 
-        _surface = vk::raii::SurfaceKHR(_instance, rawSurface)
+        _surface = vk::raii::SurfaceKHR(_instance, rawSurface);
     }
 }

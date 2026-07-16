@@ -4,34 +4,44 @@
 
 namespace Graphics
 {
+
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32_t> graphics;
+        std::optional<uint32_t> present;
+        bool Complete() const { return graphics && present; }
+    };
+    
+
     class VulkanContext;
 
     class VulkanDevice
     {
     public:
         bool Init(const VulkanContext& context);
-        void Shutdown();
+        void Shutdown() noexcept;
+        void WaitIdle() const;
 
-        VkPhysicalDevice GetPhysicalDevice() const;
-        VkDevice GetHandle() const;
-        VkQueue GetGraphicsQueue() const;
-        VkQueue GetPresentQueue() const;
-        uint32_t GetGraphicsQueueFamily() const;
-        uint32_t GetPresentQueueFamily() const;
+        //getters
+        const vk::raii::PhysicalDevice& PhysicalDevice() const { return _physicalDevice; }
+        const vk::raii::Device& Device() const { return _device; }
+        vk::raii::Device& Device() { return _device; }
+        const vk::raii::Queue& GraphicsQueue() const { return _graphicsQueue; }
+        const vk::raii::Queue& PresentQueue() const { return _presentQueue; }
+        uint32_t GraphicsQueueFamily() const { return _graphicsQueueFamily; }
+        uint32_t PresentQueueFamily() const { return _presentQueueFamily; }
+
     private:
-        VkPhysicalDevice _physicalDevice{ VK_NULL_HANDLE };
-        VkDevice _device{ VK_NULL_HANDLE };
-        VkQueue _graphicsQueue{ VK_NULL_HANDLE };
-        VkQueue _presentQueue{ VK_NULL_HANDLE };
+        vk::raii::PhysicalDevice _physicalDevice{ nullptr };
+        vk::raii::Device _device{ nullptr };
+        vk::raii::Queue _graphicsQueue{ nullptr };
+        vk::raii::Queue _presentQueue{ nullptr };
         uint32_t _graphicsQueueFamily{};
         uint32_t _presentQueueFamily{};
 
-        bool SelectPhysicalDevice(const VulkanContext& context);
-        bool CreateLogicalDevice();
-
-        bool IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) const;
-        bool FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
-        bool SupportsRequiredExtensions(VkPhysicalDevice device) const;
-        bool SupportsRequiredFeatures(VkPhysicalDevice device) const;
+        QueueFamilyIndices FindQueueFamilies(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface) const;
+        bool IsSuitable(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface, QueueFamilyIndices& queues) const;
+        void SelectPhysicalDevice(const VulkanContext& context);
+        void CreateLogicalDevice();
     };
 };

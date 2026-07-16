@@ -20,6 +20,7 @@ namespace Graphics
 
         const vk::raii::Instance& Instance() const { return _instance; }
         vk::Instance InstanceHandle() { return *_instance;  }
+        const vk::SurfaceKHR SurfaceHandle() const { return *_surface; }
 		vk::SurfaceKHR SurfaceHandle() { return *_surface; }
     private:
         bool ValidationLayerAvailable() const;

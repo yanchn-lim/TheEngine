@@ -4,136 +4,160 @@
 #include "debug/debug.hpp"
 
 #include <vector>
+#include <optional>
 
 namespace Graphics
 {
     bool VulkanDevice::Init(const VulkanContext& context)
     {
-        if (context.GetInstance() == VK_NULL_HANDLE ||
-            context.GetSurface() == VK_NULL_HANDLE)
+        Shutdown();
+        try
         {
-            return false;
-        }
-
-        if (!SelectPhysicalDevice(context))
-        {
-            Shutdown();
-            return false;
-        }
-
-        if (!CreateLogicalDevice())
-        {
-            Shutdown();
-            return false;
-        }
-
-        return true;
-    }
-
-    void VulkanDevice::Shutdown()
-    {
-
-    }
-
-    VkPhysicalDevice VulkanDevice::GetPhysicalDevice() const
-    {
-
-    }
-
-    VkDevice VulkanDevice::GetHandle() const
-    {
-
-    }
-
-    VkQueue VulkanDevice::GetGraphicsQueue() const
-    {
-
-    }
-
-    VkQueue VulkanDevice::GetPresentQueue() const
-    {
-
-    }
-
-    uint32_t VulkanDevice::GetGraphicsQueueFamily() const
-    {
-
-    }
-
-    uint32_t VulkanDevice::GetPresentQueueFamily() const
-    {
-
-    }
-
-    bool VulkanDevice::SelectPhysicalDevice(const VulkanContext& context)
-    {
-        uint32_t deviceCount;
-        VkResult res = vkEnumeratePhysicalDevices(context.GetInstance(), &deviceCount, nullptr);
-
-        if (res != VK_SUCCESS || deviceCount == 0)
-        {
-            return false;
-        }
-
-        std::vector<VkPhysicalDevice> devices;
-        res = vkEnumeratePhysicalDevices(context.GetInstance(), &deviceCount, devices.data());
-
-
-        if (res != VK_SUCCESS)
-        {
-            return false;
-        }
-
-        for (auto& pd : devices)
-        {
-            if (!IsDeviceSuitable(pd, context.GetSurface()))
-            {
-                continue;
-            }
-
-            _physicalDevice = pd;
+            SelectPhysicalDevice(context);
+            CreateLogicalDevice();
             return true;
         }
-
-        return false;
-    }
-
-    bool VulkanDevice::CreateLogicalDevice()
-    {
-        return false;
-    }
-
-    bool VulkanDevice::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface) const
-    {
-        return false;
-    }
-
-    bool VulkanDevice::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
-    {
-        //if (vkGetPhysicalDeviceQueueFamilyProperties())
-
-        uint32_t familyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, nullptr);
-
-        std::vector<VkQueueFamilyProperties> families(familyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &familyCount, families.data());
-
-        for (uint32_t i = 0; i < familyCount; ++i)
+        catch (const std::exception& error)
         {
-            const VkQueueFamilyProperties& family = families[i];
+            Debug::LogError("VulkanDevice::Init: ", error.what());
+            Shutdown();
+            return false;
+        }
+    }
 
+    void VulkanDevice::Shutdown() noexcept
+    {
+        _presentQueue = nullptr;
+        _graphicsQueue = nullptr;
+        _device = nullptr;
+        _physicalDevice = nullptr;
+        _graphicsQueueFamily = 0;
+        _presentQueueFamily = 0;
+    }
+
+    void VulkanDevice::WaitIdle() const
+    {
+        if (*_device)
+            _device.waitIdle();
+    }
+
+    QueueFamilyIndices VulkanDevice::FindQueueFamilies(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface) const
+    {
+        QueueFamilyIndices result;
+        const auto families = candidate.getQueueFamilyProperties();
+
+        for (uint32_t index = 0; index < families.size(); ++index)
+        {
+            if (families[index].queueFlags & vk::QueueFlagBits::eGraphics)
+                result.graphics = index;
+
+            if (candidate.getSurfaceSupportKHR(index, surface))
+                result.present = index;
+
+            if (result.Complete())
+                break;
         }
 
-        return false;
+        return result;
     }
 
-    bool VulkanDevice::SupportsRequiredExtensions(VkPhysicalDevice device) const
+    bool VulkanDevice::IsSuitable(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface, QueueFamilyIndices& queues) const
     {
-        return false;
+        //device must provide vulkan 1.3
+        const vk::PhysicalDeviceProperties properties = candidate.getProperties();
+        if (properties.apiVersion < VK_API_VERSION_1_3)
+            return false;
+
+        queues = FindQueueFamilies(candidate, surface);
+        if (!queues.Complete())
+            return false;
+
+        //check for swapchain extension
+        bool hasSwapchain = false;
+        for (const vk::ExtensionProperties& extension : candidate.enumerateDeviceExtensionProperties())
+        {
+            if (std::strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+            {
+                hasSwapchain = true;
+                break;
+            }
+        }
+
+        if (!hasSwapchain)
+            return false;
+
+        //check for vulkan 1.3 features
+        const auto featureChain = candidate.getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features>();
+        const auto& vulkan13 = featureChain.get<vk::PhysicalDeviceVulkan13Features>();
+        if (!vulkan13.dynamicRendering || !vulkan13.synchronization2)
+            return false;
+
+        return  !candidate.getSurfaceFormatsKHR(surface).empty() &&
+                !candidate.getSurfacePresentModesKHR(surface).empty();
     }
 
-    bool VulkanDevice::SupportsRequiredFeatures(VkPhysicalDevice device) const
+    void VulkanDevice::SelectPhysicalDevice(const VulkanContext& context)
     {
-        return false;
+        for (const vk::raii::PhysicalDevice& candidate : context.Instance().enumeratePhysicalDevices())
+        {
+            //only queue indices suitable
+            QueueFamilyIndices queues;
+            if (!IsSuitable(candidate, context.SurfaceHandle(), queues))
+                continue;
+
+            _physicalDevice = candidate;
+            _graphicsQueueFamily = *queues.graphics;
+            _presentQueueFamily = *queues.present;
+
+            const auto properties = candidate.getProperties();
+            Debug::CLog("Selected Vulkan device: ", properties.deviceName.data(), "\n");
+            return;
+        }
+
+        throw std::runtime_error("No suitable Vulkan 1.3 device found");
     }
+
+    //get each family and enable features
+    void VulkanDevice::CreateLogicalDevice()
+    {
+        const float priority = 1.0f;
+        std::vector<uint32_t> families{ _graphicsQueueFamily };
+        if (_presentQueueFamily != _graphicsQueueFamily)
+            families.push_back(_presentQueueFamily);
+
+        std::vector<vk::DeviceQueueCreateInfo> queueInfos;
+        queueInfos.reserve(families.size());
+        for (uint32_t family : families)
+        {
+            queueInfos.push_back({
+                .queueFamilyIndex = family,
+                .queueCount = 1,
+                .pQueuePriorities = &priority
+                });
+        }
+
+        vk::PhysicalDeviceVulkan13Features vulkan13{
+            .synchronization2 = vk::True,
+            .dynamicRendering = vk::True
+        };
+        vk::StructureChain<
+            vk::PhysicalDeviceFeatures2,
+            vk::PhysicalDeviceVulkan13Features> features{
+                vk::PhysicalDeviceFeatures2{}, vulkan13
+        };
+
+        constexpr std::array extensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+        const vk::DeviceCreateInfo createInfo{
+            .pNext = &features.get<vk::PhysicalDeviceFeatures2>(),
+            .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
+            .pQueueCreateInfos = queueInfos.data(),
+            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+            .ppEnabledExtensionNames = extensions.data()
+        };
+
+        _device = vk::raii::Device(_physicalDevice, createInfo);
+        _graphicsQueue = vk::raii::Queue(_device, _graphicsQueueFamily, 0);
+        _presentQueue = vk::raii::Queue(_device, _presentQueueFamily, 0);
+    }
+
 }
