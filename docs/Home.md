@@ -8,6 +8,7 @@ This vault tracks engine architecture, implementation order, and system boundari
 - [[Architecture/System Boundaries]]
 - [[Architecture/Graphics Backend]]
 - [[Architecture/Vulkan Backend]]
+- [[Guides/Vulkan Implementation Tutorial]]
 - [[Architecture/Memory Profiler]]
 - [[Architecture/Asset Manager]]
 - [[Architecture/Render Submission]]

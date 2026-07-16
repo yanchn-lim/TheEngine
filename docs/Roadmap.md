@@ -5,6 +5,7 @@
 Vulkan backend implementation is the main engine focus until this track is complete. OpenGL remains the working reference backend while Vulkan is added alongside it.
 
 Detailed design: [[Architecture/Vulkan Backend]]
+Implementation guide: [[Guides/Vulkan Implementation Tutorial]]
 
 - [x] Build the tagged memory profiler: global C++ heap counters, named OpenGL storage estimates, and existing-profiler UI output. [[Architecture/Memory Profiler]]
 - [ ] Establish backend-neutral `IRenderer` and GPU-resource factory contracts while keeping the OpenGL path working.

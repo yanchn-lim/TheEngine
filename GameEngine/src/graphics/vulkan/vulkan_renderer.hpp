@@ -19,8 +19,5 @@ namespace Graphics
 		void SetCamera(const Camera2D& camera) override;
 		void OnResize(uint32_t width, uint32_t height) override;
 		void Shutdown() override;
-
-
-
 	};
 }

@@ -4,7 +4,9 @@ namespace Graphics
 {
 	bool VulkanRenderer::Init(GLFWwindow* window)
 	{
+		//ctx test
 		return _context.Init(window);
+		//return false; 
 	}
 
 	void VulkanRenderer::Submit(const DrawCmd&)
