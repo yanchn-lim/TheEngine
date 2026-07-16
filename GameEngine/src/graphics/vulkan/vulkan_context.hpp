@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "vulkan_include.hpp"
 
 struct GLFWwindow;
 
@@ -16,18 +16,20 @@ namespace Graphics
         VulkanContext& operator=(const VulkanContext&) = delete;
 
         bool Init(GLFWwindow* window);
-        void Shutdown();
+        void Shutdown() noexcept;
 
-        VkInstance GetInstance() const { return _instance; }
-        VkSurfaceKHR GetSurface() const { return _surface; }
+        const vk::raii::Instance& Instance() const { return _instance; }
+        vk::Instance InstanceHandle() { return *_instance;  }
+		vk::SurfaceKHR SurfaceHandle() { return *_surface; }
     private:
-        bool CheckValidationLayerSupport() const;
-        bool CreateInstance();
-        bool CreateDebugMessenger();
-        bool CreateSurface(GLFWwindow* window);
+        bool ValidationLayerAvailable() const;
+        void CreateInstance();
+        void CreateDebugMessenger();
+        void CreateSurface(GLFWwindow* window);
 
-        VkInstance _instance{ VK_NULL_HANDLE };
-        VkDebugUtilsMessengerEXT _debugMessenger{ VK_NULL_HANDLE };
-        VkSurfaceKHR _surface{ VK_NULL_HANDLE };
+        vk::raii::Context _loader;
+        vk::raii::Instance _instance{ nullptr };
+		vk::raii::DebugUtilsMessengerEXT _debugMessenger{ nullptr };
+		vk::raii::SurfaceKHR _surface{ nullptr };
 	};
 }

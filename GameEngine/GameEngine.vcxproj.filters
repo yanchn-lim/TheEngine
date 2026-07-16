@@ -207,6 +207,9 @@
     <ClCompile Include="src\graphics\vulkan\vulkan_renderer.cpp">
       <Filter>Source Files\graphics\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\vulkan\vulkan_device.cpp">
+      <Filter>Source Files\graphics\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -375,6 +378,12 @@
       <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\vulkan\vulkan_renderer.hpp">
+      <Filter>Header Files\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\vulkan\vulkan_include.hpp">
+      <Filter>Header Files\graphics\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\vulkan\vulkan_device.hpp">
       <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
