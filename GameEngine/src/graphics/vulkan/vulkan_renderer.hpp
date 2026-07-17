@@ -26,6 +26,7 @@ namespace Graphics
 		VulkanDevice _device;
 		VulkanSwapchain _swapchain;
 		std::array<VulkanFrameResources, FramesInFlight> _frames;
+		std::vector<vk::raii::Semaphore> _renderFinishedSemaphores;
 		std::vector<DrawCmd> _commands;
 		Camera2D _camera;
 		uint32_t _frameIndex = 0;
@@ -37,6 +38,7 @@ namespace Graphics
 		vk::Extent2D _requestedExtent{};
 
 		void CreateFrameResources();
+		void CreateRenderFinishedSemaphores();
 		bool TryRecreateSwapchain();
 		void BeginSwapchainRendering(vk::raii::CommandBuffer& commandBuffer);
 		void EndSwapchainRendering(vk::raii::CommandBuffer& commandBuffer);

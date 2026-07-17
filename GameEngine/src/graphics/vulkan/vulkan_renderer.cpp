@@ -107,6 +107,7 @@ namespace Graphics
 		try
 		{
 			VulkanFrameResources& frame = _frames[_frameIndex];
+			vk::raii::Semaphore& renderFinished = _renderFinishedSemaphores.at(_imageIndex);
 			EndSwapchainRendering(frame.commandBuffer);
 			frame.commandBuffer.end();
 
@@ -118,7 +119,7 @@ namespace Graphics
 			waitInfo.stageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
 			
 			vk::SemaphoreSubmitInfo signalInfo{};
-			signalInfo.semaphore = *frame.renderFinished;
+			signalInfo.semaphore = *renderFinished;
 			signalInfo.stageMask = vk::PipelineStageFlagBits2::eAllGraphics;
 
 			vk::SubmitInfo2 submitInfo{};
@@ -131,7 +132,7 @@ namespace Graphics
 			_device.GraphicsQueue().submit2(submitInfo, *frame.inFlightFence);
 
 			const vk::SwapchainKHR swapchainHandle = *_swapchain.Swapchain();
-			const vk::Semaphore finished = *frame.renderFinished;
+			const vk::Semaphore finished = *renderFinished;
 			vk::PresentInfoKHR presentInfo{};
 			presentInfo.waitSemaphoreCount = 1;
 			presentInfo.pWaitSemaphores = &finished;
@@ -173,8 +174,40 @@ namespace Graphics
 
 	void VulkanRenderer::Shutdown()
 	{
+		try
+		{
+			_device.WaitIdle();
+		}
+		catch (const std::exception& error)
+		{
+			Debug::LogError(
+				"VulkanRenderer::Shutdown: waitIdle failed: ",
+				error.what());
+		}
 
+		_renderFinishedSemaphores.clear();
+
+		for (VulkanFrameResources& frame : _frames)
+		{
+			frame.commandBuffer = nullptr;
+			frame.commandPool = nullptr;
+			frame.inFlightFence = nullptr;
+			frame.imageAvailable = nullptr;
+		}
+
+		_swapchain.Shutdown();
+		_device.Shutdown();
 		_context.Shutdown();
+
+		_commands.clear();
+		_window = nullptr;
+		_frameIndex = 0;
+		_imageIndex = 0;
+		_frameReady = false;
+		_renderingActive = false;
+		_resizePending = false;
+		_fatalError = false;
+		_requestedExtent = {};
 	}
 
 	void VulkanRenderer::CreateFrameResources()
@@ -199,7 +232,21 @@ namespace Graphics
 			fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
 			frame.inFlightFence = vk::raii::Fence(_device.Device(), fenceCreateInfo);
 			frame.imageAvailable = vk::raii::Semaphore(_device.Device(), vk::SemaphoreCreateInfo{});
-			frame.renderFinished = vk::raii::Semaphore(_device.Device(), vk::SemaphoreCreateInfo{});
+		}
+
+		CreateRenderFinishedSemaphores();
+	}
+
+	void VulkanRenderer::CreateRenderFinishedSemaphores()
+	{
+		_renderFinishedSemaphores.clear();
+		_renderFinishedSemaphores.reserve(_swapchain.ImageCount());
+
+		for (uint32_t index = 0; index < _swapchain.ImageCount(); ++index)
+		{
+			_renderFinishedSemaphores.emplace_back(
+				_device.Device(),
+				vk::SemaphoreCreateInfo{});
 		}
 	}
 
@@ -229,6 +276,7 @@ namespace Graphics
 			{
 				return false;
 			}
+			CreateRenderFinishedSemaphores();
 
 			_resizePending = false;
 		}

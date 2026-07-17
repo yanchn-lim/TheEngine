@@ -12,6 +12,5 @@ namespace Graphics
 		vk::raii::CommandBuffer commandBuffer{ nullptr };
 		vk::raii::Fence inFlightFence{ nullptr };
 		vk::raii::Semaphore imageAvailable{ nullptr };
-		vk::raii::Semaphore renderFinished{ nullptr };
 	};
 }

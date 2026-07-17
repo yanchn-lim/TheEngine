@@ -154,10 +154,11 @@ namespace Graphics
 		createInfo.pNext = &debugCreateInfo;
 #endif
         createInfo.pApplicationInfo = &appInfo;
+        createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+		createInfo.ppEnabledLayerNames = layers.empty() ? nullptr : layers.data();
+
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-		createInfo.ppEnabledLayerNames = layers.data();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-		createInfo.ppEnabledExtensionNames = extensions.data();
+		createInfo.ppEnabledExtensionNames = extensions.empty() ? nullptr : extensions.data();
 
 		_instance = vk::raii::Instance(_loader, createInfo);
     }
