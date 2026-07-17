@@ -67,8 +67,8 @@ public:
 	ManualRenderTest manualRenderTest;
 
 	//engine settings
-	Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;
-	//Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
+	//Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;
+	Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
 
 
 	//asset managers

@@ -37,5 +37,8 @@ namespace Graphics
 		vk::Extent2D _requestedExtent{};
 
 		void CreateFrameResources();
+		bool TryRecreateSwapchain();
+		void BeginSwapchainRendering(vk::raii::CommandBuffer& commandBuffer);
+		void EndSwapchainRendering(vk::raii::CommandBuffer& commandBuffer);
 	};
 }
