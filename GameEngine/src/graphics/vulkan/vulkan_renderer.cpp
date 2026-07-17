@@ -86,28 +86,25 @@ namespace Graphics
 	{
 		for (VulkanFrameResources& frame : _frames)
 		{
-			frame.commandPool = vk::raii::CommandPool(
-				_device.Device(),
-				vk::CommandPoolCreateInfo{
-					.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-					.queueFamilyIndex = _device.GraphicsQueueFamily()
-				});
+			vk::CommandPoolCreateInfo cmdPoolCreateInfo{};
+			cmdPoolCreateInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+			cmdPoolCreateInfo.queueFamilyIndex = _device.GraphicsQueueFamily();
+			frame.commandPool = vk::raii::CommandPool(_device.Device(), cmdPoolCreateInfo);
 
-			auto commandBuffers = _device.Device().allocateCommandBuffers(
-				vk::CommandBufferAllocateInfo{
-					.commandPool = *frame.commandPool,
-					.level = vk::CommandBufferLevel::ePrimary,
-					.commandBufferCount = 1
-				});
+			vk::CommandBufferAllocateInfo cmdBufferAllocateInfo{};
+			cmdBufferAllocateInfo.commandPool = *frame.commandPool;
+			cmdBufferAllocateInfo.level = vk::CommandBufferLevel::ePrimary;
+			cmdBufferAllocateInfo.commandBufferCount = 1;
+			
+			auto commandBuffers = _device.Device().allocateCommandBuffers(cmdBufferAllocateInfo);
+
 			frame.commandBuffer = std::move(commandBuffers.front());
 
-			frame.inFlightFence = vk::raii::Fence(
-				_device.Device(),
-				vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled });
-			frame.imageAvailable = vk::raii::Semaphore(
-				_device.Device(), vk::SemaphoreCreateInfo{});
-			frame.renderFinished = vk::raii::Semaphore(
-				_device.Device(), vk::SemaphoreCreateInfo{});
+			vk::FenceCreateInfo fenceCreateInfo{};
+			fenceCreateInfo.flags = vk::FenceCreateFlagBits::eSignaled;
+			frame.inFlightFence = vk::raii::Fence(_device.Device(), fenceCreateInfo);
+			frame.imageAvailable = vk::raii::Semaphore(_device.Device(), vk::SemaphoreCreateInfo{});
+			frame.renderFinished = vk::raii::Semaphore(_device.Device(), vk::SemaphoreCreateInfo{});
 		}
 	}
 	

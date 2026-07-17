@@ -129,17 +129,17 @@ namespace Graphics
         queueInfos.reserve(families.size());
         for (uint32_t family : families)
         {
-            queueInfos.push_back({
-                .queueFamilyIndex = family,
-                .queueCount = 1,
-                .pQueuePriorities = &priority
-                });
+            vk::DeviceQueueCreateInfo info{};
+            info.queueFamilyIndex = family;
+            info.queueCount = 1;
+            info.pQueuePriorities = &priority;
+            queueInfos.push_back(info);
         }
 
-        vk::PhysicalDeviceVulkan13Features vulkan13{
-            .synchronization2 = vk::True,
-            .dynamicRendering = vk::True
-        };
+        vk::PhysicalDeviceVulkan13Features vulkan13{};
+        vulkan13.synchronization2 = vk::True;
+        vulkan13.dynamicRendering = vk::True;
+
         vk::StructureChain<
             vk::PhysicalDeviceFeatures2,
             vk::PhysicalDeviceVulkan13Features> features{
@@ -147,14 +147,13 @@ namespace Graphics
         };
 
         constexpr std::array extensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-        const vk::DeviceCreateInfo createInfo{
-            .pNext = &features.get<vk::PhysicalDeviceFeatures2>(),
-            .queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size()),
-            .pQueueCreateInfos = queueInfos.data(),
-            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-            .ppEnabledExtensionNames = extensions.data()
-        };
-
+        vk::DeviceCreateInfo createInfo{};
+        createInfo.pNext = &features.get<vk::PhysicalDeviceFeatures2>();
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueInfos.size());
+        createInfo.pQueueCreateInfos = queueInfos.data();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+        createInfo.ppEnabledExtensionNames = extensions.data();
+        
         _device = vk::raii::Device(_physicalDevice, createInfo);
         _graphicsQueue = vk::raii::Queue(_device, _graphicsQueueFamily, 0);
         _presentQueue = vk::raii::Queue(_device, _presentQueueFamily, 0);

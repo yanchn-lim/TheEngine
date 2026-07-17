@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vulkan_include.hpp"
+#include <optional>
 
 namespace Graphics
 {
