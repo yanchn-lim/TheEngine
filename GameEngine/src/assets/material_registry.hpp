@@ -1,22 +1,23 @@
 #pragma once
 
 #include "asset_handle.hpp"
-#include "graphics/material.hpp"
+#include "asset_records.hpp"
 
 namespace Assets
 {
+	// owns material descriptions and resolves their typed handles
 	class MaterialRegistry
 	{
 	public:
-		MaterialHandle Create(const std::string& name, const Graphics::Shader* shader, const Graphics::Texture2D* texture, Graphics::RenderState state);
-		const Graphics::Material* Get(MaterialHandle handle) const;
-		const Graphics::Material* Get(const std::string& handle) const;
+		MaterialHandle Create(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state);
+		const MaterialAsset* Get(MaterialHandle handle) const;
+		const MaterialAsset* Get(const std::string& handle) const;
 		void Clear();
 
 	private:
 		AssetId _nextId = 1;
 
 		std::unordered_map<std::string, MaterialHandle> _nameToHandle;
-		std::unordered_map<AssetId, Graphics::Material> _materials;
+		std::unordered_map<AssetId, MaterialAsset> _materials;
 	};
 }

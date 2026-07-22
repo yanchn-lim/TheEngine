@@ -1,78 +1,58 @@
-#include "debug/debug.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "texture_registry.hpp"
+
+#include "debug/debug.hpp"
 
 namespace Assets
 {
-	TextureHandle Assets::TextureRegistry::Load(const std::string& path)
-	{
-		// Reuse an existing GPU texture when the same path is loaded again.
-		const auto it = _pathToHandle.find(path);
-		if (it != _pathToHandle.end())
-			return it->second;
+    TextureHandle TextureRegistry::Load(const std::string& path)
+    {
+        // decode each source path once and keep a CPU copy in standard RGBA order
+        if (const auto existing = _pathToHandle.find(path); existing != _pathToHandle.end())
+            return existing->second;
 
-		Graphics::Texture2D tex;
-		if (!tex.LoadFromFile(path.c_str(), path))
-		{
-			Debug::LogError("TextureRegistry::Load : Failed to load texture from ", path, ". Using fallback texture for invalid lookups.");
-			return TextureHandle(); //defaults to invalid
-		}
+        stbi_set_flip_vertically_on_load(true);
+        int width = 0;
+        int height = 0;
+        int channels = 0;
+        unsigned char* source = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+        if (!source || width <= 0 || height <= 0)
+        {
+            Debug::LogError("TextureRegistry::Load : Failed to load texture ", path);
+            stbi_image_free(source);
+            return {};
+        }
 
-		TextureHandle handle{ _nextId++ };
-		_pathToHandle[path] = handle;
-		_textures[handle.id] = std::move(tex);
+        // copy stb_image memory into registry-owned storage before releasing it
+        TextureAsset asset;
+        asset.width = static_cast<uint32_t>(width);
+        asset.height = static_cast<uint32_t>(height);
+        asset.label = path;
+        const size_t byteCount = static_cast<size_t>(width) * static_cast<size_t>(height) * 4;
+        asset.pixels.assign(source, source + byteCount);
+        stbi_image_free(source);
 
-		return handle;
-	}
+        const TextureHandle handle{ _nextId++ };
+        _pathToHandle[path] = handle;
+        _textures.emplace(handle.id, std::move(asset));
+        return handle;
+    }
 
-	const Graphics::Texture2D* TextureRegistry::Get(TextureHandle handle) const
-	{
-		// Invalid or missing handles resolve to the checker fallback texture.
-		if (!handle)
-		{
-			Debug::LogError("TextureRegistry::Get : TextureHandle [", handle.id, "] is invalid. Returning fallback texture.");
-			return GetFallback();
-		}
+    const TextureAsset* TextureRegistry::Get(TextureHandle handle) const
+    {
+        if (!handle)
+            return nullptr;
 
-		const auto it = _textures.find(handle.id);
+        const auto found = _textures.find(handle.id);
+        return found == _textures.end() ? nullptr : &found->second;
+    }
 
-		if (it == _textures.end())
-		{
-			Debug::LogError("TextureRegistry::Get : Could not find TextureHandle [", handle.id, "] in the registry. Returning fallback texture.");
-			return GetFallback();
-		}
-
-		return &it->second;
-	}
-
-	const Graphics::Texture2D* TextureRegistry::GetFallback() const
-	{
-		// The fallback is generated in memory so missing files still render visibly.
-		if (_fallbackTextureReady && _fallbackTexture.IsValid())
-			return &_fallbackTexture;
-
-		constexpr unsigned char pixels[] =
-		{
-			255,   0, 255, 255,   0,   0,   0, 255,
-			  0,   0,   0, 255, 255,   0, 255, 255
-		};
-
-		if (!_fallbackTexture.CreateFromRGBA(pixels, 2, 2, "Fallback Texture"))
-		{
-			Debug::LogError("TextureRegistry::GetFallback : Failed to create fallback texture");
-			return nullptr;
-		}
-
-		_fallbackTextureReady = true;
-		return &_fallbackTexture;
-	}
-
-	void TextureRegistry::Clear()
-	{
-		// Release all registry textures and force fallback recreation on demand.
-		_nextId = 1;
-		_textures.clear();
-		_pathToHandle.clear();
-		_fallbackTexture.Destroy();
-		_fallbackTextureReady = false;
-	}
+    void TextureRegistry::Clear()
+    {
+        _nextId = 1;
+        _pathToHandle.clear();
+        _textures.clear();
+    }
 }

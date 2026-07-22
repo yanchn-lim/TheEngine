@@ -4,10 +4,12 @@
 
 namespace Assets
 {
+	// asset ids identify CPU-side records and remain independent from GPU handles
 	using AssetId = uint32_t;
 
 	constexpr AssetId InvalidAssetId = 0;
 
+	// distinct handle types prevent accidental cross-registry lookups
 	struct TextureHandle
 	{
 		AssetId id = InvalidAssetId;

@@ -5,7 +5,7 @@
 
 namespace Graphics
 {
-
+    // records the queue families required for rendering and presentation
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphics;
@@ -16,6 +16,7 @@ namespace Graphics
 
     class VulkanContext;
 
+    // selects a physical device and owns its logical device and queues
     class VulkanDevice
     {
     public:
@@ -23,7 +24,7 @@ namespace Graphics
         void Shutdown() noexcept;
         void WaitIdle() const;
 
-        //getters
+        // expose Vulkan owners only to the higher-level Vulkan graphics device
         const vk::raii::PhysicalDevice& PhysicalDevice() const { return _physicalDevice; }
         const vk::raii::Device& Device() const { return _device; }
         vk::raii::Device& Device() { return _device; }

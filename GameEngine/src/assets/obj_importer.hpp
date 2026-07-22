@@ -4,6 +4,7 @@
 
 namespace Assets
 {
+    // converts OBJ files into the engine's backend-neutral import structures
     class ObjImporter : public IModelImporter
     {
     public:

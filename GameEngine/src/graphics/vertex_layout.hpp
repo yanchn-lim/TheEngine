@@ -5,6 +5,7 @@
 
 namespace Graphics
 {
+	// lists shader-visible scalar and vector formats without native API values
 	enum class ShaderDataType
 	{
 		FLOAT,
@@ -17,6 +18,7 @@ namespace Graphics
 		INT4
 	};
 
+	// maps one vertex field to a shader location and byte offset
 	struct VertexAttribute
 	{
 		uint32_t location{};
@@ -24,6 +26,7 @@ namespace Graphics
 		uint32_t offset{};
 	};
 
+	// describes the stride and ordered attributes of one vertex buffer
 	struct VertexLayout
 	{
 		uint32_t stride{};

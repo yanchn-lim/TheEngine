@@ -6,6 +6,7 @@ namespace Assets
 {
 	ModelHandle ModelRegistry::Create(const std::string& name, std::vector<MeshHandle> handles)
 	{
+		// reuse named models so repeated loads keep stable asset references
 		const auto it = _nameToHandle.find(name);
 		if (it != _nameToHandle.end())
 			return it->second;
@@ -57,6 +58,7 @@ namespace Assets
 
 	void ModelRegistry::Clear()
 	{
+		// discard groupings without affecting meshes owned by MeshRegistry
 		_nextId = 1;
 		_nameToHandle.clear();
 		_models.clear();

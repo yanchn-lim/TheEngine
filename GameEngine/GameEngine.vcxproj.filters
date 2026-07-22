@@ -40,6 +40,14 @@
     <Filter Include="Source Files\graphics\vulkan">
       <UniqueIdentifier>{5d69f380-b20b-4f97-b417-58d331decc2f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\graphics\opengl">
+      <UniqueIdentifier>{58c73445-8b4e-464b-b8b1-46319fa7c94e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering">
+      <UniqueIdentifier>{ad2b4fa4-8870-4daf-b4fa-a45248970083}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems"><UniqueIdentifier>{970dd83f-7cdf-48e2-bacb-416fa57dd99c}</UniqueIdentifier></Filter>
+    <Filter Include="Source Files\tests"><UniqueIdentifier>{7f6a6787-fdfb-4876-b40f-07c06771d33f}</UniqueIdentifier></Filter>
     <Filter Include="Source Files\scene">
       <UniqueIdentifier>{d6ee8196-0b28-4f0f-8533-d7074d4e4fa4}</UniqueIdentifier>
     </Filter>
@@ -60,6 +68,9 @@
     </Filter>
     <Filter Include="Header Files\graphics\vulkan">
       <UniqueIdentifier>{3ccfc5d9-f4e2-4f41-b6f3-1903e4d475c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\graphics\opengl">
+      <UniqueIdentifier>{ce4f31a5-e418-4e30-a8ac-f8aeef4865bb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\scene">
       <UniqueIdentifier>{e33e24b6-6d2e-4bb2-88ed-8fbba5d0ab37}</UniqueIdentifier>
@@ -82,6 +93,8 @@
     <Filter Include="Header Files\rendering">
       <UniqueIdentifier>{59e84e8c-f369-48a1-8d83-eece00ec775e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\systems"><UniqueIdentifier>{6e0317e3-7150-4ae2-bce5-a969330db529}</UniqueIdentifier></Filter>
+    <Filter Include="Header Files\tests"><UniqueIdentifier>{fbafc4b2-099e-4fe0-bacc-ed02697be1b9}</UniqueIdentifier></Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -111,6 +124,7 @@
     <ClCompile Include="external\imgui\backends\imgui_impl_opengl3.cpp">
       <Filter>Source Files\external\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="external\imgui\backends\imgui_impl_vulkan.cpp"><Filter>Source Files\external\imgui</Filter></ClCompile>
     <ClCompile Include="src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -132,25 +146,7 @@
     <ClCompile Include="src\debug\memory_tracker.cpp">
       <Filter>Source Files\debug</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\opengl_renderer.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\shader.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\mesh.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\vertex_array.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\vertex_buffer.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\camera.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\texture2d.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\core\file_system.cpp">
@@ -161,9 +157,6 @@
     </ClCompile>
     <ClCompile Include="src\components\transform2d.cpp">
       <Filter>Source Files\components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\index_buffer.cpp">
-      <Filter>Source Files\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\vertex_layout.cpp">
       <Filter>Source Files\graphics</Filter>
@@ -198,13 +191,7 @@
     <ClCompile Include="src\assets\model_registry.cpp">
       <Filter>Source Files\assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\rendering\render_resource_resolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics\vulkan\vulkan_context.cpp">
-      <Filter>Source Files\graphics\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\vulkan\vulkan_renderer.cpp">
       <Filter>Source Files\graphics\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\vulkan\vulkan_device.cpp">
@@ -213,6 +200,29 @@
     <ClCompile Include="src\graphics\vulkan\vulkan_swapchain.cpp">
       <Filter>Source Files\graphics\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\graphics_device_factory.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\imgui_backend.cpp"><Filter>Source Files\graphics</Filter></ClCompile>
+    <ClCompile Include="src\graphics\opengl\opengl_graphics_device.cpp">
+      <Filter>Source Files\graphics\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\opengl\opengl_imgui_backend.cpp"><Filter>Source Files\graphics\opengl</Filter></ClCompile>
+    <ClCompile Include="src\graphics\vulkan\vulkan_graphics_device.cpp">
+      <Filter>Source Files\graphics\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\vulkan\vulkan_imgui_backend.cpp"><Filter>Source Files\graphics\vulkan</Filter></ClCompile>
+    <ClCompile Include="src\rendering\renderer.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rendering\render_resource_manager.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rendering\render_world.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\render_system.cpp"><Filter>Source Files\systems</Filter></ClCompile>
+    <ClCompile Include="src\tests\graphics_api_tests.cpp"><Filter>Source Files\tests</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -239,6 +249,7 @@
     <ClInclude Include="external\imgui\backends\imgui_impl_opengl3_loader.h">
       <Filter>Header Files\external\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="external\imgui\backends\imgui_impl_vulkan.h"><Filter>Header Files\external\imgui</Filter></ClInclude>
     <ClInclude Include="external\imgui\imstb_truetype.h">
       <Filter>Header Files\external\imgui</Filter>
     </ClInclude>
@@ -281,43 +292,13 @@
     <ClInclude Include="src\debug\memory_tracker.hpp">
       <Filter>Header Files\debug</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\drawcmd.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\opengl_renderer.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\shader.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\mesh.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\vertex_array.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\vertex_buffer.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\camera.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\texture2d.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\vertex_layout.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\index_buffer.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\mesh_upload_data.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\render_state.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\material.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\primitive_topology.hpp">
@@ -368,19 +349,10 @@
     <ClInclude Include="src\rendering\render_item.hpp">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\render_resource_resolver.hpp">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\irenderer.hpp">
-      <Filter>Header Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\renderer_backend.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\vulkan\vulkan_context.hpp">
-      <Filter>Header Files\graphics\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\vulkan\vulkan_renderer.hpp">
       <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\vulkan\vulkan_include.hpp">
@@ -395,6 +367,24 @@
     <ClInclude Include="src\graphics\vulkan\vulkan_frameresources.hpp">
       <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\assets\asset_records.hpp"><Filter>Header Files\assets</Filter></ClInclude>
+    <ClInclude Include="src\components\mesh_renderer_component.hpp"><Filter>Header Files\components</Filter></ClInclude>
+    <ClInclude Include="src\graphics\graphics_command_list.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\graphics_descriptions.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\graphics_device.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\graphics_device_factory.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\graphics_handles.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\imgui_backend.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\resource_table.hpp"><Filter>Header Files\graphics</Filter></ClInclude>
+    <ClInclude Include="src\graphics\opengl\opengl_graphics_device.hpp"><Filter>Header Files\graphics\opengl</Filter></ClInclude>
+    <ClInclude Include="src\graphics\opengl\opengl_imgui_backend.hpp"><Filter>Header Files\graphics\opengl</Filter></ClInclude>
+    <ClInclude Include="src\graphics\vulkan\vulkan_graphics_device.hpp"><Filter>Header Files\graphics\vulkan</Filter></ClInclude>
+    <ClInclude Include="src\graphics\vulkan\vulkan_imgui_backend.hpp"><Filter>Header Files\graphics\vulkan</Filter></ClInclude>
+    <ClInclude Include="src\rendering\renderer.hpp"><Filter>Header Files\rendering</Filter></ClInclude>
+    <ClInclude Include="src\rendering\render_resource_manager.hpp"><Filter>Header Files\rendering</Filter></ClInclude>
+    <ClInclude Include="src\rendering\render_world.hpp"><Filter>Header Files\rendering</Filter></ClInclude>
+    <ClInclude Include="src\systems\render_system.hpp"><Filter>Header Files\systems</Filter></ClInclude>
+    <ClInclude Include="src\tests\graphics_api_tests.hpp"><Filter>Header Files\tests</Filter></ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\models\test_quad.obj">
@@ -412,6 +402,13 @@
     <None Include="assets\shaders\sprite.vert">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
+    <None Include="assets\shaders\standard_gl.frag"><Filter>Resource Files\assets\shaders</Filter></None>
+    <None Include="assets\shaders\standard_gl.vert"><Filter>Resource Files\assets\shaders</Filter></None>
+    <None Include="assets\shaders\standard_vk.frag"><Filter>Resource Files\assets\shaders</Filter></None>
+    <None Include="assets\shaders\standard_vk.frag.spv"><Filter>Resource Files\assets\shaders</Filter></None>
+    <None Include="assets\shaders\standard_vk.vert"><Filter>Resource Files\assets\shaders</Filter></None>
+    <None Include="assets\shaders\standard_vk.vert.spv"><Filter>Resource Files\assets\shaders</Filter></None>
+    <None Include="tools\compile_shaders.ps1"><Filter>Resource Files</Filter></None>
     <None Include="todo.md">
       <Filter>Resource Files</Filter>
     </None>

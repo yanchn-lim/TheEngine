@@ -4,7 +4,7 @@ namespace Assets
 {
 	void ModelImporterRegistry::RegisterImporter(std::unique_ptr<IModelImporter> importer)
 	{
-		// Importers are tried in registration order when loading model files.
+		// importers are tried in registration order when loading model files
 		if (!importer)
 			return;
 
@@ -13,7 +13,7 @@ namespace Assets
 
 	bool ModelImporterRegistry::Import(const std::string& path, ModelImportData& outModel) const
 	{
-		// Find the first importer that claims support for this file.
+		// find the first importer that claims support for this file
 		for (const auto& importer : _importers)
 		{
 			if (importer->CanImport(path))

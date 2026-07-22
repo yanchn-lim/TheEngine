@@ -3,31 +3,30 @@
 
 namespace Assets
 {
-	MaterialHandle MaterialRegistry::Create(const std::string& name, const Graphics::Shader* shader, const Graphics::Texture2D* texture, Graphics::RenderState state)
+	MaterialHandle MaterialRegistry::Create(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
 	{
-		// Materials store non-owning renderer resource pointers resolved by AssetManager.
 		const auto it = _nameToHandle.find(name);
 		if (it != _nameToHandle.end())
 			return it->second;
 
 		if (!shader || !texture)
 		{
-			Debug::LogError("MaterialRegistry::Create : Shader or Texture2D pointer is invalid");
+			Debug::LogError("MaterialRegistry::Create : Shader or texture handle is invalid");
 			return MaterialHandle();
 		}
 
 		MaterialHandle handle{ _nextId++ };
 
-		Graphics::Material material { shader, texture, state};
+		MaterialAsset material { shader, texture, state, name };
 		_nameToHandle[name] = handle;
 		_materials[handle.id] = material;
 
 		return handle;
 	}
 
-	const Graphics::Material* MaterialRegistry::Get(MaterialHandle handle) const
+	const MaterialAsset* MaterialRegistry::Get(MaterialHandle handle) const
 	{
-		// Handle lookup keeps material ownership centralized in the registry.
+		// handle lookup keeps material ownership centralized in the registry
 		if (!handle)
 		{
 			Debug::LogError("MaterialRegistry::Get : MaterialHandle [", handle.id, "] is invalid");
@@ -44,9 +43,9 @@ namespace Assets
 		return &it->second;
 	}
 
-	const Graphics::Material* MaterialRegistry::Get(const std::string& handle) const
+	const MaterialAsset* MaterialRegistry::Get(const std::string& handle) const
 	{
-		// Name lookup is a convenience path for tests and simple engine code.
+		// name lookup is a convenience path for tests and simple engine code
 		const auto it = _nameToHandle.find(handle);
 		if (it == _nameToHandle.end())
 		{
@@ -59,7 +58,7 @@ namespace Assets
 
 	void MaterialRegistry::Clear()
 	{
-		// Clear materials before their referenced shader/texture registries are reset.
+		// clear materials before their referenced shader and texture registries are reset
 		_nextId = 1;
 		_nameToHandle.clear();
 		_materials.clear();

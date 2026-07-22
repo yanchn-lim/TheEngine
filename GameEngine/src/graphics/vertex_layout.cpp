@@ -4,7 +4,7 @@ namespace Graphics
 {
 	uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	{
-		// Byte size is used to advance attribute offsets and total stride.
+		// byte size advances attribute offsets and the total stride
 		switch (type)
 		{
 		case ShaderDataType::FLOAT:  return sizeof(float);
@@ -21,7 +21,7 @@ namespace Graphics
 
 	uint32_t GetShaderDataTypeComponentCount(ShaderDataType type)
 	{
-		// Component count is passed to OpenGL attribute format calls.
+		// component count is passed to OpenGL attribute format calls
 		switch (type)
 		{
 		case ShaderDataType::FLOAT:  return 1;
@@ -47,7 +47,7 @@ namespace Graphics
 
 	void VertexLayout::Add(uint32_t location, ShaderDataType type)
 	{
-		// Attributes are tightly packed in the order they are added.
+		// attributes are tightly packed in the order they are added
 		attributes.push_back({ location, type, stride });
 
 		stride += GetShaderDataTypeSize(type);

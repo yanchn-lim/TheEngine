@@ -10,6 +10,7 @@ namespace Graphics
 {
     bool VulkanDevice::Init(const VulkanContext& context)
     {
+        // select hardware first because logical-device creation uses its queue families
         Shutdown();
         try
         {
@@ -27,6 +28,7 @@ namespace Graphics
 
     void VulkanDevice::Shutdown() noexcept
     {
+        // release queues and the logical device before the selected physical handle
         _presentQueue = nullptr;
         _graphicsQueue = nullptr;
         _device = nullptr;
@@ -43,6 +45,7 @@ namespace Graphics
 
     QueueFamilyIndices VulkanDevice::FindQueueFamilies(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface) const
     {
+        // rendering and presentation can use the same family or separate families
         QueueFamilyIndices result;
         const auto families = candidate.getQueueFamilyProperties();
 
@@ -63,7 +66,7 @@ namespace Graphics
 
     bool VulkanDevice::IsSuitable(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface, QueueFamilyIndices& queues) const
     {
-        //device must provide vulkan 1.3
+        // require Vulkan 1.3 for dynamic rendering and synchronization2
         const vk::PhysicalDeviceProperties properties = candidate.getProperties();
         if (properties.apiVersion < VK_API_VERSION_1_3)
             return false;
@@ -72,7 +75,7 @@ namespace Graphics
         if (!queues.Complete())
             return false;
 
-        //check for swapchain extension
+        // reject devices that cannot present through a swapchain
         bool hasSwapchain = false;
         for (const vk::ExtensionProperties& extension : candidate.enumerateDeviceExtensionProperties())
         {
@@ -86,7 +89,7 @@ namespace Graphics
         if (!hasSwapchain)
             return false;
 
-        //check for vulkan 1.3 features
+        // require the Vulkan 1.3 features used by command recording
         const auto featureChain = candidate.getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features>();
         const auto& vulkan13 = featureChain.get<vk::PhysicalDeviceVulkan13Features>();
         if (!vulkan13.dynamicRendering || !vulkan13.synchronization2)
@@ -100,7 +103,7 @@ namespace Graphics
     {
         for (const vk::raii::PhysicalDevice& candidate : context.Instance().enumeratePhysicalDevices())
         {
-            //only queue indices suitable
+            // accept the first device that satisfies every renderer requirement
             QueueFamilyIndices queues;
             if (!IsSuitable(candidate, context.SurfaceHandle(), queues))
                 continue;
@@ -117,7 +120,7 @@ namespace Graphics
         throw std::runtime_error("No suitable Vulkan 1.3 device found");
     }
 
-    //get each family and enable features
+    // create one queue per required family and enable the required Vulkan 1.3 features
     void VulkanDevice::CreateLogicalDevice()
     {
         const float priority = 1.0f;

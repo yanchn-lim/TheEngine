@@ -13,7 +13,7 @@ namespace Graphics
     {
         constexpr const char* VALIDATION_LAYER = "VK_LAYER_KHRONOS_validation";
 
-        //log validation messages
+        // route Vulkan validation messages through the engine logger
         VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(
             vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
             vk::DebugUtilsMessageTypeFlagsEXT,
@@ -60,16 +60,16 @@ namespace Graphics
         }
     }
 
-    //cleanup context
+    // release context owners if explicit shutdown was skipped
     VulkanContext::~VulkanContext()
     {
         Shutdown();
     }
 
-    //initialize context
+    // initialize instance-level Vulkan state for the supplied window
     bool VulkanContext::Init(GLFWwindow* window)
     {
-        //reset previous state
+        // reset previous state so repeated initialization remains safe
         Shutdown();
 
         if (!window || glfwVulkanSupported() != GLFW_TRUE)
@@ -81,7 +81,7 @@ namespace Graphics
         try
         {
 #if defined(_DEBUG)
-            //check validation layer
+            // require the validation layer in debug builds
             if (!ValidationLayerAvailable())
                 throw std::runtime_error("VK_LAYER_KHRONOS_validation is unavailable");
             
@@ -104,7 +104,7 @@ namespace Graphics
         return false;
     }
 
-    //destroy context resources
+    // destroy owners in surface-to-instance dependency order
     void VulkanContext::Shutdown() noexcept
     {
 		_surface = nullptr;
@@ -123,16 +123,16 @@ namespace Graphics
         return false;
     }
 
-    //create vulkan instance
+    // create the Vulkan instance with GLFW and debug extensions
     void VulkanContext::CreateInstance()
     {
-        //get glfw extensions
+        // request every platform extension required by GLFW
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
         if (!glfwExtensions || glfwExtensionCount == 0)
             throw std::runtime_error("GLFW returned no Vulkan instance extensions");
 
-        //copy extensions
+        // keep extension and layer storage alive through instance creation
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
         std::vector<const char*> layers;
 
@@ -163,7 +163,7 @@ namespace Graphics
 		_instance = vk::raii::Instance(_loader, createInfo);
     }
 
-    //create debug messenger
+    // create the debug messenger only when validation is compiled in
     void VulkanContext::CreateDebugMessenger()
     {
 #if defined(_DEBUG)
@@ -173,7 +173,7 @@ namespace Graphics
 #endif
     }
 
-    //create glfw surface
+    // wrap the native GLFW surface in a Vulkan RAII owner
     void VulkanContext::CreateSurface(GLFWwindow* window)
     {
 		VkSurfaceKHR rawSurface = VK_NULL_HANDLE;

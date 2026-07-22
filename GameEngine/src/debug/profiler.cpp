@@ -76,6 +76,7 @@ void Profiler::PrintFrameStatistics(size_t numFrames) const
 
 	numFrames = std::min(numFrames, available);
 	size_t startOffset = available - numFrames;
+	const size_t historyStart = (_frames.head + PROFILER_CAP - available) % PROFILER_CAP;
 
 	std::vector<double> frameTimes;
 	frameTimes.reserve(numFrames);
@@ -108,7 +109,7 @@ void Profiler::PrintFrameStatistics(size_t numFrames) const
 
 	for (size_t i = startOffset; i < available; ++i)
 	{
-		size_t idx = (_frames.head + i) % PROFILER_CAP;
+		size_t idx = (historyStart + i) % PROFILER_CAP;
 		const FrameData& frame = _frames.data[idx];
 
 		frameTimes.push_back(frame.frameTimeMs);
@@ -201,6 +202,7 @@ void Profiler::PrintFrameStatisticsToFile(const std::string& filename, size_t nu
 
 	numFrames = std::min(numFrames, available);
 	size_t startOffset = available - numFrames;
+	const size_t historyStart = (_frames.head + PROFILER_CAP - available) % PROFILER_CAP;
 
 	std::vector<double> frameTimes;
 	frameTimes.reserve(numFrames);
@@ -233,7 +235,7 @@ void Profiler::PrintFrameStatisticsToFile(const std::string& filename, size_t nu
 
 	for (size_t i = startOffset; i < available; ++i)
 	{
-		size_t idx = (_frames.head + i) % PROFILER_CAP;
+		size_t idx = (historyStart + i) % PROFILER_CAP;
 		const FrameData& frame = _frames.data[idx];
 		frameTimes.push_back(frame.frameTimeMs);
 		for (const auto& root : frame.roots)

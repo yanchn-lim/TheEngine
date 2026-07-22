@@ -8,6 +8,7 @@
 
 namespace Assets
 {
+    // isolates file-format parsing from the asset manager
     class IModelImporter
     {
     public:
@@ -16,6 +17,7 @@ namespace Assets
         virtual bool Import(const std::string& path, ModelImportData& outModel) = 0;
     };
 
+    // selects the first registered importer that accepts a source path
     class ModelImporterRegistry
     {
     public:
