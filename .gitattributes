@@ -1,2 +1,2 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# keep tracked text files consistent with the Windows toolchain
+* text=auto eol=crlf

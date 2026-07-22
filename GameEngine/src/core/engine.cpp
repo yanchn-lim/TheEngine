@@ -210,16 +210,16 @@ void Engine::Update()
 
         {
             PROFILE_SCOPE("RendererLoop");
-            bool frameReady = false;
+            Graphics::FrameStatus frameStatus = Graphics::FrameStatus::Skip;
             {
                 PROFILE_SCOPE("World Rendering");
                 Graphics::Camera2D camera;
                 camera.SetViewport(static_cast<float>(window.width), static_cast<float>(window.height));
-                frameReady = renderer->Render(camera,
+                frameStatus = renderer->Render(camera,
                     static_cast<uint32_t>(window.width), static_cast<uint32_t>(window.height));
             }
 
-            if (frameReady && imgui.IsInitialized())
+            if (frameStatus == Graphics::FrameStatus::Success && imgui.IsInitialized())
             {
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
@@ -239,13 +239,22 @@ void Engine::Update()
                 imgui.End();
             }
 
+            if (frameStatus == Graphics::FrameStatus::Success)
             {
                 PROFILE_SCOPE("Command Submission");
-                renderer->EndFrame();
+                frameStatus = renderer->EndFrame();
             }
+            if (frameStatus == Graphics::FrameStatus::Success)
             {
                 PROFILE_SCOPE("Presentation");
-                renderer->Present();
+                frameStatus = renderer->Present();
+            }
+
+            if (frameStatus == Graphics::FrameStatus::DeviceLost ||
+                frameStatus == Graphics::FrameStatus::Fatal)
+            {
+                Debug::LogError("graphics frame failed with status ", static_cast<int>(frameStatus));
+                running = false;
             }
         }
         Memory::EndFrame();

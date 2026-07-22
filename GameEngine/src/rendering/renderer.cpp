@@ -2,6 +2,8 @@
 
 #include <type_traits>
 
+#include "debug/debug.hpp"
+
 namespace Rendering
 {
     Renderer::Renderer(Graphics::IGraphicsDevice& device, const Assets::AssetManager& assets, RenderWorld& world)
@@ -11,14 +13,16 @@ namespace Rendering
 
     void Renderer::Configure(const RendererDesc& desc) { _desc = desc; }
 
-    bool Renderer::Render(const Graphics::Camera2D& camera, uint32_t width, uint32_t height)
+    Graphics::FrameStatus Renderer::Render(const Graphics::Camera2D& camera, uint32_t width, uint32_t height)
     {
         // begin the selected backend frame before collecting render data
-        _frameReady = _device.BeginFrame(_frame) == Graphics::FrameStatus::Success;
+        const Graphics::FrameStatus status = _device.BeginFrame(_frame);
+        _frameReady = status == Graphics::FrameStatus::Success;
         if (!_frameReady)
         {
             _world.EndFrame();
-            return false;
+            _items.clear();
+            return status;
         }
 
         Graphics::IGraphicsCommandList& commands = _device.GetCommandList(_frame);
@@ -45,33 +49,57 @@ namespace Rendering
             }, item);
         }
 
-        return true;
+        return Graphics::FrameStatus::Success;
     }
 
-    void Renderer::EndFrame()
+    Graphics::FrameStatus Renderer::EndFrame()
     {
         // UI is recorded before this call so Vulkan can share the active render pass
-        if (!_frameReady) return;
+        if (!_frameReady) return Graphics::FrameStatus::Skip;
         _device.GetCommandList(_frame).EndRenderPass();
-        _device.EndFrame(_frame);
+        const Graphics::FrameStatus status = _device.EndFrame(_frame);
         _world.EndFrame();
-        ++_frame.frameNumber;
+        _frameReady = status == Graphics::FrameStatus::Success;
+        if (_frameReady) ++_frame.frameNumber;
+        return status;
     }
 
-    void Renderer::Present()
+    Graphics::FrameStatus Renderer::Present()
     {
-        if (_frameReady)
-        {
-            _device.Present(_frame);
-            _frameReady = false;
-        }
+        if (!_frameReady) return Graphics::FrameStatus::Skip;
+        const Graphics::FrameStatus status = _device.Present(_frame);
+        _frameReady = false;
+        return status;
     }
 
     void Renderer::OnResize(uint32_t width, uint32_t height) { _device.OnResize(width, height); }
 
+    void Renderer::Invalidate(Assets::MeshHandle handle)
+    {
+        if (_frameReady) { Debug::LogWarning("cannot invalidate graphics resources during an active frame"); return; }
+        _resources.Invalidate(handle);
+    }
+
+    void Renderer::Invalidate(Assets::TextureHandle handle)
+    {
+        if (_frameReady) { Debug::LogWarning("cannot invalidate graphics resources during an active frame"); return; }
+        _resources.Invalidate(handle);
+    }
+
+    void Renderer::Invalidate(Assets::ShaderHandle handle)
+    {
+        if (_frameReady) { Debug::LogWarning("cannot invalidate graphics resources during an active frame"); return; }
+        _resources.Invalidate(handle);
+    }
+
+    void Renderer::Invalidate(Assets::MaterialHandle handle)
+    {
+        if (_frameReady) { Debug::LogWarning("cannot invalidate graphics resources during an active frame"); return; }
+        _resources.Invalidate(handle);
+    }
+
     void Renderer::Shutdown()
     {
-        _device.WaitIdle();
         _resources.Clear();
         _items.clear();
         _frameReady = false;

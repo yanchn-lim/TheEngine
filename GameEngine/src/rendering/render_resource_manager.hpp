@@ -28,6 +28,10 @@ namespace Rendering
         RenderResourceManager(const Assets::AssetManager& assets, Graphics::IGraphicsDevice& device);
         bool Resolve(Assets::MeshHandle mesh, Assets::MaterialHandle material, ResolvedDraw& output,
             Assets::TextureHandle textureOverride = {});
+        void Invalidate(Assets::MeshHandle handle);
+        void Invalidate(Assets::TextureHandle handle);
+        void Invalidate(Assets::ShaderHandle handle);
+        void Invalidate(Assets::MaterialHandle handle);
         void Clear();
 
     private:
@@ -45,6 +49,8 @@ namespace Rendering
         struct TextureGpu { Graphics::GpuTextureHandle texture; Graphics::GpuSamplerHandle sampler; };
         struct MaterialGpu
         {
+            Assets::ShaderHandle shaderAsset;
+            Assets::TextureHandle textureAsset;
             Graphics::GpuShaderHandle shader;
             TextureGpu texture;
             Graphics::RenderState state{};
@@ -63,5 +69,7 @@ namespace Rendering
         TextureGpu* ResolveTexture(Assets::TextureHandle handle);
         Graphics::GpuShaderHandle ResolveShader(Assets::ShaderHandle handle);
         MaterialGpu* ResolveMaterial(Assets::MaterialHandle handle);
+        void DestroyPipelinesForMesh(Assets::AssetId id);
+        void DestroyPipelinesForMaterial(Assets::AssetId id);
     };
 }

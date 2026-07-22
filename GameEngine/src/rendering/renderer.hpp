@@ -22,10 +22,14 @@ namespace Rendering
         Renderer(Graphics::IGraphicsDevice& device, const Assets::AssetManager& assets, RenderWorld& world);
         void Configure(const RendererDesc& desc);
         // Render records world and scene draws while EndFrame waits for UI recording
-        bool Render(const Graphics::Camera2D& camera, uint32_t width, uint32_t height);
-        void EndFrame();
-        void Present();
+        Graphics::FrameStatus Render(const Graphics::Camera2D& camera, uint32_t width, uint32_t height);
+        Graphics::FrameStatus EndFrame();
+        Graphics::FrameStatus Present();
         void OnResize(uint32_t width, uint32_t height);
+        void Invalidate(Assets::MeshHandle handle);
+        void Invalidate(Assets::TextureHandle handle);
+        void Invalidate(Assets::ShaderHandle handle);
+        void Invalidate(Assets::MaterialHandle handle);
         void Shutdown();
 
     private:

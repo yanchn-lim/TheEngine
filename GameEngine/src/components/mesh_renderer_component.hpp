@@ -12,7 +12,6 @@ struct MeshRendererComponent
     Assets::MaterialHandle material;
     Rendering::RenderLayerMask layers = Rendering::DefaultRenderLayer;
     bool visible = true;
-    bool castShadows = true;
     // runtime fields connect this component to RenderWorld and are not serialized
     Rendering::RenderInstanceHandle renderInstance;
     uint64_t renderVersion = 0;

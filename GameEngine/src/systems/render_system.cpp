@@ -15,7 +15,6 @@ namespace Systems
         desc.layers = component.layers;
         desc.entityId = entityId;
         desc.visible = component.visible;
-        desc.castShadows = component.castShadows;
         component.renderInstance = _world.CreateMeshInstance(desc);
         component.renderVersion = changeVersion;
         return static_cast<bool>(component.renderInstance);
@@ -53,7 +52,6 @@ namespace Systems
         desc.layers = component.layers;
         desc.entityId = entityId;
         desc.visible = component.visible;
-        desc.castShadows = component.castShadows;
         if (!_world.UpdateMeshInstance(component.renderInstance, desc)) return false;
         component.renderVersion = changeVersion;
         return true;

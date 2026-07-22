@@ -89,8 +89,7 @@ Rendering::MeshInstanceDesc description{
     .mesh = mesh,
     .material = material,
     .transform = transform,
-    .visible = true,
-    .castShadows = true
+    .visible = true
 };
 ```
 

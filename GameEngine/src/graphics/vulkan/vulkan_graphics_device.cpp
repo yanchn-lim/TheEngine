@@ -43,10 +43,33 @@ namespace
         default: return vk::Format::eUndefined;
         }
     }
+
+    Graphics::FrameStatus FromVulkanError(const vk::SystemError& error)
+    {
+        return error.code().value() == VK_ERROR_DEVICE_LOST
+            ? Graphics::FrameStatus::DeviceLost
+            : Graphics::FrameStatus::Fatal;
+    }
 }
 
 namespace Graphics
 {
+    size_t VulkanGraphicsDevice::TextureSetKeyHash::operator()(const TextureSetKey& key) const
+    {
+        // combine every handle field so descriptor caching cannot alias reused resource slots
+        size_t hash = key.texture.index;
+        const auto combine = [&hash](uint32_t value)
+        {
+            hash ^= static_cast<size_t>(value) + 0x9e3779b9u + (hash << 6) + (hash >> 2);
+        };
+        combine(key.texture.generation);
+        combine(key.texture.owner);
+        combine(key.sampler.index);
+        combine(key.sampler.generation);
+        combine(key.sampler.owner);
+        return hash;
+    }
+
     bool VulkanGraphicsDevice::Initialize(const GraphicsDeviceDesc& desc)
     {
         // create Vulkan owners from the window outward before frame resources
@@ -60,7 +83,9 @@ namespace Graphics
         if (!_swapchain.Create(_device, _context.SurfaceHandle(), _requestedExtent)) return false;
         try
         {
+            _depthFormat = FindDepthFormat();
             CreateFrameResources();
+            CreateDepthResources();
             CreateDescriptors();
             return true;
         }
@@ -258,16 +283,36 @@ namespace Graphics
             blend.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
                 vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
             blend.blendEnable = desc.renderState.blendMode != BlendMode::NONE;
-            blend.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
-            blend.dstColorBlendFactor = desc.renderState.blendMode == BlendMode::ADDITIVE
-                ? vk::BlendFactor::eOne : vk::BlendFactor::eOneMinusSrcAlpha;
+            switch (desc.renderState.blendMode)
+            {
+            case BlendMode::ADDITIVE:
+                blend.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+                blend.dstColorBlendFactor = vk::BlendFactor::eOne;
+                break;
+            case BlendMode::PREMULTIPLIED_ALPHA:
+                blend.srcColorBlendFactor = vk::BlendFactor::eOne;
+                blend.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+                break;
+            case BlendMode::MULTIPLY:
+                blend.srcColorBlendFactor = vk::BlendFactor::eDstColor;
+                blend.dstColorBlendFactor = vk::BlendFactor::eZero;
+                break;
+            default:
+                blend.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+                blend.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+                break;
+            }
             blend.colorBlendOp = vk::BlendOp::eAdd;
-            blend.srcAlphaBlendFactor = vk::BlendFactor::eOne;
-            blend.dstAlphaBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+            blend.srcAlphaBlendFactor = blend.srcColorBlendFactor;
+            blend.dstAlphaBlendFactor = blend.dstColorBlendFactor;
             blend.alphaBlendOp = vk::BlendOp::eAdd;
             vk::PipelineColorBlendStateCreateInfo blendState{};
             blendState.attachmentCount = 1;
             blendState.pAttachments = &blend;
+            vk::PipelineDepthStencilStateCreateInfo depthState{};
+            depthState.depthTestEnable = desc.renderState.depthTest;
+            depthState.depthWriteEnable = desc.renderState.depthWrite;
+            depthState.depthCompareOp = vk::CompareOp::eLess;
             std::array dynamicStates{ vk::DynamicState::eViewport, vk::DynamicState::eScissor };
             vk::PipelineDynamicStateCreateInfo dynamic{};
             dynamic.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
@@ -288,6 +333,7 @@ namespace Graphics
             const vk::Format colorFormat = _swapchain.Format();
             rendering.colorAttachmentCount = 1;
             rendering.pColorAttachmentFormats = &colorFormat;
+            rendering.depthAttachmentFormat = _depthFormat;
             vk::GraphicsPipelineCreateInfo pipelineInfo{};
             pipelineInfo.pNext = &rendering;
             pipelineInfo.stageCount = static_cast<uint32_t>(stages.size());
@@ -298,6 +344,7 @@ namespace Graphics
             pipelineInfo.pRasterizationState = &raster;
             pipelineInfo.pMultisampleState = &multisample;
             pipelineInfo.pColorBlendState = &blendState;
+            pipelineInfo.pDepthStencilState = &depthState;
             pipelineInfo.pDynamicState = &dynamic;
             pipelineInfo.layout = *resource.layout;
             resource.pipeline = vk::raii::Pipeline(_device.Device(), nullptr, pipelineInfo);
@@ -311,8 +358,25 @@ namespace Graphics
     }
 
     void VulkanGraphicsDevice::DestroyBuffer(GpuBufferHandle handle) { _buffers.Destroy(handle); }
-    void VulkanGraphicsDevice::DestroyTexture(GpuTextureHandle handle) { _textures.Destroy(handle); }
-    void VulkanGraphicsDevice::DestroySampler(GpuSamplerHandle handle) { _samplers.Destroy(handle); }
+    void VulkanGraphicsDevice::DestroyTexture(GpuTextureHandle handle)
+    {
+        for (auto set = _textureSets.begin(); set != _textureSets.end();)
+        {
+            if (set->first.texture == handle) set = _textureSets.erase(set);
+            else ++set;
+        }
+        _textures.Destroy(handle);
+    }
+
+    void VulkanGraphicsDevice::DestroySampler(GpuSamplerHandle handle)
+    {
+        for (auto set = _textureSets.begin(); set != _textureSets.end();)
+        {
+            if (set->first.sampler == handle) set = _textureSets.erase(set);
+            else ++set;
+        }
+        _samplers.Destroy(handle);
+    }
     void VulkanGraphicsDevice::DestroyShader(GpuShaderHandle handle) { _shaders.Destroy(handle); }
     void VulkanGraphicsDevice::DestroyPipeline(GpuPipelineHandle handle) { _pipelines.Destroy(handle); }
 
@@ -320,9 +384,9 @@ namespace Graphics
     {
         // wait for this frame slot before acquiring and resetting its command buffer
         _frameReady = false;
-        if (!RecreateSwapchain()) return FrameStatus::Skip;
         try
         {
+            if (!RecreateSwapchain()) return FrameStatus::Skip;
             VulkanFrameResources& frame = _frames[_frameIndex];
             if (_device.Device().waitForFences(*frame.inFlightFence, vk::True, UINT64_MAX) != vk::Result::eSuccess)
                 return FrameStatus::Fatal;
@@ -337,6 +401,11 @@ namespace Graphics
             _activePipeline = {};
             _frameReady = true;
             return FrameStatus::Success;
+        }
+        catch (const vk::SystemError& error)
+        {
+            Debug::LogError("Vulkan BeginFrame failed: ", error.what());
+            return FromVulkanError(error);
         }
         catch (const std::exception& error)
         {
@@ -373,27 +442,51 @@ namespace Graphics
             _device.GraphicsQueue().submit2(submit, *frame.inFlightFence);
             return FrameStatus::Success;
         }
-        catch (...) { _frameReady = false; return FrameStatus::Fatal; }
+        catch (const vk::SystemError& error)
+        {
+            _frameReady = false;
+            Debug::LogError("Vulkan EndFrame failed: ", error.what());
+            return FromVulkanError(error);
+        }
+        catch (...)
+        {
+            _frameReady = false;
+            return FrameStatus::Fatal;
+        }
     }
 
     FrameStatus VulkanGraphicsDevice::Present(FrameContext&)
     {
         // present the acquired image and defer swapchain recreation to the next frame
         if (!_frameReady) return FrameStatus::Skip;
-        const vk::SwapchainKHR swapchain = *_swapchain.Swapchain();
-        const vk::Semaphore semaphore = *_renderFinished.at(_imageIndex);
-        vk::PresentInfoKHR info{};
-        info.waitSemaphoreCount = 1;
-        info.pWaitSemaphores = &semaphore;
-        info.swapchainCount = 1;
-        info.pSwapchains = &swapchain;
-        info.pImageIndices = &_imageIndex;
-        const vk::Result result = _device.PresentQueue().presentKHR(info);
-        _resizePending |= result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR;
-        _frameReady = false;
-        _frameIndex = (_frameIndex + 1) % FramesInFlight;
-        return result == vk::Result::eSuccess || result == vk::Result::eSuboptimalKHR || result == vk::Result::eErrorOutOfDateKHR
-            ? FrameStatus::Success : FrameStatus::Fatal;
+        try
+        {
+            const vk::SwapchainKHR swapchain = *_swapchain.Swapchain();
+            const vk::Semaphore semaphore = *_renderFinished.at(_imageIndex);
+            vk::PresentInfoKHR info{};
+            info.waitSemaphoreCount = 1;
+            info.pWaitSemaphores = &semaphore;
+            info.swapchainCount = 1;
+            info.pSwapchains = &swapchain;
+            info.pImageIndices = &_imageIndex;
+            const vk::Result result = _device.PresentQueue().presentKHR(info);
+            _resizePending |= result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR;
+            _frameReady = false;
+            _frameIndex = (_frameIndex + 1) % FramesInFlight;
+            if (_resizePending) return FrameStatus::ResizeRequired;
+            return result == vk::Result::eSuccess ? FrameStatus::Success : FrameStatus::Fatal;
+        }
+        catch (const vk::SystemError& error)
+        {
+            _frameReady = false;
+            Debug::LogError("Vulkan Present failed: ", error.what());
+            return FromVulkanError(error);
+        }
+        catch (...)
+        {
+            _frameReady = false;
+            return FrameStatus::Fatal;
+        }
     }
 
     void VulkanGraphicsDevice::OnResize(uint32_t width, uint32_t height)
@@ -423,10 +516,12 @@ namespace Graphics
             frame.inFlightFence = nullptr;
             frame.imageAvailable = nullptr;
         }
+        _depthResources.clear();
         _swapchain.Shutdown();
         _device.Shutdown();
         _context.Shutdown();
         _window = nullptr;
+        _depthFormat = vk::Format::eUndefined;
         _frameReady = false;
     }
 
@@ -443,11 +538,20 @@ namespace Graphics
         attachment.loadOp = desc.clearColorTarget ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
         attachment.storeOp = vk::AttachmentStoreOp::eStore;
         attachment.clearValue = clear;
+        vk::ClearValue depthClear{};
+        depthClear.depthStencil = { 1.0f, 0 };
+        vk::RenderingAttachmentInfo depthAttachment{};
+        depthAttachment.imageView = *_depthResources.at(_imageIndex).view;
+        depthAttachment.imageLayout = vk::ImageLayout::eDepthAttachmentOptimal;
+        depthAttachment.loadOp = desc.clearDepthTarget ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
+        depthAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+        depthAttachment.clearValue = depthClear;
         vk::RenderingInfo info{};
         info.renderArea = { {0, 0}, _swapchain.Extent() };
         info.layerCount = 1;
         info.colorAttachmentCount = 1;
         info.pColorAttachments = &attachment;
+        info.pDepthAttachment = &depthAttachment;
         commands.beginRendering(info);
         _renderPassActive = true;
     }
@@ -511,9 +615,7 @@ namespace Graphics
         SamplerResource* nativeSampler = _samplers.Get(sampler);
         PipelineResource* pipeline = _pipelines.Get(_activePipeline);
         if (!image || !nativeSampler || !pipeline) return;
-        const uint64_t key = (static_cast<uint64_t>(texture.index) << 32) ^
-            (static_cast<uint64_t>(texture.generation) << 16) ^ sampler.index ^
-            (static_cast<uint64_t>(sampler.generation) << 48);
+        const TextureSetKey key{ texture, sampler };
         auto found = _textureSets.find(key);
         if (found == _textureSets.end())
         {
@@ -532,9 +634,11 @@ namespace Graphics
             write.descriptorType = vk::DescriptorType::eCombinedImageSampler;
             write.pImageInfo = &imageInfo;
             _device.Device().updateDescriptorSets(write, {});
-            found = _textureSets.emplace(key, std::move(set)).first;
+            TextureSet textureSet;
+            textureSet.set = std::move(set);
+            found = _textureSets.emplace(key, std::move(textureSet)).first;
         }
-        const vk::DescriptorSet set = *found->second;
+        const vk::DescriptorSet set = *found->second.set;
         CurrentCommands().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->layout, 0, set, {});
     }
 
@@ -572,6 +676,17 @@ namespace Graphics
         for (uint32_t index = 0; index < memory.memoryTypeCount; ++index)
             if ((bits & (1u << index)) && (memory.memoryTypes[index].propertyFlags & properties) == properties) return index;
         throw std::runtime_error("No compatible Vulkan memory type");
+    }
+
+    vk::Format VulkanGraphicsDevice::FindDepthFormat() const
+    {
+        for (const vk::Format format : { vk::Format::eD32Sfloat, vk::Format::eD16Unorm })
+        {
+            const vk::FormatProperties properties = _device.PhysicalDevice().getFormatProperties(format);
+            if (properties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+                return format;
+        }
+        throw std::runtime_error("No supported Vulkan depth format");
     }
 
     VulkanGraphicsDevice::BufferResource VulkanGraphicsDevice::CreateBufferResource(
@@ -650,6 +765,69 @@ namespace Graphics
             _renderFinished.emplace_back(_device.Device(), vk::SemaphoreCreateInfo{});
     }
 
+    void VulkanGraphicsDevice::CreateDepthResources()
+    {
+        // keep one depth image per swapchain image so frames in flight never share it
+        std::vector<DepthResource> replacements;
+        replacements.reserve(_swapchain.ImageCount());
+        for (uint32_t index = 0; index < _swapchain.ImageCount(); ++index)
+        {
+            vk::ImageCreateInfo imageInfo{};
+            imageInfo.imageType = vk::ImageType::e2D;
+            imageInfo.format = _depthFormat;
+            imageInfo.extent = { _swapchain.Extent().width, _swapchain.Extent().height, 1 };
+            imageInfo.mipLevels = 1;
+            imageInfo.arrayLayers = 1;
+            imageInfo.samples = vk::SampleCountFlagBits::e1;
+            imageInfo.tiling = vk::ImageTiling::eOptimal;
+            imageInfo.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
+            imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+
+            DepthResource depth;
+            depth.image = vk::raii::Image(_device.Device(), imageInfo);
+            const vk::MemoryRequirements requirements = depth.image.getMemoryRequirements();
+            vk::MemoryAllocateInfo allocation{};
+            allocation.allocationSize = requirements.size;
+            allocation.memoryTypeIndex = FindMemoryType(requirements.memoryTypeBits,
+                vk::MemoryPropertyFlagBits::eDeviceLocal);
+            depth.memory = vk::raii::DeviceMemory(_device.Device(), allocation);
+            depth.image.bindMemory(*depth.memory, 0);
+
+            vk::ImageViewCreateInfo viewInfo{};
+            viewInfo.image = *depth.image;
+            viewInfo.viewType = vk::ImageViewType::e2D;
+            viewInfo.format = _depthFormat;
+            viewInfo.subresourceRange = { vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1 };
+            depth.view = vk::raii::ImageView(_device.Device(), viewInfo);
+            replacements.push_back(std::move(depth));
+        }
+
+        SubmitImmediate([&](vk::raii::CommandBuffer& commands)
+        {
+            std::vector<vk::ImageMemoryBarrier2> barriers;
+            barriers.reserve(replacements.size());
+            for (const DepthResource& depth : replacements)
+            {
+                vk::ImageMemoryBarrier2 barrier{};
+                barrier.dstStageMask = vk::PipelineStageFlagBits2::eEarlyFragmentTests |
+                    vk::PipelineStageFlagBits2::eLateFragmentTests;
+                barrier.dstAccessMask = vk::AccessFlagBits2::eDepthStencilAttachmentRead |
+                    vk::AccessFlagBits2::eDepthStencilAttachmentWrite;
+                barrier.oldLayout = vk::ImageLayout::eUndefined;
+                barrier.newLayout = vk::ImageLayout::eDepthAttachmentOptimal;
+                barrier.image = *depth.image;
+                barrier.subresourceRange = { vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1 };
+                barriers.push_back(barrier);
+            }
+            vk::DependencyInfo dependency{};
+            dependency.imageMemoryBarrierCount = static_cast<uint32_t>(barriers.size());
+            dependency.pImageMemoryBarriers = barriers.data();
+            commands.pipelineBarrier2(dependency);
+        });
+
+        _depthResources = std::move(replacements);
+    }
+
     void VulkanGraphicsDevice::CreateDescriptors()
     {
         vk::DescriptorSetLayoutBinding binding{};
@@ -683,6 +861,7 @@ namespace Graphics
         WaitIdle();
         _requestedExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
         if (!_swapchain.Recreate(_device, _context.SurfaceHandle(), _requestedExtent)) return false;
+        CreateDepthResources();
         _renderFinished.clear();
         for (uint32_t index = 0; index < _swapchain.ImageCount(); ++index)
             _renderFinished.emplace_back(_device.Device(), vk::SemaphoreCreateInfo{});

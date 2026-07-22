@@ -22,7 +22,6 @@ namespace Rendering
         int32_t sortingOrder = 0;
         uint64_t entityId = 0;
         bool visible = true;
-        bool castShadows = true;
     };
 
     // sprite data uses the same lifetime and submission rules as mesh data
