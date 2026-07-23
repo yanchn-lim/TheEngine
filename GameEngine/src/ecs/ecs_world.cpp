@@ -9,17 +9,18 @@ namespace ECS
 		uint32_t generation = 0;
 
 		//check free
-		if (!_freeSlot.empty())
+		if (!_freeSlots.empty())
 		{
-			entityId = _freeSlot.back();
-			_freeSlot.pop_back();
-			_entities[entityId].alive = true;
-			_entities[entityId].generation++;
+			entityId = _freeSlots.back();
+			_freeSlots.pop_back();
+			_entitySlots[entityId].alive = true;
+			_entitySlots[entityId].generation++;
 		}
 		else
 		{
-			entityId = static_cast<uint32_t>(_entities.size());
-			_entities.push_back({ 1, true });
+			entityId = static_cast<uint32_t>(_entitySlots.size());
+			generation = 1;
+			_entitySlots.push_back({ generation, true });
 		}
 
 		_entityAliveCount++;
@@ -37,20 +38,20 @@ namespace ECS
 		if (!entity.IsValid())
 			return;
 
-		auto& slot = _entities[entity.id];
+		auto& slot = _entitySlots[entity.id];
 		if (slot.alive)
 		{
 			slot.alive = false;
-			_freeSlot.push_back(entity.id);
+			_freeSlots.push_back(entity.id);
 			_entityAliveCount--;
 		}
 	}
 
-	bool World::IsEntityAlive(Entity entity) const
+	bool World::IsEntityAlive(const Entity& entity) const
 	{
-		if (!entity.IsValid())
+		if (!entity.IsValid() || entity.id >= _entitySlots.size())
 			return false;
 
-		return _entities[entity.id].alive;
+		return _entitySlots[entity.id].alive;
 	}
 }

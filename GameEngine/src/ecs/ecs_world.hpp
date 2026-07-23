@@ -2,6 +2,9 @@
 
 #include "ecs_entity.hpp"
 
+#include <cstdint>
+#include <vector>
+
 namespace ECS
 {
 	struct EntitySlot
@@ -13,8 +16,8 @@ namespace ECS
 	class World
 	{
 	private:
-		std::vector<EntitySlot> _entities{ EntitySlot{0,false} };
-		std::vector<uint32_t> _freeSlot;
+		std::vector<EntitySlot> _entitySlots{ EntitySlot{0,false} };
+		std::vector<uint32_t> _freeSlots;
 		uint32_t _entityAliveCount = 0;
 	public:
 		World() = default;

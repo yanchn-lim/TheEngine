@@ -9,11 +9,11 @@ namespace ECS
 
 		bool IsValid() const noexcept
 		{
-			return id != 0;
+			return id != 0 && generation != 0;
 		}
 	};
 
-	bool operator==(const Entity& lhs, const Entity& rhs) noexcept
+	inline bool operator==(const Entity& lhs, const Entity& rhs) noexcept
 	{
 		return lhs.id == rhs.id && lhs.generation == rhs.generation;
 	}
