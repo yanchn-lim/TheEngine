@@ -1,48 +1,11 @@
 # Render Submission
 
-## Goal
+`RenderWorld` is the single front-facing render submission API.
 
-Convert world data into renderer-agnostic draw commands.
+Persistent entity components, persistent non-entity objects, and one-frame code draws use `MeshInstanceDesc` or `SpriteInstanceDesc`. Persistent calls return a generation-checked `RenderInstanceHandle`. Transient calls copy the description into frame storage.
 
-## Current Flow
+`Systems::RenderSystem` processes ECS render components. It converts component and transform lifecycle events into add, update, or remove operations on `RenderWorld`. It does not create GPU resources and it does not send device commands.
 
-```text
-ManualRenderTest / future Scene / ECS / E-CS
-    -> render submission layer
-    -> asset handle resolution
-    -> Graphics::DrawCmd
-    -> Graphics::Material
-    -> Graphics::Renderer
-    -> OpenGL
-```
+At frame start, `Rendering::Renderer` collects visible items, applies layer filtering and stable sort order, resolves their asset handles, and sends backend-neutral commands. Both back ends receive the same resolved draw data.
 
-## Why This Layer Exists
-
-World data and GPU commands should not be the same thing.
-
-The submission layer can handle:
-
-- Visibility checks
-- Sorting order
-- Texture/material selection
-- Transform matrix creation
-- Asset handle resolution
-- Command creation
-
-## Current Status
-
-The temporary `SpriteRenderSystem` bridge has been removed from the current backend direction.
-
-Manual imported mesh rendering has been moved out of the main engine loop into `ManualRenderTest`. This keeps visual smoke testing available without making `engine.cpp` the permanent render submission layer.
-
-`ManualRenderTest` is not final architecture. It is a temporary app-level harness that loads a model asset, resolves the model's mesh handles and material, and submits `Graphics::DrawCmd` objects to the renderer.
-
-The next architectural step is a render resource access boundary. That boundary should let future Scene, GameObject, ECS, or E-CS code submit renderable data without giving `Graphics::Renderer` direct knowledge of `Assets::AssetManager`.
-
-Current rule:
-
-```text
-Renderer receives resolved DrawCmd data.
-Renderer does not resolve asset handles.
-Renderer does not know about Scene, GameObject, ECS, or AssetManager.
-```
+When an editor or asset tool replaces mesh, texture, shader, or material data, it must call the matching `Renderer::Invalidate` overload outside an active frame. The renderer waits for in-flight work and removes dependent cached GPU resources. The next visible draw uploads the current asset data again.

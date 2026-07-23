@@ -9,6 +9,7 @@ namespace Assets
 {
 	struct ModelAsset;
 
+	// owns model-to-mesh groupings and resolves model handles or names
 	struct ModelRegistry
 	{
 	public:

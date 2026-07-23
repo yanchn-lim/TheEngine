@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>ECS integration · TheEngine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="ecs">
+  <header class="mobile-bar" id="mobile-bar"></header>
+  <aside class="site-nav" id="site-nav"></aside>
+
+  <div class="page-shell">
+    <main class="page-content">
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / ECS integration</div>
+      <h1>ECS integration</h1>
+      <p class="lead">Components store render source data. <code>RenderSystem</code> converts component lifecycle events into persistent <code>RenderWorld</code> instances.</p>
+
+      <div class="callout warning">
+        <p>The adapter code is present. A complete ECS query or lifecycle dispatcher does not call it yet.</p>
+      </div>
+
+      <section id="boundary">
+        <h2>System boundary</h2>
+        <div class="flow" aria-label="component render flow">
+          <span>entity components</span><b>→</b>
+          <span>RenderSystem</span><b>→</b>
+          <span>persistent RenderWorld instance</span>
+        </div>
+
+        <p>The component remains the serialized source of truth. <code>RenderWorld</code> owns the runtime copy that the renderer reads.</p>
+      </section>
+
+      <section id="classes">
+        <h2>Classes and structures</h2>
+        <dl class="api-list">
+          <dt><a href="systems-rendersystem.html"><code>Systems::RenderSystem</code></a></dt><dd>Converts component lifecycle events into persistent render instances.</dd>
+          <dt><code>SpriteComponent</code></dt><dd>Stores serialized sprite data and a runtime render connection.</dd>
+          <dt><code>MeshRendererComponent</code></dt><dd>Stores serialized mesh data and a runtime render connection.</dd>
+          <dt><code>Transform2D</code></dt><dd>Provides the model matrix used by render descriptions.</dd>
+        </dl>
+      </section>
+
+      <section id="components">
+        <h2>Component types</h2>
+        <h3><code>SpriteComponent</code></h3>
+        <p>The serialized fields define visibility, texture, material, color, UV bounds, pivot, and sorting order.</p>
+
+        <p>The runtime fields store a <code>RenderInstanceHandle</code> and a render version. Do not serialize these runtime fields.</p>
+
+        <h3><code>MeshRendererComponent</code></h3>
+        <p>The serialized fields define mesh, material, layer mask, and visibility. The runtime fields store a <code>RenderInstanceHandle</code> and a render version.</p>
+
+        <h3><code>Transform2D</code></h3>
+        <p>The transform provides the model matrix for the render description. <code>RenderSystem</code> combines it with the render component data.</p>
+      </section>
+
+      <section id="lifecycle">
+        <h2>Lifecycle summary</h2>
+        <p>For the complete contract, read the <a href="systems-rendersystem.html"><code>RenderSystem</code> reference</a>.</p>
+        <dl class="api-list">
+          <dt>Add(entityId, transform, component, ...)</dt>
+          <dd>Builds a render description, creates a persistent instance, and stores its handle in the component.</dd>
+          <dt>Update(entityId, transform, component, ...)</dt>
+          <dd>Applies changed transform or component data to the existing instance.</dd>
+          <dt>Remove(component)</dt>
+          <dd>Destroys the persistent instance and clears its runtime connection.</dd>
+        </dl>
+
+        <p>The sprite overload accepts a fallback material. This value lets the system submit a sprite when the component does not select its own material.</p>
+      </section>
+
+      <section id="integration">
+        <h2>Connect an ECS</h2>
+        <p>The ECS integration must detect three events.</p>
+
+        <ol class="steps">
+          <li>When a matching component enters the query, call <code>Add</code>.</li>
+          <li>When its transform or render data changes, call <code>Update</code>.</li>
+          <li>Before the component or entity leaves the query, call <code>Remove</code>.</li>
+        </ol>
+
+        <p>Use a change version to avoid a full render update when the source data did not change. Keep entity iteration and change detection in the ECS layer. Keep render-description conversion in <code>RenderSystem</code>.</p>
+
+        <div class="callout">
+          <p>Call <code>Remove</code> before component storage becomes invalid. The operation needs the stored <code>RenderInstanceHandle</code>.</p>
+        </div>
+      </section>
+
+      <section id="direct-code">
+        <h2>Draw without an entity</h2>
+        <p>Direct code does not use <code>RenderSystem</code>. It submits to the same <code>RenderWorld</code>.</p>
+
+        <p>Create a persistent instance when the code owns a long-lived object. Call <code>DrawMeshOnce</code> or <code>DrawSpriteOnce</code> when the object exists for one frame.</p>
+
+        <pre><code>Rendering::MeshInstanceDesc desc{};
+desc.mesh = customMesh;
+desc.material = customMaterial;
+desc.transform = transform;
+
+renderWorld.DrawMeshOnce(desc);</code></pre>
+
+        <p>This path does not create an entity. It still uses the same sorting, layer filtering, resource resolution, and backend execution.</p>
+      </section>
+
+      <section id="scene">
+        <h2>Scene status</h2>
+        <p><code>Scene</code> and <code>GameObject</code> are minimal. They do not provide the full ECS integration. Do not place graphics-backend work in these classes.</p>
+      </section>
+
+      <div class="next-links">
+        <a href="assets.html"><small>previous</small>assets and GPU resources</a>
+        <a href="diagnostics.html"><small>next</small>diagnostics and tests</a>
+      </div>
+      <footer>Source: <code>GameEngine/src/components</code>, <code>GameEngine/src/systems/render_system.*</code>, and <code>GameEngine/src/scene</code>.</footer>
+    </main>
+
+    <aside class="toc" aria-label="on this page">
+      <strong>on this page</strong>
+      <a href="#boundary">system boundary</a>
+      <a href="#classes">classes and structures</a>
+      <a href="#components">component types</a>
+      <a href="#lifecycle">lifecycle summary</a>
+      <a href="#integration">connect an ECS</a>
+      <a href="#direct-code">draw without an entity</a>
+      <a href="#scene">scene status</a>
+    </aside>
+  </div>
+
+  <script src="docs.js"></script>
+</body>
+</html>

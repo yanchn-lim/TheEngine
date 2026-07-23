@@ -2,6 +2,7 @@
 
 namespace Graphics
 {
+	// describes blend intent so each back end can select native factors
 	enum class BlendMode
 	{
 		NONE,

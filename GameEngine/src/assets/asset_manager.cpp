@@ -6,19 +6,20 @@ namespace Assets
 {
 	TextureHandle AssetManager::LoadTexture(const std::string& path)
 	{
-		// Delegate file loading and fallback ownership to the texture registry.
+		// decode and register CPU texture data
 		return _textures.Load(path);
 	}
 
-	ShaderHandle AssetManager::LoadShader(const std::string& vertexPath, const std::string& fragmentPath)
+	ShaderHandle AssetManager::LoadShader(const std::string& vertexPath, const std::string& fragmentPath,
+		const std::string& vertexSpirvPath, const std::string& fragmentSpirvPath)
 	{
-		// Shader registry owns compiled programs and deduplicates by source paths.
-		return _shaders.Load(vertexPath, fragmentPath);
+		// store backend shader variants and deduplicate them by source paths
+		return _shaders.Load(vertexPath, fragmentPath, vertexSpirvPath, fragmentSpirvPath);
 	}
 
 	MeshHandle AssetManager::LoadMesh(const std::string& name, const std::string& path)
 	{
-		// Imported model data is temporary; only the created GPU mesh is kept.
+		// imported model data is temporary; the registry keeps the first CPU mesh record
 		ModelImportData collection;
 		if (!_modelImporters.Import(path, collection))
 		{
@@ -62,60 +63,42 @@ namespace Assets
 
 	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
 	{
-		// Resolve handles up front so materials can hold renderer-facing pointers.
-		const Graphics::Shader* shaderPtr = Get(shader);
-		const Graphics::Texture2D* texturePtr = Get(texture);
-
-		if (!shaderPtr || !texturePtr)
+		if (!Get(shader) || !Get(texture))
 		{
 			Debug::LogError("AssetManager::CreateMaterial : Could not resolve shader or texture fallback for material ", name);
 			return MaterialHandle{};
 		}
 
-		return _materials.Create(name, shaderPtr, texturePtr, state);
+		return _materials.Create(name, shader, texture, state);
 	}
 
 	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshImportData& data)
 	{
-		// Procedural/source mesh data is converted into a registry-owned Graphics::Mesh.
+		// keep procedural mesh data in the asset registry until RenderResourceManager uploads it
 		return _meshes.Create(name, data);
 	}
 
-	const Graphics::Texture2D* AssetManager::Get(TextureHandle handle) const 
+	const TextureAsset* AssetManager::Get(TextureHandle handle) const
 	{
 		return _textures.Get(handle);
 	}
 
-	const Graphics::Shader* AssetManager::Get(ShaderHandle handle) const
+	const ShaderAsset* AssetManager::Get(ShaderHandle handle) const
 	{
 		return _shaders.Get(handle);
 	}
 
-	const Graphics::Material* AssetManager::Get(MaterialHandle handle) const
+	const MaterialAsset* AssetManager::Get(MaterialHandle handle) const
 	{
-		const Graphics::Material* material = _materials.Get(handle);
-		if (!material)
-		{
-			Debug::LogError("AssetManager::Get : Returning fallback material for MaterialHandle [", handle.id, "]");
-			return GetFallbackMaterial();
-		}
-
-		return material;
+		return _materials.Get(handle);
 	}
 
-	const Graphics::Material* AssetManager::Get(const std::string& name) const
+	const MaterialAsset* AssetManager::Get(const std::string& name) const
 	{
-		const Graphics::Material* material = _materials.Get(name);
-		if (!material)
-		{
-			Debug::LogError("AssetManager::Get : Returning fallback material for material name ", name);
-			return GetFallbackMaterial();
-		}
-
-		return material;
+		return _materials.Get(name);
 	}
 
-	const Graphics::Mesh* AssetManager::Get(MeshHandle handle) const
+	const MeshAsset* AssetManager::Get(MeshHandle handle) const
 	{
 		return _meshes.Get(handle);
 	}
@@ -125,35 +108,9 @@ namespace Assets
 		return _models.Get(handle);
 	}
 
-
-	const Graphics::Material* AssetManager::GetFallbackMaterial() const
-	{
-		// Build the fallback lazily so shader/texture fallback resources exist first.
-		if (_fallbackMaterialReady)
-			return &_fallbackMaterial;
-
-		const Graphics::Shader* shader = _shaders.Get(ShaderHandle{});
-		const Graphics::Texture2D* texture = _textures.Get(TextureHandle{});
-
-		if (!shader || !texture)
-		{
-			Debug::LogError("AssetManager::GetFallbackMaterial : Could not create fallback material");
-			return nullptr;
-		}
-
-		_fallbackMaterial.shader = shader;
-		_fallbackMaterial.texture = texture;
-		_fallbackMaterial.state = Graphics::RenderState{};
-		_fallbackMaterialReady = true;
-
-		return &_fallbackMaterial;
-	}
-
 	void AssetManager::Clear()
 	{
-		// Clear dependent resources before shader/texture registries invalidate pointers.
-		_fallbackMaterial = Graphics::Material{};
-		_fallbackMaterialReady = false;
+		// clear dependent asset records before their referenced handles
 		_models.Clear();
 		_meshes.Clear();
 		_materials.Clear();
@@ -163,7 +120,7 @@ namespace Assets
 
 	AssetManager::AssetManager()
 	{
-		// Register format importers here so callers only talk to AssetManager.
+		// register format importers here so callers only talk to AssetManager
 		_modelImporters.RegisterImporter(std::make_unique<ObjImporter>());
 	}
 

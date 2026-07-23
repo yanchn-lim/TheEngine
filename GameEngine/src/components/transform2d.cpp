@@ -3,7 +3,7 @@
 
 glm::mat4 Transform2D::GetMatrix() const
 {
-	// Compose local transform in translate-rotate-scale order for 2D objects.
+	// compose the local transform in translate-rotate-scale order for 2D objects
 	glm::mat4 matrix{ 1.f };
 
 	matrix = glm::translate(matrix, glm::vec3(position, 0.f));

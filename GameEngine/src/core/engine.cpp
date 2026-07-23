@@ -1,361 +1,225 @@
+#include "engine.hpp"
+
 #include <cstdio>
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "engine.hpp"
+#include "assets/primitives/primitive_mesh2d.hpp"
 #include "debug/debug.hpp"
 #include "debug/memory_tracker.hpp"
 #include "debug/profiler.hpp"
+#include "graphics/graphics_device_factory.hpp"
+#include "tests/graphics_api_tests.hpp"
 
-#include "graphics/camera.hpp"
-#include "graphics/drawcmd.hpp"
-#include "graphics/material.hpp"
-#include "graphics/opengl_renderer.hpp"
-#include "graphics/vulkan/vulkan_renderer.hpp"
-#include "rendering/render_resource_resolver.hpp"
-
-
-static void ProcessInput(GLFWwindow* window, int key, int scancode, int action, int mods)
+namespace
 {
-    // Global debug/runtime hotkeys are handled at the window callback level.
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    void ProcessInput(GLFWwindow*, int key, int, int action, int)
     {
-        Engine::Get().running = false;
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Engine::Get().running = false;
+        if (key == GLFW_KEY_F5 && action == GLFW_PRESS) Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
+        if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
+        {
+            Profiler::Get().PrintFrameStatistics(2048);
+            Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt", 2048);
+        }
     }
 
-    if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
+    void ErrorCallback(int error, const char* description)
     {
-        Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
-    }
-
-    if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
-    {
-        Profiler::Get().PrintFrameStatistics(2048);
-        Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt", 2048);
+        std::fprintf(stderr, "GLFW Error %d: %s\n", error, description);
     }
 }
 
-static void ErrorCallback(int error, const char* description)
+Engine& Engine::Get()
 {
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+    static Engine engine;
+    return engine;
 }
 
-bool Window::Init(Graphics::RendererBackend renderbackend)
+bool Window::Init(Graphics::RendererBackend backend)
 {
-    // Create the OpenGL context before initializing GLAD or renderer resources.
     if (!glfwInit()) return false;
-
     glfwSetErrorCallback(ErrorCallback);
-
-    switch (renderbackend)
+    if (backend == Graphics::RendererBackend::OPENGL)
     {
-    case Graphics::RendererBackend::OPENGL:
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        break;
-    case Graphics::RendererBackend::VULKAN:
+    }
+    else
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        break;
-    default:
-        break;
-    }
 
-
-    Debug::CLog("Creating window...\n");
     handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
-    if (!handle)
-    {
-        Debug::CLog("Failed to create window\n");
-        glfwTerminate();
-        return false;
-    }
-
-    if (renderbackend == Graphics::RendererBackend::OPENGL)
-    {
-        glfwMakeContextCurrent(handle);
-        glfwSwapInterval(vsync ? 1 : 0);
-
-        Debug::CLog("Initializing GLAD...\n");
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-        {
-            Debug::CLog("Failed to initialize GLAD\n");
-            return false;
-        }
-
-        //set debug
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    }
-
-    //glDebugMessageCallback();
-
+    if (!handle) { glfwTerminate(); return false; }
     glfwSetFramebufferSizeCallback(handle, [](GLFWwindow*, int w, int h)
-        {
-            Engine::Get().window.width = w;
-            Engine::Get().window.height = h;
-            Engine::Get().window.resizePending = true;
-        });
-
+    {
+        Engine::Get().window.width = w;
+        Engine::Get().window.height = h;
+        Engine::Get().window.resizePending = true;
+    });
     glfwSetKeyCallback(handle, ProcessInput);
-
-    Debug::CLog("Window created successfully\n");
     return true;
 }
 
 void Window::Shutdown()
 {
-    glfwDestroyWindow(handle);
+    if (handle) glfwDestroyWindow(handle);
+    handle = nullptr;
     glfwTerminate();
 }
 
-
-// ========= IMGUI ==========
-bool ImGuiLayer::Init(GLFWwindow* window)
+bool ImGuiLayer::Init(GLFWwindow* window, Graphics::RendererBackend backend, Graphics::IGraphicsDevice& device)
 {
-    // ImGui is configured once against the active GLFW/OpenGL context.
-    Debug::CLog("Initializing ImGui...\n");
+    _backend = Graphics::CreateImGuiBackend(backend);
+    if (!_backend || !_backend->IsAvailable()) return true;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
+    if (_backend->SupportsViewports()) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    if (!_backend->Initialize(window, device))
     {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    if (!ImGui_ImplGlfw_InitForOpenGL(window, true))
-    {
-        Debug::CLog("Failed to initialize ImGui GLFW backend\n");
+        ImGui::DestroyContext();
+        _backend.reset();
         return false;
     }
-    if (!ImGui_ImplOpenGL3_Init("#version 460"))
-    {
-        Debug::CLog("Failed to initialize ImGui OpenGL backend\n");
-        return false;
-    }
-
     _initialized = true;
-    Debug::CLog("ImGui initialized successfully\n");
     return true;
 }
 
 void ImGuiLayer::Begin()
 {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
+    _backend->BeginFrame();
     ImGui::NewFrame();
 }
 
 void ImGuiLayer::End()
 {
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        GLFWwindow* backup = glfwGetCurrentContext();
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backup);
-    }
+    _backend->Render(ImGui::GetDrawData());
 }
 
 void ImGuiLayer::Shutdown()
 {
-    if (!_initialized)
-        return;
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    _initialized = false;
+    if (_initialized)
+    {
+        _backend->Shutdown();
+        ImGui::DestroyContext();
+        _initialized = false;
+    }
+    _backend.reset();
 }
 
-
-
-// ========= ENGINE =========
-
-bool ManualRenderTest::Initialize(Assets::AssetManager& assets)
+bool ManualRenderTest::Initialize(Assets::AssetManager& assetManager, Rendering::RenderWorld& world)
 {
-    // Keep temporary visual checks contained while backend and asset APIs settle.
-    Assets::ShaderHandle shader = assets.LoadShader("assets/shaders/bugatti.vert", "assets/shaders/bugatti.frag");
-    if (!shader)
-        return false;
-
-    Assets::TextureHandle texture = assets.LoadTexture("assets/textures/maxwell.png");
-    if (!texture)
-        return false;
-
-    Graphics::RenderState state = { true, true, Graphics::BlendMode::NONE, true };
-    material = assets.CreateMaterial("manual_model_test", shader, texture, state);
-    if (!material)
-        return false;
-
-    model = assets.LoadModel("manual_model_test", "assets/models/maxwell.obj");
-    if (!model)
-        return false;
-
+    const Assets::ShaderHandle shader = assetManager.LoadShader(
+        "assets/shaders/standard_gl.vert", "assets/shaders/standard_gl.frag",
+        "assets/shaders/standard_vk.vert.spv", "assets/shaders/standard_vk.frag.spv");
+    const Assets::TextureHandle texture = assetManager.LoadTexture("assets/textures/maxwell.png");
+    if (!shader || !texture) return false;
+    material = assetManager.CreateMaterial("standard_material", shader, texture,
+        { false, false, Graphics::BlendMode::NONE, true });
+    model = assetManager.LoadModel("manual_model", "assets/models/maxwell.obj");
+    spriteMesh = assetManager.CreateMesh("builtin_quad", Assets::Primitive2D::Quad());
+    const Assets::ModelAsset* modelAsset = assetManager.Get(model);
+    if (!material || !modelAsset || !spriteMesh) return false;
+    for (Assets::MeshHandle mesh : modelAsset->meshes)
+        instances.push_back(world.CreateMeshInstance({ mesh, material }));
     return true;
 }
 
-void ManualRenderTest::Submit(Graphics::IRenderer& renderer, const Assets::AssetManager& assets, double deltaTime)
+void ManualRenderTest::Update(Rendering::RenderWorld& world, double deltaTime)
 {
-    Rendering::RenderResourceResolver resources(assets);
-    const Assets::ModelAsset* modelAsset = resources.Resolve(model);
-    if (!modelAsset)
-        return;
-
-    const glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(0.f, -0.1f, 0.f))
-        * glm::scale(glm::mat4(1.f), glm::vec3(0.002f))
-        * glm::rotate(glm::mat4(1.f), rotation, glm::vec3(0.f, 1.f, 0.f));
-
-    for (const Assets::MeshHandle mesh : modelAsset->meshes)
-    {
-        Rendering::RenderItem item;
-        item.mesh = mesh;
-        item.material = material;
-        item.transform = transform;
-
-        Graphics::DrawCmd cmd;
-        if (resources.TryResolve(item, cmd))
-            renderer.Submit(cmd);
-    }
-
+    const glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)) *
+        glm::scale(glm::mat4(1.0f), glm::vec3(0.002f)) *
+        glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+    for (Rendering::RenderInstanceHandle instance : instances) world.SetTransform(instance, transform);
     rotation += 2.0f * static_cast<float>(deltaTime);
+}
+
+void ManualRenderTest::Shutdown(Rendering::RenderWorld& world)
+{
+    for (Rendering::RenderInstanceHandle instance : instances) world.Destroy(instance);
+    instances.clear();
 }
 
 int Engine::Run()
 {
-    // Keep the public entrypoint small: initialize, run the frame loop, then teardown.
     if (!Initialize())
+    {
+        Shutdown();
         return EXIT_FAILURE;
-
+    }
     Update();
     Shutdown();
-
     return EXIT_SUCCESS;
 }
 
 bool Engine::Initialize()
 {
-    // Initialization order matters: window/context, UI, renderer, then manual test assets.
-    Debug::CLog("========== Initializing engine... ==========\n");
-    if (!window.Init(renderbackend))
+#ifndef NDEBUG
+    if (!Tests::RunGraphicsApiTests())
     {
-        Debug::CLog("Failed to initialize window\n");
+        Debug::LogError("Graphics API self-tests failed");
         return false;
     }
-
-    switch (renderbackend)
-    {
-    case Graphics::RendererBackend::OPENGL:
-        renderer = std::make_unique<Graphics::OpenGLRenderer>();
-        break;
-    case Graphics::RendererBackend::VULKAN:
-        renderer = std::make_unique<Graphics::VulkanRenderer>();
-        break;
-    default:
-        return false;
-        break;
-    }
-
-    if (!renderer->Init(window.handle))
-    {
-        Debug::CLog("Failed to initialize renderer\n");
-        return false;
-    }
-
-    if (renderbackend == Graphics::RendererBackend::OPENGL && !imgui.Init(window.handle))
-    {
-        Debug::CLog("Failed to initialize ImGui\n");
-        return false;
-    }
-
-
-
-
-    renderer->OnResize(
-        static_cast<uint32_t>(window.width),
-        static_cast<uint32_t>(window.height));
-
+#endif
+    if (!window.Init(renderbackend)) return false;
+    graphicsDevice = Graphics::CreateGraphicsDevice(renderbackend);
+    if (!graphicsDevice || !graphicsDevice->Initialize({ window.handle, window.vsync })) return false;
+    renderer = std::make_unique<Rendering::Renderer>(*graphicsDevice, assets, renderWorld);
+    if (!manualRenderTest.Initialize(assets, renderWorld)) return false;
+    renderer->Configure({ manualRenderTest.spriteMesh, manualRenderTest.material });
+    if (!imgui.Init(window.handle, renderbackend, *graphicsDevice)) return false;
+    renderer->OnResize(static_cast<uint32_t>(window.width), static_cast<uint32_t>(window.height));
     running = true;
-
-    if (renderbackend == Graphics::RendererBackend::OPENGL)
-    {
-        Debug::CLog("Initializing manual render test...\n");
-        if (!manualRenderTest.Initialize(assets))
-            return false;
-
-        Debug::CLog("Successfully initialized manual render test!\n");
-    }
-
-
-    Debug::CLog("========== Initialization Success! ==========\n\n");
     return true;
 }
 
 void Engine::Update()
 {
-    //set time
     time.totalTime = glfwGetTime();
-    time.deltaTime = 0.0;
-
-    // Main loop owns per-frame polling, camera setup, rendering, UI, and swap.
-	while (!glfwWindowShouldClose(window.handle) && running)
-	{
-		Profiler::Get().BeginFrame();
-		Memory::BeginFrame();
-        double currentTime = glfwGetTime();
-        time.deltaTime = currentTime - time.totalTime;
-        time.totalTime = currentTime;
-
+    while (!glfwWindowShouldClose(window.handle) && running)
+    {
+        Profiler::Get().BeginFrame();
+        Memory::BeginFrame();
         {
             PROFILE_SCOPE("MainLoop");
-            glfwPollEvents();
-   
-            if (window.resizePending)
-            {
-                renderer->OnResize(
-                    static_cast<uint32_t>(window.width),
-                    static_cast<uint32_t>(window.height));
 
-                window.resizePending = false;
+            {
+                PROFILE_SCOPE("Platform Events");
+                const double current = glfwGetTime();
+                time.deltaTime = current - time.totalTime;
+                time.totalTime = current;
+                glfwPollEvents();
+                if (window.resizePending)
+                {
+                    renderer->OnResize(static_cast<uint32_t>(window.width), static_cast<uint32_t>(window.height));
+                    window.resizePending = false;
+                }
             }
 
-            Graphics::Camera2D camera;
-            camera.position = { 0.f, 0.f };
-            camera.zoom = 1.f;
-            camera.rotation = 0.f;
-            camera.SetViewport((float)window.width, (float)window.height);
-
-            renderer->SetCamera(camera);
+            {
+                PROFILE_SCOPE("Simulation");
+                manualRenderTest.Update(renderWorld, time.deltaTime);
+            }
         }
 
         {
             PROFILE_SCOPE("RendererLoop");
-            renderer->BeginFrame();
+            Graphics::FrameStatus frameStatus = Graphics::FrameStatus::Skip;
+            {
+                PROFILE_SCOPE("World Rendering");
+                Graphics::Camera2D camera;
+                camera.SetViewport(static_cast<float>(window.width), static_cast<float>(window.height));
+                frameStatus = renderer->Render(camera,
+                    static_cast<uint32_t>(window.width), static_cast<uint32_t>(window.height));
+            }
 
-            if (renderbackend == Graphics::RendererBackend::OPENGL)
-                manualRenderTest.Submit(*renderer, assets, time.deltaTime);
-
-
-			renderer->EndFrame();
-
-            if (imgui.IsInitialized())
+            if (frameStatus == Graphics::FrameStatus::Success && imgui.IsInitialized())
             {
                 PROFILE_SCOPE("ImGui");
                 imgui.Begin();
@@ -375,24 +239,38 @@ void Engine::Update()
                 imgui.End();
             }
 
-            renderer->Present();
-        }
+            if (frameStatus == Graphics::FrameStatus::Success)
+            {
+                PROFILE_SCOPE("Command Submission");
+                frameStatus = renderer->EndFrame();
+            }
+            if (frameStatus == Graphics::FrameStatus::Success)
+            {
+                PROFILE_SCOPE("Presentation");
+                frameStatus = renderer->Present();
+            }
 
-		Memory::EndFrame();
+            if (frameStatus == Graphics::FrameStatus::DeviceLost ||
+                frameStatus == Graphics::FrameStatus::Fatal)
+            {
+                Debug::LogError("graphics frame failed with status ", static_cast<int>(frameStatus));
+                running = false;
+            }
+        }
+        Memory::EndFrame();
         Profiler::Get().EndFrame();
     }
 }
 
 void Engine::Shutdown()
 {
-    // Tear down GL-backed systems before destroying the window/context.
-    Debug::CLog("========== Shutting down engine... ==========\n");
-
-    if (renderer)
-        renderer->Shutdown();
-    assets.Clear();
+    manualRenderTest.Shutdown(renderWorld);
     imgui.Shutdown();
+    if (renderer) renderer->Shutdown();
+    renderWorld.Clear();
+    assets.Clear();
+    if (graphicsDevice) graphicsDevice->Shutdown();
+    renderer.reset();
+    graphicsDevice.reset();
     window.Shutdown();
-
-    Debug::CLog("Engine shutdown complete\n");
 }

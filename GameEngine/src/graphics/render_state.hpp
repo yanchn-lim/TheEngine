@@ -4,6 +4,7 @@
 
 namespace Graphics
 {
+	// collects fixed pipeline state shared by materials and both back ends
 	struct RenderState
 	{
 		bool depthTest = false;

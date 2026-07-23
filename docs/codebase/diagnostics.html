@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Diagnostics and tests · TheEngine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="diagnostics">
+  <header class="mobile-bar" id="mobile-bar"></header>
+  <aside class="site-nav" id="site-nav"></aside>
+
+  <div class="page-shell">
+    <main class="page-content">
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / diagnostics and tests</div>
+      <h1>Diagnostics and tests</h1>
+      <p class="lead">Use the profiler, memory tracker, log, and graphics tests to locate frame and resource failures.</p>
+
+      <section id="profiler">
+        <h2><code>Profiler</code></h2>
+        <p>The update loop starts and ends one profiler frame. Scoped timers record engine work such as rendering, ImGui, frame submission, and presentation.</p>
+
+        <p>The profiler UI reads this captured data. Open the ImGui debugger to inspect frame time and individual scopes.</p>
+
+        <ul>
+          <li>Press <code>F5</code> to pause or resume profiler capture.</li>
+          <li>Press <code>F6</code> to export frame statistics.</li>
+        </ul>
+
+        <div class="callout">
+          <p>If the profiler UI has no frame data, first confirm that <code>Profiler::BeginFrame</code> and the matching frame-end operation still run in the engine update loop.</p>
+        </div>
+      </section>
+
+      <section id="memory">
+        <h2><code>Memory::ResourceUsage</code></h2>
+        <p>The memory tracker records allocations and per-frame totals in supported builds. The engine starts the memory frame with the profiler frame.</p>
+
+        <p>Use the tracker to find unexpected allocation growth and resources that remain live after shutdown.</p>
+      </section>
+
+      <section id="logging">
+        <h2><code>DebugConsole</code></h2>
+        <p><code>debug/debug.hpp</code> and <code>debug/debug.cpp</code> provide engine logging and the debug console. Backend operations log context when initialization or a frame operation fails.</p>
+
+        <p>Keep the first failure message. Later failures can be results of the first error.</p>
+      </section>
+
+      <section id="tests">
+        <h2>Graphics API tests</h2>
+        <p>Debug startup calls <code>Tests::RunGraphicsApiTests()</code>. The main test source is <code>GameEngine/src/tests/graphics_api_tests.cpp</code>.</p>
+
+        <ul>
+          <li>Resource table tests verify generations and stale-handle rejection.</li>
+          <li><code>RenderWorld</code> tests verify persistent and one-frame data, filtering, sorting, updates, and destruction.</li>
+          <li>Renderer tests use a fake graphics device to verify frame results and resource invalidation.</li>
+        </ul>
+
+        <p>The fake device lets renderer tests run without OpenGL or Vulkan. Backend behavior still requires a real backend run.</p>
+      </section>
+
+      <section id="frame-failure">
+        <h2>Trace a frame failure</h2>
+        <ol class="steps">
+          <li>Read the first graphics error in the debug log.</li>
+          <li>Identify whether the failure came from <code>BeginFrame</code>, recording, <code>EndFrame</code>, or <code>Present</code>.</li>
+          <li>Check the returned <code>FrameStatus</code>.</li>
+          <li>Confirm that the engine did not continue an invalid frame.</li>
+          <li>For Vulkan, check image acquisition, swapchain state, and device-loss errors.</li>
+          <li>For OpenGL, check context state and the first OpenGL error.</li>
+        </ol>
+      </section>
+
+      <section id="visual-failure">
+        <h2>Trace an incorrect image</h2>
+        <ol class="steps">
+          <li>Confirm the render item visibility and layer mask.</li>
+          <li>Confirm the selected mesh, material, texture, and sampler handles.</li>
+          <li>Confirm that the asset cache resolved valid GPU handles.</li>
+          <li>Check frame constants and draw constants.</li>
+          <li>Check blend, depth, viewport, and scissor state.</li>
+          <li>Compare the same item on OpenGL and Vulkan.</li>
+        </ol>
+
+        <p>If only one backend fails, inspect its state translation. If both backends fail, inspect the render description, asset data, or renderer command order.</p>
+      </section>
+
+      <div class="next-links">
+        <a href="ecs.html"><small>previous</small>components and RenderSystem</a>
+        <a href="source-map.html"><small>next</small>source map</a>
+      </div>
+      <footer>Source: <code>GameEngine/src/debug</code>, <code>GameEngine/src/core/engine.cpp</code>, and <code>GameEngine/src/tests</code>.</footer>
+    </main>
+
+    <aside class="toc" aria-label="on this page">
+      <strong>on this page</strong>
+      <a href="#profiler">Profiler</a>
+      <a href="#memory">Memory::ResourceUsage</a>
+      <a href="#logging">DebugConsole</a>
+      <a href="#tests">graphics API tests</a>
+      <a href="#frame-failure">trace a frame failure</a>
+      <a href="#visual-failure">trace an incorrect image</a>
+    </aside>
+  </div>
+
+  <script src="docs.js"></script>
+</body>
+</html>

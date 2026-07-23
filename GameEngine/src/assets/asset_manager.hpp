@@ -15,11 +15,13 @@
 
 namespace Assets
 {
-	class AssetManager
+    // owns CPU asset registries and exposes one typed-handle entry point to callers
+    class AssetManager
 	{
 	public:
 		TextureHandle LoadTexture(const std::string& path);
-		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath);
+		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath,
+			const std::string& vertexSpirvPath = {}, const std::string& fragmentSpirvPath = {});
 		MeshHandle LoadMesh(const std::string& name, const std::string& path);
 		ModelHandle LoadModel(const std::string& name, const std::string& path);
 
@@ -32,11 +34,11 @@ namespace Assets
 
 		MeshHandle CreateMesh(const std::string& name, const MeshImportData& data);
 
-		const Graphics::Texture2D* Get(TextureHandle handle) const;
-		const Graphics::Shader* Get(ShaderHandle handle) const;
-		const Graphics::Material* Get(MaterialHandle handle) const;
-		const Graphics::Material* Get(const std::string& name) const;
-		const Graphics::Mesh* Get(MeshHandle handle) const;
+		const TextureAsset* Get(TextureHandle handle) const;
+		const ShaderAsset* Get(ShaderHandle handle) const;
+		const MaterialAsset* Get(MaterialHandle handle) const;
+		const MaterialAsset* Get(const std::string& name) const;
+		const MeshAsset* Get(MeshHandle handle) const;
 		const ModelAsset* Get(ModelHandle handle) const;
 
 		void Clear();
@@ -44,8 +46,6 @@ namespace Assets
 		AssetManager();
 
 	private:
-		const Graphics::Material* GetFallbackMaterial() const;
-
 		ShaderRegistry _shaders;
 		TextureRegistry _textures;
 		MaterialRegistry _materials;
@@ -53,7 +53,5 @@ namespace Assets
 		ModelRegistry _models;
 		ModelImporterRegistry _modelImporters;
 
-		mutable Graphics::Material _fallbackMaterial;
-		mutable bool _fallbackMaterialReady = false;
 	};
 }

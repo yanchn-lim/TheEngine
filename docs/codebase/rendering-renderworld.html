@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><title>RenderWorld · TheEngine</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="render-world"><header class="mobile-bar" id="mobile-bar"></header><aside class="site-nav" id="site-nav"></aside>
+<div class="page-shell"><main class="page-content">
+  <div class="breadcrumbs"><a href="index.html">TheEngine</a> / <a href="rendering.html">Rendering</a> / RenderWorld</div><h1><code>RenderWorld</code></h1>
+  <p class="lead">Owns persistent render instances and one-frame render submissions.</p><div class="page-meta"><span class="tag">Rendering</span><span class="tag">class</span><span class="tag">render_world.hpp</span></div>
+  <section id="declaration"><h2>Declaration</h2><pre><code>namespace Rendering {
+class RenderWorld {
+public:
+    RenderInstanceHandle CreateMeshInstance(const MeshInstanceDesc&amp; desc);
+    void DrawMeshOnce(const MeshInstanceDesc&amp; desc);
+    void Collect(RenderLayerMask layers, std::vector&lt;RenderItem&gt;&amp; output) const;
+    void EndFrame();
+};
+}</code></pre></section>
+  <section id="responsibility"><h2>Responsibility</h2><dl class="api-list"><dt>Owns</dt><dd>Persistent descriptions and frame-owned transient descriptions.</dd><dt>Identifies</dt><dd>Persistent instances with generation-checked <code>RenderInstanceHandle</code> values.</dd><dt>Produces</dt><dd>Filtered and stably sorted <code>RenderItem</code> values for the renderer.</dd></dl></section>
+  <section id="members"><h2>Member functions</h2><h3>Persistent instances</h3><dl class="api-list"><dt>CreateMeshInstance / CreateSpriteInstance</dt><dd>Create persistent render data.</dd><dt>UpdateMeshInstance / UpdateSpriteInstance</dt><dd>Replace a complete description.</dd><dt>SetTransform / SetVisible / SetMesh / SetMaterial / SetLayers</dt><dd>Change one field.</dd><dt>Destroy(handle)</dt><dd>Remove the instance and invalidate its old generation.</dd></dl><h3>Frame data</h3><dl class="api-list"><dt>DrawMeshOnce / DrawSpriteOnce</dt><dd>Copy a description into frame-owned storage.</dd><dt>Collect(layers, output)</dt><dd>Append visible items that match the view layers.</dd><dt>EndFrame()</dt><dd>Clear one-frame submissions.</dd><dt>Clear()</dt><dd>Clear persistent and transient data.</dd></dl></section>
+  <section id="lifetimes"><h2>Submission lifetimes</h2><dl class="api-list"><dt>Persistent</dt><dd>Create once, update when source data changes, and destroy with its owner.</dd><dt>One frame</dt><dd>Submit a complete description each frame. Do not keep a handle.</dd></dl></section>
+  <section id="usage"><h2>Usage rules</h2><ul><li>Use persistent instances for scene objects and components.</li><li>Use one-frame draws for debug geometry, tools, and transient effects.</li><li>Call <code>EndFrame</code> after frame execution.</li><li>Do not store native graphics objects in render descriptions.</li></ul></section>
+  <section id="related"><h2>Related types</h2><p><code>RenderInstanceHandle</code>, <code>MeshInstanceDesc</code>, <code>SpriteInstanceDesc</code>, <code>RenderItem</code>, and <a href="rendering-renderer.html"><code>Renderer</code></a>.</p></section>
+  <div class="next-links"><a href="rendering.html"><small>system</small>Rendering overview</a><a href="rendering-renderer.html"><small>next class</small>Renderer</a></div><footer>Source: <code>GameEngine/src/rendering/render_world.*</code>.</footer>
+</main><aside class="toc" aria-label="on this page"><strong>on this page</strong><a href="#declaration">declaration</a><a href="#responsibility">responsibility</a><a href="#members">member functions</a><a href="#lifetimes">submission lifetimes</a><a href="#usage">usage rules</a><a href="#related">related types</a></aside></div><script src="docs.js"></script></body></html>

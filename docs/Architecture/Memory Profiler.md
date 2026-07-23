@@ -31,7 +31,7 @@ OpenGL wrappers
 
 The allocation header makes frees exact without a pointer map. Counter updates use atomics and do not allocate. The tracker state is intentionally never destroyed so global deallocation remains safe during CRT teardown.
 
-`ResourceUsage` is move-only, so a moved `VertexBuffer`, `IndexBuffer`, or `Texture2D` retains one resource registration and destruction removes it exactly once.
+`ResourceUsage` is move-only, so moved profiler records retain one registration and destruction removes it exactly once. GPU resource ownership now stays inside the selected graphics device.
 
 ## Required Correctness Rules
 

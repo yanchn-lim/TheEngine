@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><title>IGraphicsCommandList · TheEngine</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="graphics-command-list">
+  <header class="mobile-bar" id="mobile-bar"></header><aside class="site-nav" id="site-nav"></aside>
+  <div class="page-shell"><main class="page-content">
+    <div class="breadcrumbs"><a href="index.html">TheEngine</a> / <a href="graphics-api.html">Graphics</a> / IGraphicsCommandList</div>
+    <h1><code>IGraphicsCommandList</code></h1>
+    <p class="lead">Records backend-neutral state and draw operations for the active frame.</p>
+    <div class="page-meta"><span class="tag">Graphics</span><span class="tag">class</span><span class="tag">graphics_command_list.hpp</span></div>
+    <section id="declaration"><h2>Declaration</h2><pre><code>namespace Graphics {
+class IGraphicsCommandList {
+public:
+    virtual void BeginRenderPass(const RenderPassDesc&amp; desc) = 0;
+    virtual void SetPipeline(GpuPipelineHandle pipeline) = 0;
+    virtual void Draw(uint32_t vertexCount) = 0;
+    virtual void DrawIndexed(uint32_t indexCount) = 0;
+    virtual void EndRenderPass() = 0;
+};
+}</code></pre></section>
+    <section id="responsibility"><h2>Responsibility</h2><dl class="api-list"><dt>Receives</dt><dd>Descriptions, constants, and typed GPU handles.</dd><dt>Records</dt><dd>One ordered graphics command stream.</dd><dt>Does not own</dt><dd>Resources bound to the command stream.</dd></dl></section>
+    <section id="members"><h2>Member functions</h2><dl class="api-list">
+      <dt>BeginRenderPass(desc)</dt><dd>Starts one render pass.</dd><dt>EndRenderPass()</dt><dd>Ends the active render pass.</dd>
+      <dt>SetViewport / SetScissor</dt><dd>Set dynamic raster state.</dd><dt>SetPipeline</dt><dd>Binds the graphics pipeline.</dd>
+      <dt>SetVertexBuffer / SetIndexBuffer</dt><dd>Bind geometry data.</dd><dt>SetFrameConstants</dt><dd>Binds data shared by draws in the frame.</dd>
+      <dt>SetMaterialResources</dt><dd>Binds the texture and sampler.</dd><dt>SetDrawConstants</dt><dd>Binds data for one draw.</dd>
+      <dt>Draw / DrawIndexed</dt><dd>Records a draw with the active state.</dd><dt>AddDebugMarker(label)</dt><dd>Labels a region for graphics debugging.</dd>
+    </dl></section>
+    <section id="order"><h2>Required order</h2><ol class="steps"><li>Begin the render pass.</li><li>Set viewport and scissor.</li><li>Set the pipeline.</li><li>Bind vertex and optional index buffers.</li><li>Set frame, material, and draw data.</li><li>Record draws.</li><li>End the render pass.</li></ol></section>
+    <section id="usage"><h2>Usage rules</h2><ul><li>Use the command list only during its active frame.</li><li>Set all required state before a draw.</li><li>Keep bound resources valid until submitted work finishes.</li><li>Do not pass native backend objects.</li></ul></section>
+    <section id="related"><h2>Related types</h2><p><a href="graphics-igraphicsdevice.html"><code>IGraphicsDevice</code></a>, <code>RenderPassDesc</code>, <code>GraphicsPipelineDesc</code>, and typed GPU handles.</p></section>
+    <div class="next-links"><a href="graphics-igraphicsdevice.html"><small>previous class</small>IGraphicsDevice</a><a href="graphics-api.html"><small>system</small>Graphics overview</a></div>
+    <footer>Source: <code>GameEngine/src/graphics/graphics_command_list.hpp</code>.</footer>
+  </main><aside class="toc" aria-label="on this page"><strong>on this page</strong><a href="#declaration">declaration</a><a href="#responsibility">responsibility</a><a href="#members">member functions</a><a href="#order">required order</a><a href="#usage">usage rules</a><a href="#related">related types</a></aside></div>
+  <script src="docs.js"></script>
+</body></html>

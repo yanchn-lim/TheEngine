@@ -21,19 +21,27 @@ namespace Graphics
 				return false;
 			}
 
-			//get format with preference
+			// the engine writes display-ready colors on both Vulkan and OpenGL
+			// use an UNORM swapchain so presentation does not apply another sRGB encoding pass
 			vk::SurfaceFormatKHR selectedFormat = formats.front();
-			for (const vk::SurfaceFormatKHR& available : formats)
+			auto selectFormat = [&formats, &selectedFormat](vk::Format preferred)
 			{
-				if (available.format == vk::Format::eB8G8R8A8Srgb &&
-					available.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+				for (const vk::SurfaceFormatKHR& available : formats)
 				{
-					selectedFormat = available;
-					break;
+					if (available.format == preferred &&
+						available.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+					{
+						selectedFormat = available;
+						return true;
+					}
 				}
-			}
+				return false;
+			};
 
-			//get present mode
+			if (!selectFormat(vk::Format::eB8G8R8A8Unorm))
+				selectFormat(vk::Format::eR8G8B8A8Unorm);
+
+			// prefer mailbox presentation and fall back to guaranteed FIFO presentation
 			vk::PresentModeKHR selectedPresentMode = vk::PresentModeKHR::eFifo;
 			for (vk::PresentModeKHR available : presentModes)
 			{
@@ -44,7 +52,7 @@ namespace Graphics
 				}
 			}
 
-			//get size of framebuffer
+			// clamp the requested framebuffer size to the surface limits
 			vk::Extent2D selectedExtent;
 			if (capabilities.currentExtent.width != UINT32_MAX)
 			{
@@ -70,7 +78,7 @@ namespace Graphics
 				return false;
 			}
 
-			//get one more image than minimum
+			// request one image beyond the minimum when the surface permits it
 			uint32_t imageCount = capabilities.minImageCount + 1;
 			if (capabilities.maxImageCount > 0 &&
 				imageCount > capabilities.maxImageCount)
@@ -93,7 +101,7 @@ namespace Graphics
 				vk::CompositeAlphaFlagBitsKHR::eInherit
 			};
 
-			//get composite mode (blending)
+			// choose the first supported window-system composite mode
 			vk::CompositeAlphaFlagBitsKHR selectedCompositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
 			bool foundCompositeAlpha = false;
 
@@ -136,7 +144,7 @@ namespace Graphics
 			createInfo.clipped = vk::True;
 			createInfo.oldSwapchain = nullptr;
 
-			//create temp owners to prevent failure, leaving swapchain half initialized
+			// keep new owners temporary so failure cannot leave a partial swapchain
 			vk::raii::SwapchainKHR newSwapchain(device.Device(), createInfo);
 			std::vector<vk::Image> newImages = newSwapchain.getImages();
 			std::vector<vk::raii::ImageView> newImageViews;
@@ -159,7 +167,7 @@ namespace Graphics
 				newImageViews.emplace_back(device.Device(), viewInfo);
 			}
 
-			//swap the temp into actl
+			// commit the complete replacement only after all image views succeed
 			_swapchain = std::move(newSwapchain);
 			_images = std::move(newImages);
 			_imageViews = std::move(newImageViews);

@@ -5,6 +5,7 @@
 #include <cctype>
 
 #define NOMINMAX
+#define TINYOBJLOADER_DISABLE_FAST_FLOAT
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
@@ -41,7 +42,7 @@ namespace Assets
 
 	bool ObjImporter::CanImport(const std::string& path) const
 	{
-		// OBJ support is selected by file extension only for now.
+		// OBJ support is selected by file extension only for now
 		std::string ext = std::filesystem::path(path).extension().string();
 
 		std::transform(ext.begin(), ext.end(), ext.begin(),
@@ -52,7 +53,7 @@ namespace Assets
 
 	bool ObjImporter::Import(const std::string& path, ModelImportData& outModel)
 	{
-        // tinyobj stores shared attribute arrays plus per-face index triplets.
+        // tinyobj stores shared attribute arrays plus per-face index triplets
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -93,7 +94,7 @@ namespace Assets
 
                 MeshVertex vertex{};
 
-                // OBJ has separate indices for position/uv/normal; pack the used fields.
+                // OBJ has separate indices for position, UV, and normal, so pack the used fields
                 vertex.position = {
                     attrib.vertices[3 * index.vertex_index + 0],
                     attrib.vertices[3 * index.vertex_index + 1],
@@ -110,7 +111,7 @@ namespace Assets
                     };
                 }
 
-                // Use the full OBJ index triplet so UV seams and hard normals stay split.
+                // use the full OBJ index triplet so UV seams and hard normals stay split
                 ObjVertexKey key
                 {
                     index.vertex_index,
@@ -118,7 +119,7 @@ namespace Assets
                     index.normal_index
                 };
 
-                // Reuse an engine vertex only when this exact triplet was already converted.
+                // reuse an engine vertex only when this exact triplet was already converted
                 auto it = uniqueVertices.find(key);
                 if (it != uniqueVertices.end())
                 {

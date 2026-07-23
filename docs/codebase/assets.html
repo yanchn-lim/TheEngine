@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Assets system · TheEngine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="assets">
+  <header class="mobile-bar" id="mobile-bar"></header>
+  <aside class="site-nav" id="site-nav"></aside>
+
+  <div class="page-shell">
+    <main class="page-content">
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / Assets</div>
+      <h1>Assets system</h1>
+      <p class="lead">The asset layer owns CPU data. The graphics layer owns GPU data. <code>RenderResourceManager</code> connects the two layers.</p>
+
+      <section id="flow">
+        <h2>Resource flow</h2>
+        <div class="flow" aria-label="asset to GPU resource flow">
+          <span>AssetManager</span><b>→</b>
+          <span>asset handle</span><b>→</b>
+          <span>RenderResourceManager</span><b>→</b>
+          <span>GPU handle</span><b>→</b>
+          <span>IGraphicsDevice</span>
+        </div>
+
+        <p>A render description stores an asset handle. The renderer requests a GPU handle from <code>RenderResourceManager</code>. The manager creates the GPU resource on the first request and returns the cached handle on later requests.</p>
+      </section>
+
+      <section id="classes">
+        <h2>Classes</h2>
+        <dl class="api-list">
+          <dt><a href="assets-assetmanager.html"><code>AssetManager</code></a></dt><dd>Owns CPU asset registries and returns typed handles.</dd>
+          <dt><code>TextureRegistry</code></dt><dd>Owns texture records and pixel data.</dd>
+          <dt><code>ShaderRegistry</code></dt><dd>Owns shader source and compiled data.</dd>
+          <dt><code>MeshRegistry</code></dt><dd>Owns vertex, index, and layout data.</dd>
+          <dt><code>MaterialRegistry</code></dt><dd>Owns material and render-state choices.</dd>
+          <dt><code>ModelRegistry</code></dt><dd>Owns imported models and mesh references.</dd>
+        </dl>
+      </section>
+
+      <section id="asset-manager">
+        <h2>Asset registry model</h2>
+        <p>For the complete contract, read the <a href="assets-assetmanager.html"><code>AssetManager</code> reference</a>.</p>
+        <p><code>AssetManager</code> provides the central access point for CPU assets. Separate registries own each asset category.</p>
+
+        <dl class="api-list">
+          <dt>TextureRegistry</dt><dd>Stores texture records and pixel data.</dd>
+          <dt>ShaderRegistry</dt><dd>Stores shader source and compiled shader data.</dd>
+          <dt>MeshRegistry</dt><dd>Stores vertex data, index data, and vertex layout data.</dd>
+          <dt>MaterialRegistry</dt><dd>Stores shader, texture, sampler, and render-state choices.</dd>
+          <dt>ModelRegistry</dt><dd>Stores imported model data and its mesh references.</dd>
+        </dl>
+
+        <p>Each registry returns a typed handle. The handle identifies one record without exposing its storage address.</p>
+      </section>
+
+      <section id="handles">
+        <h2>Asset handles</h2>
+        <p>The main types are <code>TextureHandle</code>, <code>ShaderHandle</code>, <code>MeshHandle</code>, <code>MaterialHandle</code>, and <code>ModelHandle</code>.</p>
+
+        <p>An asset handle and a GPU handle are different concepts. An asset handle identifies CPU-owned content. A GPU handle identifies a resource created by one graphics device.</p>
+      </section>
+
+      <section id="import">
+        <h2>Import and primitive data</h2>
+        <p>The OBJ importer reads model files through tinyobjloader. The model importer registry selects an importer for a supported source path. The mesh registry stores the resulting vertex and index data.</p>
+
+        <p>The primitive mesh code creates built-in 2D mesh data without a source file.</p>
+
+        <p>A shader asset can store GLSL source and SPIR-V data. This arrangement lets OpenGL and Vulkan use the same logical shader asset.</p>
+      </section>
+
+      <section id="resource-manager">
+        <h2><code>RenderResourceManager</code></h2>
+        <p>The manager converts asset descriptions into device descriptions. It then calls <code>IGraphicsDevice</code> to create buffers, textures, samplers, shaders, and graphics pipelines.</p>
+
+        <p>The manager caches the returned GPU handles by asset handle. This cache prevents duplicate GPU resources when many render items use the same asset.</p>
+
+        <h3>Material resolution</h3>
+        <p>A material selects its shader and fixed graphics state. It can also select a texture and sampler. The manager combines this data with mesh layout data when it resolves the graphics pipeline.</p>
+      </section>
+
+      <section id="invalidation">
+        <h2>Invalidation</h2>
+        <p>Invalidate a cached GPU resource when its source asset changes or is removed. The renderer provides invalidation entry points for textures, shaders, meshes, and materials.</p>
+
+        <ol class="steps">
+          <li>Finish the active frame.</li>
+          <li>Call the matching renderer invalidation operation.</li>
+          <li>Update or remove the CPU asset.</li>
+          <li>Let the next render request create the new GPU resource.</li>
+        </ol>
+
+        <div class="callout warning">
+          <p>Do not invalidate a GPU resource during an active frame. Recorded commands can still reference it.</p>
+        </div>
+      </section>
+
+      <section id="shutdown">
+        <h2>Shutdown</h2>
+        <p><code>RenderResourceManager::Shutdown</code> destroys all cached GPU resources. The engine calls it before the graphics device shuts down.</p>
+      </section>
+
+      <div class="next-links">
+        <a href="backends.html"><small>previous</small>OpenGL and Vulkan</a>
+        <a href="ecs.html"><small>next</small>components and RenderSystem</a>
+      </div>
+      <footer>Source: <code>GameEngine/src/assets</code> and <code>GameEngine/src/rendering/render_resource_manager.*</code>.</footer>
+    </main>
+
+    <aside class="toc" aria-label="on this page">
+      <strong>on this page</strong>
+      <a href="#flow">resource flow</a>
+      <a href="#classes">classes</a>
+      <a href="#asset-manager">asset registry model</a>
+      <a href="#handles">asset handles</a>
+      <a href="#import">import and primitive data</a>
+      <a href="#resource-manager">RenderResourceManager</a>
+      <a href="#invalidation">invalidation</a>
+      <a href="#shutdown">shutdown</a>
+    </aside>
+  </div>
+
+  <script src="docs.js"></script>
+</body>
+</html>

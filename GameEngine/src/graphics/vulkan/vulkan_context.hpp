@@ -6,6 +6,7 @@ struct GLFWwindow;
 
 namespace Graphics
 {
+	// owns the Vulkan instance, validation messenger, and window surface
 	class VulkanContext
 	{
 	public:
@@ -23,6 +24,7 @@ namespace Graphics
         const vk::SurfaceKHR SurfaceHandle() const { return *_surface; }
 		vk::SurfaceKHR SurfaceHandle() { return *_surface; }
     private:
+        // construction is split so each Vulkan dependency is created in order
         bool ValidationLayerAvailable() const;
         void CreateInstance();
         void CreateDebugMessenger();

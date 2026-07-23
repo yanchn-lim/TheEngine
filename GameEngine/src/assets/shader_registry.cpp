@@ -1,131 +1,83 @@
-#include "debug/debug.hpp"
 #include "shader_registry.hpp"
+
+#include <cstring>
+
 #include "core/file_system.hpp"
+#include "debug/debug.hpp"
+
+namespace
+{
+    // load optional SPIR-V words while keeping file parsing outside the GPU back end
+    bool ReadSpirv(const std::string& path, std::vector<uint32_t>& output)
+    {
+        if (path.empty())
+            return true;
+
+        std::ifstream file(path, std::ios::binary | std::ios::ate);
+        if (!file)
+            return false;
+
+        const std::streamsize size = file.tellg();
+        if (size <= 0 || size % static_cast<std::streamsize>(sizeof(uint32_t)) != 0)
+            return false;
+
+        file.seekg(0, std::ios::beg);
+        output.resize(static_cast<size_t>(size) / sizeof(uint32_t));
+        return static_cast<bool>(file.read(
+            reinterpret_cast<char*>(output.data()), size));
+    }
+}
 
 namespace Assets
 {
-	namespace
-	{
-		const char* FallbackVertexShader = R"(
-#version 460 core
+    ShaderHandle ShaderRegistry::Load(
+        const std::string& vertexPath,
+        const std::string& fragmentPath,
+        const std::string& vertexSpirvPath,
+        const std::string& fragmentSpirvPath)
+    {
+        // use all variant paths as one deduplication key
+        const std::string key = vertexPath + "|" + fragmentPath + "|" +
+            vertexSpirvPath + "|" + fragmentSpirvPath;
+        if (const auto existing = _pathToHandle.find(key); existing != _pathToHandle.end())
+            return existing->second;
 
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec3 aColor;
-layout(location = 2) in vec2 aTexCoord;
+        // retain GLSL and SPIR-V together so the selected back end uses its native form
+        ShaderAsset asset;
+        asset.label = key;
+        if (!FileSystem::ReadTextFile(vertexPath.c_str(), asset.vertexSource) ||
+            !FileSystem::ReadTextFile(fragmentPath.c_str(), asset.fragmentSource))
+        {
+            Debug::LogError("ShaderRegistry::Load : Failed to read GLSL source for ", key);
+            return {};
+        }
 
-uniform mat4 uModel;
-uniform mat4 uView;
-uniform mat4 uProjection;
+        if (!ReadSpirv(vertexSpirvPath, asset.vertexSpirv) ||
+            !ReadSpirv(fragmentSpirvPath, asset.fragmentSpirv))
+        {
+            Debug::LogError("ShaderRegistry::Load : Failed to read SPIR-V for ", key);
+            return {};
+        }
 
-out vec3 vColor;
-out vec2 vTexCoord;
+        const ShaderHandle handle{ _nextId++ };
+        _pathToHandle[key] = handle;
+        _shaders.emplace(handle.id, std::move(asset));
+        return handle;
+    }
 
-void main()
-{
-	vColor = aColor;
-	vTexCoord = aTexCoord;
-	gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
-}
-)";
+    const ShaderAsset* ShaderRegistry::Get(ShaderHandle handle) const
+    {
+        if (!handle)
+            return nullptr;
 
-		const char* FallbackFragmentShader = R"(
-#version 460 core
+        const auto found = _shaders.find(handle.id);
+        return found == _shaders.end() ? nullptr : &found->second;
+    }
 
-in vec3 vColor;
-in vec2 vTexCoord;
-
-uniform sampler2D uTexture;
-
-out vec4 FragColor;
-
-void main()
-{
-	vec4 checker = texture(uTexture, vTexCoord);
-	FragColor = checker * vec4(vColor, 1.0);
-}
-)";
-	}
-
-	ShaderHandle ShaderRegistry::Load(const std::string& vertexPath, const std::string& fragmentPath)
-	{
-		// A shader program is keyed by the vertex/fragment path pair.
-		std::string concatPath = vertexPath + "|" + fragmentPath;
-		const auto it = _pathToHandle.find(concatPath);
-
-		if (it != _pathToHandle.end())
-			return it->second;
-
-		std::string vertSrc;
-		std::string fragSrc;
-		if (!FileSystem::ReadTextFile(vertexPath.c_str(), vertSrc))
-		{
-			Debug::LogError("ShaderRegistry::Load : Failed to read vertex shader ", vertexPath, ". Using fallback shader for invalid lookups.");
-			return ShaderHandle();
-		}
-
-		if (!FileSystem::ReadTextFile(fragmentPath.c_str(), fragSrc))
-		{
-			Debug::LogError("ShaderRegistry::Load : Failed to read fragment shader ", fragmentPath, ". Using fallback shader for invalid lookups.");
-			return ShaderHandle();
-		}
-
-		Graphics::Shader shader;
-		if (!shader.Create(vertSrc, fragSrc))
-		{
-			Debug::LogError("ShaderRegistry::Load : Failed to create shader program. Using fallback shader for invalid lookups.");
-			return ShaderHandle();
-		}
-		
-		ShaderHandle handle{ _nextId++ };
-		_pathToHandle[concatPath] = handle;
-		_shaders[handle.id] = std::move(shader);
-
-		return handle;
-	}
-
-	const Graphics::Shader* ShaderRegistry::Get(ShaderHandle handle) const
-	{
-		// Invalid or missing handles resolve to the built-in debug shader.
-		if (!handle)
-		{
-			Debug::LogError("ShaderRegistry::Get : ShaderHandle [", handle.id, "] is invalid. Returning fallback shader.");
-			return GetFallback();
-		}
-
-		const auto it = _shaders.find(handle.id);
-		if (it == _shaders.end())
-		{
-			Debug::LogError("ShaderRegistry::Get : Could not find ShaderHandle [", handle.id, "] in the registry. Returning fallback shader.");
-			return GetFallback();
-		}
-
-
-		return &it->second;
-	}
-
-	const Graphics::Shader* ShaderRegistry::GetFallback() const
-	{
-		// Compile fallback source lazily so startup stays tied to requested assets.
-		if (_fallbackShaderReady && _fallbackShader.IsValid())
-			return &_fallbackShader;
-
-		if (!_fallbackShader.Create(FallbackVertexShader, FallbackFragmentShader))
-		{
-			Debug::LogError("ShaderRegistry::GetFallback : Failed to create fallback shader");
-			return nullptr;
-		}
-
-		_fallbackShaderReady = true;
-		return &_fallbackShader;
-	}
-
-	void ShaderRegistry::Clear()
-	{
-		// Destroy all compiled programs and reset fallback state.
-		_nextId = 1;
-		_pathToHandle.clear();
-		_shaders.clear();
-		_fallbackShader.Destroy();
-		_fallbackShaderReady = false;
-	}
+    void ShaderRegistry::Clear()
+    {
+        _nextId = 1;
+        _pathToHandle.clear();
+        _shaders.clear();
+    }
 }

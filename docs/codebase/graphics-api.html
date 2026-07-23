@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Graphics system · TheEngine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="graphics-api">
+  <header class="mobile-bar" id="mobile-bar"></header>
+  <aside class="site-nav" id="site-nav"></aside>
+
+  <div class="page-shell">
+    <main class="page-content">
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / Graphics</div>
+      <h1>Graphics system</h1>
+      <p class="lead"><code>namespace Graphics</code> defines the backend-neutral resource, command, frame, and presentation contracts.</p>
+
+      <section id="boundary">
+        <h2>API boundary</h2>
+        <p>Rendering code uses <code>IGraphicsDevice</code>, <code>IGraphicsCommandList</code>, typed handles, and description structures. Backend code converts these values into native graphics operations.</p>
+
+        <div class="flow" aria-label="graphics API boundary">
+          <span>Renderer</span><b>→</b>
+          <span>graphics descriptions</span><b>→</b>
+          <span>IGraphicsDevice</span><b>→</b>
+          <span>backend implementation</span>
+        </div>
+
+        <div class="callout">
+          <p>A public graphics header must not require an OpenGL or Vulkan type. Put native types in the backend directory.</p>
+        </div>
+      </section>
+
+      <section id="classes">
+        <h2>Classes</h2>
+        <dl class="api-list">
+          <dt><a href="graphics-igraphicsdevice.html"><code>IGraphicsDevice</code></a></dt><dd>Owns GPU resources, frame submission, and presentation.</dd>
+          <dt><a href="graphics-igraphicscommandlist.html"><code>IGraphicsCommandList</code></a></dt><dd>Records backend-neutral state and draw operations.</dd>
+          <dt><a href="backends.html#opengl"><code>OpenGLGraphicsDevice</code></a></dt><dd>Implements the graphics contracts with OpenGL 4.6.</dd>
+          <dt><a href="backends.html#vulkan"><code>VulkanGraphicsDevice</code></a></dt><dd>Implements the graphics contracts with Vulkan 1.3.</dd>
+          <dt><code>ResourceTable</code></dt><dd>Stores native resources behind generation-checked handles.</dd>
+        </dl>
+      </section>
+
+      <section id="frame">
+        <h2>Frame contract</h2>
+        <p><a href="graphics-igraphicsdevice.html"><code>IGraphicsDevice</code></a> prepares, submits, and presents each frame. It returns a status after each frame operation.</p>
+
+        <dl class="api-list">
+          <dt>Success</dt><dd>Continue the current frame.</dd>
+          <dt>Skip</dt><dd>Do not record or present the current frame.</dd>
+          <dt>ResizeRequired</dt><dd>Rebuild size-dependent state and start a later frame.</dd>
+          <dt>DeviceLost</dt><dd>Stop rendering. The graphics device is not usable.</dd>
+          <dt>Fatal</dt><dd>Stop the engine loop because the frame failed.</dd>
+        </dl>
+
+        <div class="callout warning">
+          <p>Check the returned <code>FrameStatus</code> before the next frame operation. Do not present a frame that did not complete submission.</p>
+        </div>
+      </section>
+
+      <section id="handles">
+        <h2>Typed handles</h2>
+        <p>A GPU handle contains a table index, generation, and device owner. The generation rejects stale access. The owner prevents a handle from one device from being used with another device.</p>
+
+        <p>The main types are <code>GpuBufferHandle</code>, <code>GpuTextureHandle</code>, <code>GpuSamplerHandle</code>, <code>GpuShaderHandle</code>, and <code>GpuPipelineHandle</code>.</p>
+
+        <p>Handles do not own resources. The graphics device owns the native resource until its matching destroy operation.</p>
+      </section>
+
+      <section id="descriptions">
+        <h2>Descriptions and state</h2>
+        <p>Description structures carry all data required to create a resource or record a command. They keep the API independent from native graphics structures.</p>
+
+        <p>The current API supports triangle, line, and point topology. It supports no blend, alpha blend, additive blend, premultiplied alpha blend, and multiply blend. It also supports viewport, scissor, depth state, vertex layouts, index formats, frame constants, and draw constants.</p>
+      </section>
+
+      <section id="lifetime">
+        <h2>Resource lifetime</h2>
+        <ul>
+          <li>Create a resource before its first command use.</li>
+          <li>Keep it valid until all submitted commands stop using it.</li>
+          <li>Invalidate asset-backed GPU resources outside an active frame.</li>
+          <li>Call <code>WaitIdle</code> before shutdown destroys shared device state.</li>
+          <li>Destroy resources before the device shuts down.</li>
+        </ul>
+      </section>
+
+      <section id="scope">
+        <h2>Current scope</h2>
+        <p>The scope is intentionally small. The API supports one swapchain color target and one backend-owned depth target. Each draw uses one texture and one sampler.</p>
+
+        <p>The API does not provide compute commands, instanced draws, indirect draws, multiple color targets, or shadow passes. Add one of these features only when a user-facing render requirement needs it.</p>
+      </section>
+
+      <div class="next-links">
+        <a href="rendering.html"><small>previous</small>render submission</a>
+        <a href="backends.html"><small>next</small>OpenGL and Vulkan</a>
+      </div>
+      <footer>Source: <code>GameEngine/src/graphics/graphics_device.hpp</code>, <code>graphics_command_list.hpp</code>, <code>graphics_descriptions.hpp</code>, and <code>graphics_handles.hpp</code>.</footer>
+    </main>
+
+    <aside class="toc" aria-label="on this page">
+      <strong>on this page</strong>
+      <a href="#boundary">API boundary</a>
+      <a href="#classes">classes</a>
+      <a href="#frame">frame contract</a>
+      <a href="#handles">typed handles</a>
+      <a href="#descriptions">descriptions and state</a>
+      <a href="#lifetime">resource lifetime</a>
+      <a href="#scope">current scope</a>
+    </aside>
+  </div>
+
+  <script src="docs.js"></script>
+</body>
+</html>

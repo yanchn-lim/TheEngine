@@ -7,6 +7,7 @@ namespace Graphics
 {
 	class VulkanDevice;
 
+	// owns presentable images and their views for the current window size
 	class VulkanSwapchain
 	{
 	public:

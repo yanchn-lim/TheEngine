@@ -11,6 +11,7 @@
 
 namespace Assets
 {
+	// describes the engine vertex format produced by model and primitive importers
 	struct MeshVertex
 	{
 		glm::vec3 position{};
@@ -18,6 +19,7 @@ namespace Assets
 		glm::vec2 texCoord0{};
 	};
 
+	// keeps imported geometry on the CPU until the render resource manager needs it
 	struct MeshImportData
 	{
 		std::vector<MeshVertex> vertices;
@@ -27,6 +29,7 @@ namespace Assets
 
 	Graphics::VertexLayout CreateMeshVertexLayout();
 
+	// one imported model can contain several independently drawable meshes
 	struct ModelImportData
 	{
 		std::vector<MeshImportData> meshes;

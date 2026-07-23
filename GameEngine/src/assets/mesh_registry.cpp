@@ -1,13 +1,11 @@
 #include "debug/debug.hpp"
-#include "core/file_system.hpp"
 #include "mesh_registry.hpp"
-#include "graphics/mesh_upload_data.hpp"
 
 namespace Assets
 {
 	MeshHandle MeshRegistry::Create(const std::string& name, const MeshImportData& data)
 	{
-		// Mesh names act as simple deduplication keys inside the registry.
+		// mesh names act as simple deduplication keys inside the registry
 		if (data.vertices.empty() || data.indices.empty())
 		{
 			Debug::LogError("MeshRegistry::Create : Mesh vertices or indices is empty");
@@ -20,34 +18,15 @@ namespace Assets
 		}
 
 		MeshHandle handle{ _nextId++ };
-		Graphics::Mesh mesh;
-		Graphics::VertexLayout layout = Assets::CreateMeshVertexLayout();
-		const uint32_t vertexCount = static_cast<uint32_t>(data.vertices.size());
-		const uint32_t indexCount = static_cast<uint32_t>(data.indices.size());
-
-		Graphics::MeshUploadData meshUploadData;
-		// Bridge asset-side mesh source data into the graphics backend upload format.
-		meshUploadData.vertices = reinterpret_cast<const void*>(data.vertices.data());
-		meshUploadData.vertexCount = vertexCount;
-		meshUploadData.indices = data.indices.data();
-		meshUploadData.indexCount = indexCount;
-		meshUploadData.topology = data.topology;
-		meshUploadData.layout = layout;
-
-		if (!mesh.Create(meshUploadData, name))
-		{
-			Debug::LogError("MeshRegistry::Create : Mesh creation failed");
-			return MeshHandle();
-		}
 		_nameToHandle[name] = handle;
-		_meshes[handle.id] = std::move(mesh);
+		_meshes[handle.id] = MeshAsset{ data, name };
 
 		return handle;
 	}
 
-	const Graphics::Mesh* MeshRegistry::Get(MeshHandle handle) const
+	const MeshAsset* MeshRegistry::Get(MeshHandle handle) const
 	{
-		// Handles are lightweight ids; registry lookup is the ownership boundary.
+		// handles are lightweight ids while registry lookup is the ownership boundary
 		if (!handle)
 		{
 			Debug::LogError("MeshRegistry::Get : MeshHandle [", handle.id, "] is invalid");
@@ -66,7 +45,7 @@ namespace Assets
 
 	void MeshRegistry::Clear()
 	{
-		// Destroy all registry-owned GPU meshes and reset handle generation.
+		// destroy all registry-owned CPU meshes and reset handle allocation
 		_nextId = 1;
 		_nameToHandle.clear();
 		_meshes.clear();
