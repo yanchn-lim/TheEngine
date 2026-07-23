@@ -15,6 +15,7 @@ namespace ECS
 			_freeSlots.pop_back();
 			_entitySlots[entityId].alive = true;
 			_entitySlots[entityId].generation++;
+			generation = _entitySlots[entityId].generation;
 		}
 		else
 		{
@@ -47,7 +48,7 @@ namespace ECS
 		}
 	}
 
-	bool World::IsEntityAlive(const Entity& entity) const
+	bool World::IsEntityAlive(Entity entity) const
 	{
 		if (!entity.IsValid() || entity.id >= _entitySlots.size())
 			return false;
