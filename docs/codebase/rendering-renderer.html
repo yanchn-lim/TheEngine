@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark"><title>Renderer · TheEngine</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="renderer"><header class="mobile-bar" id="mobile-bar"></header><aside class="site-nav" id="site-nav"></aside>
+<div class="page-shell"><main class="page-content">
+  <div class="breadcrumbs"><a href="index.html">TheEngine</a> / <a href="rendering.html">Rendering</a> / Renderer</div><h1><code>Renderer</code></h1>
+  <p class="lead">Collects render data, resolves GPU resources, and records one scene frame.</p><div class="page-meta"><span class="tag">Rendering</span><span class="tag">class</span><span class="tag">renderer.hpp</span></div>
+  <section id="declaration"><h2>Declaration</h2><pre><code>namespace Rendering {
+class Renderer {
+public:
+    Renderer(Graphics::IGraphicsDevice&amp; device,
+             const Assets::AssetManager&amp; assets,
+             RenderWorld&amp; world);
+    Graphics::FrameStatus Render(const Graphics::Camera2D&amp; camera,
+                                 uint32_t width, uint32_t height);
+    Graphics::FrameStatus EndFrame();
+    Graphics::FrameStatus Present();
+};
+}</code></pre></section>
+  <section id="responsibility"><h2>Responsibility</h2><dl class="api-list"><dt>Reads</dt><dd>Visible render items from <code>RenderWorld</code>.</dd><dt>Owns</dt><dd>Frame execution state and one <code>RenderResourceManager</code>.</dd><dt>Records</dt><dd>Backend-neutral commands through <code>IGraphicsCommandList</code>.</dd></dl></section>
+  <section id="members"><h2>Member functions</h2><dl class="api-list"><dt>Configure(desc)</dt><dd>Sets shared sprite resources.</dd><dt>Render(camera, width, height)</dt><dd>Starts a frame, collects items, resolves resources, and records the scene pass.</dd><dt>EndFrame()</dt><dd>Submits recorded graphics work.</dd><dt>Present()</dt><dd>Presents the submitted frame.</dd><dt>OnResize(width, height)</dt><dd>Forwards the new extent to the graphics device.</dd><dt>Invalidate(handle)</dt><dd>Destroys a cached GPU resource for an asset.</dd><dt>Shutdown()</dt><dd>Destroys cached resources before device shutdown.</dd></dl></section>
+  <section id="sequence"><h2>Frame sequence</h2><ol class="steps"><li>Begin the graphics frame.</li><li>Collect visible render items.</li><li>Resolve asset handles into GPU handles.</li><li>Record the scene render pass.</li><li>Leave the command list available for UI recording.</li><li>End and submit the frame.</li><li>Present the swapchain image.</li></ol></section>
+  <section id="usage"><h2>Usage rules</h2><ul><li>Call <code>EndFrame</code> only after all command recording is complete.</li><li>Call <code>Present</code> only after successful submission.</li><li>Invalidate resources outside an active frame.</li><li>Call <code>Shutdown</code> before the device shuts down.</li></ul></section>
+  <section id="related"><h2>Related types</h2><p><a href="rendering-renderworld.html"><code>RenderWorld</code></a>, <code>RenderResourceManager</code>, <a href="graphics-igraphicsdevice.html"><code>IGraphicsDevice</code></a>, and <a href="graphics-igraphicscommandlist.html"><code>IGraphicsCommandList</code></a>.</p></section>
+  <div class="next-links"><a href="rendering-renderworld.html"><small>previous class</small>RenderWorld</a><a href="rendering.html"><small>system</small>Rendering overview</a></div><footer>Source: <code>GameEngine/src/rendering/renderer.*</code>.</footer>
+</main><aside class="toc" aria-label="on this page"><strong>on this page</strong><a href="#declaration">declaration</a><a href="#responsibility">responsibility</a><a href="#members">member functions</a><a href="#sequence">frame sequence</a><a href="#usage">usage rules</a><a href="#related">related types</a></aside></div><script src="docs.js"></script></body></html>

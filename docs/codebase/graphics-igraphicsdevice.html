@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>IGraphicsDevice · TheEngine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="graphics-device">
+  <header class="mobile-bar" id="mobile-bar"></header>
+  <aside class="site-nav" id="site-nav"></aside>
+  <div class="page-shell">
+    <main class="page-content">
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / <a href="graphics-api.html">Graphics</a> / IGraphicsDevice</div>
+      <h1><code>IGraphicsDevice</code></h1>
+      <p class="lead">Owns GPU resources, frame submission, and presentation for one graphics backend.</p>
+      <div class="page-meta"><span class="tag">Graphics</span><span class="tag">class</span><span class="tag">graphics_device.hpp</span></div>
+
+      <section id="declaration">
+        <h2>Declaration</h2>
+        <pre><code>namespace Graphics {
+class IGraphicsDevice {
+public:
+    virtual bool Initialize(const GraphicsDeviceDesc&amp; desc) = 0;
+    virtual FrameStatus BeginFrame(FrameContext&amp; context) = 0;
+    virtual IGraphicsCommandList&amp; GetCommandList(FrameContext&amp; context) = 0;
+    virtual FrameStatus EndFrame(FrameContext&amp; context) = 0;
+    virtual FrameStatus Present(FrameContext&amp; context) = 0;
+};
+}</code></pre>
+      </section>
+
+      <section id="responsibility">
+        <h2>Responsibility</h2>
+        <dl class="api-list">
+          <dt>Owns</dt><dd>Native buffers, textures, samplers, shaders, pipelines, frame state, and presentation state.</dd>
+          <dt>Returns</dt><dd>Typed GPU handles and <code>FrameStatus</code> values.</dd>
+          <dt>Does not expose</dt><dd>Native OpenGL or Vulkan objects through public graphics headers.</dd>
+        </dl>
+      </section>
+
+      <section id="members">
+        <h2>Member functions</h2>
+        <h3>Device lifecycle</h3>
+        <dl class="api-list">
+          <dt>Initialize(desc)</dt><dd>Initializes the backend for the native window.</dd>
+          <dt>GetCapabilities()</dt><dd>Returns limits and supported backend features.</dd>
+          <dt>OnResize(width, height)</dt><dd>Updates or marks size-dependent resources.</dd>
+          <dt>WaitIdle()</dt><dd>Waits until submitted graphics work finishes.</dd>
+          <dt>Shutdown()</dt><dd>Releases device-owned state.</dd>
+        </dl>
+        <h3>Resources</h3>
+        <dl class="api-list">
+          <dt>CreateBuffer / DestroyBuffer</dt><dd>Manage buffer data.</dd>
+          <dt>CreateTexture / DestroyTexture</dt><dd>Manage sampled image data.</dd>
+          <dt>CreateSampler / DestroySampler</dt><dd>Manage texture sampling state.</dd>
+          <dt>CreateShader / DestroyShader</dt><dd>Manage backend shader programs.</dd>
+          <dt>CreateGraphicsPipeline / DestroyPipeline</dt><dd>Manage graphics pipeline state.</dd>
+        </dl>
+        <h3>Frames</h3>
+        <dl class="api-list">
+          <dt>BeginFrame(context)</dt><dd>Acquires and prepares one frame.</dd>
+          <dt>GetCommandList(context)</dt><dd>Returns the command list for the active frame.</dd>
+          <dt>EndFrame(context)</dt><dd>Finishes recording and submits graphics work.</dd>
+          <dt>Present(context)</dt><dd>Presents the completed swapchain image.</dd>
+        </dl>
+      </section>
+
+      <section id="status">
+        <h2>Frame status</h2>
+        <dl class="api-list">
+          <dt>Success</dt><dd>Continue the current frame.</dd>
+          <dt>Skip</dt><dd>Do not record or present this frame.</dd>
+          <dt>ResizeRequired</dt><dd>Rebuild size-dependent state before a later frame.</dd>
+          <dt>DeviceLost</dt><dd>Stop rendering because the device is unusable.</dd>
+          <dt>Fatal</dt><dd>Stop the engine loop.</dd>
+        </dl>
+      </section>
+
+      <section id="usage">
+        <h2>Usage rules</h2>
+        <ul><li>Check each <code>FrameStatus</code> before the next frame operation.</li><li>Destroy resources before device shutdown.</li><li>Call <code>WaitIdle</code> before shared device state is destroyed.</li><li>Do not use a handle with a different device.</li></ul>
+      </section>
+
+      <section id="related">
+        <h2>Related types</h2>
+        <p><a href="graphics-igraphicscommandlist.html"><code>IGraphicsCommandList</code></a>, <code>FrameContext</code>, <code>FrameStatus</code>, <code>GraphicsCapabilities</code>, and the typed GPU handles.</p>
+      </section>
+      <div class="next-links"><a href="graphics-api.html"><small>system</small>Graphics overview</a><a href="graphics-igraphicscommandlist.html"><small>next class</small>IGraphicsCommandList</a></div>
+      <footer>Source: <code>GameEngine/src/graphics/graphics_device.hpp</code>.</footer>
+    </main>
+    <aside class="toc" aria-label="on this page"><strong>on this page</strong><a href="#declaration">declaration</a><a href="#responsibility">responsibility</a><a href="#members">member functions</a><a href="#status">frame status</a><a href="#usage">usage rules</a><a href="#related">related types</a></aside>
+  </div>
+  <script src="docs.js"></script>
+</body>
+</html>

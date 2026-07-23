@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Build and run · TheEngine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="getting-started">
+  <header class="mobile-bar" id="mobile-bar"></header>
+  <aside class="site-nav" id="site-nav"></aside>
+
+  <div class="page-shell">
+    <main class="page-content">
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / build and run</div>
+      <h1>Build and run</h1>
+      <p class="lead">Build the Visual Studio project, select one graphics backend, and start the engine. The repository contains its third-party source dependencies.</p>
+
+      <section id="requirements">
+        <h2>Requirements</h2>
+        <ul>
+          <li>Visual Studio 2022 with the C++ desktop workload.</li>
+          <li>A 64-bit Windows build environment.</li>
+          <li>The Vulkan SDK for the Vulkan backend.</li>
+          <li>A graphics driver that supports OpenGL 4.6 or Vulkan 1.3.</li>
+        </ul>
+
+        <p>The project uses the v143 toolset and C++20. It includes GLFW, GLAD, GLM, ImGui, stb, tinyobjloader, and Vulkan headers through the project file.</p>
+      </section>
+
+      <section id="build">
+        <h2>Build the engine</h2>
+        <ol class="steps">
+          <li>Open <code>GameEngine/GameEngine.sln</code>.</li>
+          <li>Select an x64 configuration.</li>
+          <li>Build the <code>GameEngine</code> project.</li>
+          <li>Start the executable from Visual Studio.</li>
+        </ol>
+
+        <div class="callout">
+          <p>Debug builds call <code>Tests::RunGraphicsApiTests()</code> during engine startup. A test failure can stop startup before the window loop begins.</p>
+        </div>
+      </section>
+
+      <section id="backend">
+        <h2>Select a backend</h2>
+        <p><code>Engine::renderbackend</code> selects the graphics backend. The current default is Vulkan.</p>
+
+        <pre><code>// GameEngine/src/core/engine.hpp
+Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
+
+// select this value to use OpenGL
+// Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;</code></pre>
+
+        <p>The selection controls window setup, graphics device creation, and ImGui backend creation. User render code does not change.</p>
+      </section>
+
+      <section id="initialization">
+        <h2>Initialization order</h2>
+        <ol class="steps">
+          <li>The window initializes GLFW for the selected backend.</li>
+          <li>The graphics factory creates the matching <code>IGraphicsDevice</code>.</li>
+          <li>The device creates its native context and graphics resources.</li>
+          <li>The engine creates <code>RenderWorld</code>, <code>RenderResourceManager</code>, and <code>Renderer</code>.</li>
+          <li>The ImGui factory creates the matching <code>IImGuiBackend</code>.</li>
+          <li>The engine enters the update loop.</li>
+        </ol>
+
+        <p><code>GameEngine/src/main.cpp</code> is the application entry point. <code>GameEngine/src/core/engine.cpp</code> owns the lifecycle.</p>
+      </section>
+
+      <section id="update-loop">
+        <h2>Update loop</h2>
+        <ol class="steps">
+          <li>The profiler and memory tracker start a frame.</li>
+          <li>The engine polls window events and updates time.</li>
+          <li>Game code updates persistent render data or submits one-frame draws.</li>
+          <li><code>Renderer::Render</code> records the scene pass.</li>
+          <li>The ImGui backend records the debug interface.</li>
+          <li><code>Renderer::EndFrame</code> submits graphics work.</li>
+          <li><code>Renderer::Present</code> presents the swapchain image.</li>
+          <li>The profiler and memory tracker finish the frame.</li>
+        </ol>
+
+        <p>The loop uses <code>FrameStatus</code> after each graphics operation. It skips an invalid frame. It stops after <code>DeviceLost</code> or <code>Fatal</code>.</p>
+      </section>
+
+      <section id="shutdown">
+        <h2>Shutdown order</h2>
+        <p>The engine first waits for graphics work to stop. It then destroys ImGui, renderer resources, render data, the graphics device, and the window. This order prevents a subsystem from using an object that its owner already destroyed.</p>
+      </section>
+
+      <div class="next-links">
+        <a href="index.html"><small>previous</small>codebase overview</a>
+        <a href="rendering.html"><small>next</small>render submission</a>
+      </div>
+      <footer>Source: <code>GameEngine/src/main.cpp</code>, <code>GameEngine/src/core/engine.*</code>, and <code>GameEngine/GameEngine.vcxproj</code>.</footer>
+    </main>
+
+    <aside class="toc" aria-label="on this page">
+      <strong>on this page</strong>
+      <a href="#requirements">requirements</a>
+      <a href="#build">build the engine</a>
+      <a href="#backend">select a backend</a>
+      <a href="#initialization">initialization order</a>
+      <a href="#update-loop">update loop</a>
+      <a href="#shutdown">shutdown order</a>
+    </aside>
+  </div>
+
+  <script src="docs.js"></script>
+</body>
+</html>
