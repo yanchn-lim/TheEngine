@@ -45,7 +45,7 @@ namespace ECS
 			//remove components
 			for(auto& pool : _componentPools)
 			{
-				if(pool->Contains(entity) && pool)
+				if(pool && pool->Contains(entity))
 					pool->RemoveIfPresent(entity);
 			}
 

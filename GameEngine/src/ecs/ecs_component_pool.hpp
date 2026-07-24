@@ -2,11 +2,12 @@
 
 #include "ecs_component_pool_interface.hpp"
 #include "ecs_entity.hpp"
+
 #include <vector>
 #include <cstdint>
 #include <algorithm>
 #include <limits>
-#include <exception>
+#include <stdexcept>
 
 namespace ECS
 {
@@ -18,7 +19,7 @@ namespace ECS
 	private:
 		std::vector<Entity> _denseEntities;
 		std::vector<Component> _denseComponents;
-		std::vector<uint32_t> _sparseIndices;
+		std::vector<uint32_t> _sparseIndices; //same size as the maximum entity id, maps entity id to dense index
 
 		bool _validEntity(const Entity& entity) const
 		{
@@ -68,8 +69,8 @@ namespace ECS
 
 		void RemoveIfPresent(Entity entity) override
 		{
-			if(!Contains(entity))
-				throw std::runtime_error("Entity does not exist or have this component");
+			if (!Contains(entity))
+				return;
 
 			const uint32_t removedIndex = static_cast<uint32_t>(_sparseIndices[entity.id]);
 			const uint32_t lastIndex = static_cast<uint32_t>(_denseComponents.size() - 1);

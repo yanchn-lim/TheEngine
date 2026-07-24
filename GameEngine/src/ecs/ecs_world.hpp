@@ -7,9 +7,35 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <atomic>
 
 namespace ECS
 {
+	using ComponentTypeID = std::size_t;
+
+	namespace Detail
+	{
+		inline ComponentTypeID AllocateComponentTypeID() noexcept
+		{
+			static std::atomic<ComponentTypeID> nextId = 0;
+			return nextId.fetch_add(1, std::memory_order_relaxed);
+		}
+
+		template<typename Component>
+		inline ComponentTypeID GetComponentTypeIdImpl() noexcept
+		{
+			static ComponentTypeID typeId = AllocateComponentTypeID();
+			return typeId;
+		}
+	}
+
+	template<typename Component>
+	inline ComponentTypeID GetComponentTypeId() noexcept
+	{
+		using PlainComponent = std::remove_cvref_t<Component>;
+		return Detail::GetComponentTypeIdImpl<PlainComponent>();
+	}
+
 	struct EntitySlot
 	{
 		uint32_t generation;
@@ -33,20 +59,28 @@ namespace ECS
 		bool IsEntityAlive(Entity entity) const;
 
 		template<typename Component>
+		ComponentPool<Component>& GetOrCreatePool()
+		{
+			const ComponentTypeID typeID = GetComponentTypeId<Component>();
+			if (typeID >= _componentPools.size())
+				_componentPools.resize(typeID + 1);
+
+			if (!_componentPools[typeID])
+			{
+				_componentPools[typeID] = std::make_unique<ComponentPool<Component>>();
+			}
+
+			return *static_cast<ComponentPool<Component>*>(_componentPools[typeID].get());
+		}
+
+		template<typename Component>
 		Component& AddComponent(Entity entity, const Component& component)
 		{
 			if (!IsEntityAlive(entity))
 				throw std::runtime_error("Entity is not alive");
 
-			uint32_t componentTypeId = GetComponentTypeId<Component>();
-			if (componentTypeId >= _componentPools.size())
-				_componentPools.resize(componentTypeId + 1);
-
-			if (!_componentPools[componentTypeId])
-				_componentPools[componentTypeId] = std::make_unique<ComponentPool<Component>>();
-
-			auto* pool = static_cast<ComponentPool<Component>*>(_componentPools[componentTypeId].get());
-			return pool->AddComponent(entity, component);
+			auto& pool = GetOrCreatePool<Component>();
+			return pool.AddComponent(entity, component);
 		}
 	};
 }
