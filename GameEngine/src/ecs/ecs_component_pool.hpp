@@ -4,6 +4,8 @@
 
 namespace ECS
 {
+	constexpr uint32_t INVALID_COMPONENT_INDEX = UINT32_MAX;
+
 	template<typename Component>
 	class ComponentPool : public IComponentPool
 	{
@@ -14,7 +16,9 @@ namespace ECS
 
 		bool _validEntity(const Entity& entity) const
 		{
-			return entity.IsValid() && entity.id < _sparseIndices.size();
+			return	entity.IsValid() && 
+					entity.id < _sparseIndices.size() && 
+					entity.generation == _denseEntities[_sparseIndices[entity.id]].generation;
 		}
 
 	public:
@@ -34,6 +38,7 @@ namespace ECS
 			//resize sparse indices if needed
 			_sparseIndices.resize(std::max(_sparseIndices.size(), static_cast<size_t>(entity.id + 1)), INVALID_COMPONENT_INDEX);
 			_sparseIndices[entity.id] = _denseIndex;
+			return _denseComponents.back();
 		}
 
 		Component& GetComponent(Entity entity)
@@ -66,7 +71,12 @@ namespace ECS
 			_denseComponents.pop_back();
 			_denseEntities.pop_back();
 
+			_sparseIndices[entity.id] = INVALID_COMPONENT_INDEX;
+
 			//update sparse index of the swapped entity
+			if(componentIndex >= _denseComponents.size())
+				componentIndex = _denseComponents.size() - 1;
+
 			Entity swappedEntity = _denseEntities[componentIndex];
 			_sparseIndices[swappedEntity.id] = componentIndex;
 		}

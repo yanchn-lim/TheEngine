@@ -45,6 +45,12 @@ namespace ECS
 			slot.alive = false;
 			_freeSlots.push_back(entity.id);
 			_entityAliveCount--;
+
+			//remove components
+			for(auto& pool : _componentPools)
+			{
+				pool->RemoveIfPresent(entity);
+			}
 		}
 	}
 
