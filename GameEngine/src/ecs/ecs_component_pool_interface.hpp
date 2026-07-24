@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ecs_entity.hpp"
+#include <cstddef>
+#include <span>
 
 namespace ECS
 {

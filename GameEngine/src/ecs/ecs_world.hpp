@@ -12,6 +12,9 @@
 #include <type_traits>
 #include <cstddef>
 #include <stdexcept>
+#include <array>
+#include <tuple>
+#include <functional>
 
 namespace ECS
 {
@@ -199,7 +202,7 @@ namespace ECS
 		}
 
 		template<typename... Components, typename Func>
-		void ForEach(Func&& func)
+		void ForEach(Func&& func) //this should not make any structural changes to the pools
 		{
 			static_assert(sizeof...(Components) > 0, "ForEach requires at least one component type");
 
@@ -227,6 +230,60 @@ namespace ECS
 			for (Entity entity : iterationPool->GetEntities())
 			{
 				std::tuple<Components*...> components
+				{
+					TryGetComponent<Components>(entity)...
+				};
+
+				//check if the entity has all components
+				const bool hasAllComponents = std::apply(
+					[](auto*... component)
+					{
+						return ((component != nullptr) && ...);
+					},
+					components);
+
+				//skip if doesnt include all
+				if (!hasAllComponents)
+					continue;
+
+				std::apply(
+					[&](auto*... component)
+					{
+						std::invoke(func, entity, *component...);
+					},
+					components);
+			}
+		}
+
+		template<typename... Components, typename Func>
+		void ForEach(Func&& func) const
+		{
+			static_assert(sizeof...(Components) > 0, "ForEach requires at least one component type");
+
+			//look for pools
+			std::array<const Internal::IComponentPool*, sizeof...(Components)> pools
+			{
+				FindPool<Components>()... //unpack and find
+			};
+
+			for (const Internal::IComponentPool* pool : pools)
+			{
+				//check if any pool doesnt exist
+				if (!pool)
+					return;
+			}
+
+			const Internal::IComponentPool* iterationPool = pools[0];
+
+			for (const Internal::IComponentPool* pool : pools)
+			{
+				if (pool->GetSize() < iterationPool->GetSize())
+					iterationPool = pool;
+			}
+
+			for (Entity entity : iterationPool->GetEntities())
+			{
+				std::tuple<const Components*...> components
 				{
 					TryGetComponent<Components>(entity)...
 				};

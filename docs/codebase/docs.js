@@ -48,24 +48,16 @@
       }]
     },
     {
-      name: 'ECS integration',
-      namespaces: [
-        {
-          name: 'Systems',
-          items: [
-            { kind: 'page', page: 'ecs', title: 'ECS overview', href: 'ecs.html', terms: 'ECS entity component integration direct code' },
-            { kind: 'class', page: 'render-system', title: 'RenderSystem', href: 'systems-rendersystem.html', terms: 'component lifecycle synchronization persistent instances' }
-          ]
-        },
-        {
-          name: 'global',
-          items: [
-            { kind: 'struct', title: 'SpriteComponent', href: 'ecs.html#components', terms: 'sprite component' },
-            { kind: 'struct', title: 'MeshRendererComponent', href: 'ecs.html#components', terms: 'mesh component' },
-            { kind: 'struct', title: 'Transform2D', href: 'ecs.html#components', terms: 'transform component' }
-          ]
-        }
-      ]
+      name: 'ECS',
+      namespaces: [{
+        name: 'ECS',
+        items: [
+          { kind: 'page', page: 'ecs', title: 'ECS overview', href: 'ecs.html', terms: 'entity component sparse set pool view query iteration' },
+          { kind: 'class', page: 'ecs-world', title: 'World', href: 'ecs-world.html', terms: 'entities component access views foreach queries' },
+          { kind: 'struct', title: 'Entity', href: 'ecs.html#entities', terms: 'entity id generation alive stale handle' },
+          { kind: 'struct', title: 'ComponentView', href: 'ecs-world.html#views', terms: 'span dense components entities view' }
+        ]
+      }]
     },
     {
       name: 'Diagnostics',

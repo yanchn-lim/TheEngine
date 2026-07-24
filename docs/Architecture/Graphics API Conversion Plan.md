@@ -6,8 +6,6 @@ Use this plan to replace the current graphics API with a user-first graphics API
 
 The new API must support these operations:
 
-- An editor user adds a sprite component or a mesh component.
-- An ECS system connects the component to the render world.
 - User code creates a render instance without an entity.
 - User code submits a render item for one frame.
 - OpenGL and Vulkan render the same render data.
@@ -55,9 +53,8 @@ The current design has these conditions:
 - `VulkanRenderer::EndFrame()` does not draw the submitted commands.
 - `ImGuiLayer` calls the OpenGL ImGui backend directly.
 - `Window::Init()` initializes OpenGL functions.
-- `Scene`, `GameObject`, and `SpriteComponent` are early stubs.
-- The repository does not contain the final ECS or editor implementation.
-- The Visual Studio project uses C++17.
+- The repository does not contain the final editor implementation.
+- The Visual Studio project uses C++20.
 
 The conversion must remove each backend dependency from the user API.
 
@@ -66,11 +63,6 @@ The conversion must remove each backend dependency from the user API.
 Use this dependency direction:
 
 ```text
-Editor
-  -> ECS component data
-  -> ECS render synchronization
-  -> RenderWorld
-
 User code
   -> RenderWorld
 
@@ -97,13 +89,6 @@ User code can create a persistent object without an entity.
 
 ```cpp
 Rendering::RenderInstanceHandle instance =
-    renderWorld.CreateMeshInstance(description);
-```
-
-An ECS system uses the same operation for an entity component.
-
-```cpp
-component.renderInstance =
     renderWorld.CreateMeshInstance(description);
 ```
 
@@ -697,84 +682,11 @@ Compare both images. The persistent and transient paths must give the same mater
 
 The step is complete when both paths use the same draw-packet code.
 
-### Step 17: Add ECS Render Components
-
-Replace the current `SpriteComponent` texture alias with `Assets::TextureHandle`.
-
-Add `MeshRendererComponent` and `SpriteRendererComponent`.
-
-Use asset handles in serialized fields. Do not serialize GPU handles or render-instance handles.
-
-Use these runtime-only fields:
-
-```cpp
-Rendering::RenderInstanceHandle renderInstance;
-uint64_t renderVersion = 0;
-```
-
-Add component lifecycle hooks or an ECS change stream for these events:
-
-- Component add
-- Component update
-- Transform update
-- Component disable
-- Component enable
-- Component remove
-- Entity destruction
-- Scene unload
-
-Do not scan all unchanged components after the first correct implementation. Add dirty flags or change versions.
-
-The step is complete when component changes update the correct render instance.
-
-### Step 18: Add the ECS Render Synchronization System
-
-Add `RenderSystem` as the only ECS-to-render-world adapter.
-
-For a component add event, create a render instance.
-
-For a component data change, update the render instance.
-
-For a transform change, update the render-instance transform.
-
-For a component remove event, destroy the render instance.
-
-For entity destruction, destroy all related render instances.
-
-For scene unload, destroy the scene render instances before asset unload.
-
-Store the optional entity ID in the render instance. Use it for editor selection and object picking.
-
-Do not submit a `DrawCmd` from an ECS system.
-
-The step is complete when the ECS path and direct-code path create identical render items.
-
-### Step 19: Prepare the Editor Integration
+### Step 17: Prepare the Editor Integration
 
 The repository does not contain the final editor. Define the editor contract before editor implementation.
 
-Expose these serialized component fields:
-
-- Mesh asset
-- Texture asset
-- Material asset
-- Tint
-- Visibility
-- Render layers
-- Sorting order
-- Shadow flags
-
-Hide these runtime fields:
-
-- Render-instance handle
-- GPU handles
-- Synchronization version
-- Queue index
-- Draw-packet data
-
-Add asset pickers that return asset handles. Do not return pointers or file paths to components.
-
-Use the ECS component command path for undo and redo. Let `RenderSystem` process the resulting change.
+Add asset pickers that return asset handles. Do not return pointers or file paths.
 
 Use the optional entity ID for viewport selection and picking.
 
@@ -784,7 +696,7 @@ Use transient render items for one-frame gizmos and selection outlines.
 
 The step is complete when editor operations need no backend API.
 
-### Step 20: Complete the Sprite Path
+### Step 18: Complete the Sprite Path
 
 Create one shared unit quad mesh as a render resource.
 
@@ -802,11 +714,11 @@ Store transform, tint, UV rectangle, and object ID as instance data.
 
 Use a dynamic frame buffer for sprite instance data.
 
-Keep `DrawSpriteOnce()` and `SpriteRendererComponent` on the same batch path.
+Keep persistent and transient sprites on the same batch path.
 
 The step is complete when persistent and transient sprites can share one draw operation.
 
-### Step 21: Implement Vulkan GPU Resources
+### Step 19: Implement Vulkan GPU Resources
 
 Keep the current Vulkan context, device, swapchain, and frame owners where they meet the new interface.
 
@@ -832,7 +744,7 @@ Implement every graphics-device creation and destruction operation.
 
 The step is complete when Vulkan can create and destroy all fallback resources without validation errors.
 
-### Step 22: Implement Vulkan Draw Packets
+### Step 20: Implement Vulkan Draw Packets
 
 Convert the Vulkan clear-frame renderer into `VulkanGraphicsDevice`.
 
@@ -857,7 +769,7 @@ Add the depth target to dynamic rendering. Recreate it after a size change.
 
 The step is complete when Vulkan renders the same manual model as OpenGL.
 
-### Step 23: Complete Window and Presentation Control
+### Step 21: Complete Window and Presentation Control
 
 Keep GLFW in the platform layer.
 
@@ -884,7 +796,7 @@ Handle these window conditions:
 
 The step is complete when both backends survive repeated resize and minimize operations.
 
-### Step 24: Convert ImGui and Editor Rendering
+### Step 22: Convert ImGui and Editor Rendering
 
 Keep `ImGuiLayer` responsible for the ImGui context and UI construction.
 
@@ -904,7 +816,7 @@ Do not let `Engine` include an OpenGL ImGui backend header.
 
 The step is complete when the profiler and console render with both backends.
 
-### Step 25: Define Asset Reload and Resource Destruction
+### Step 23: Define Asset Reload and Resource Destruction
 
 Define this resource lifetime sequence:
 
@@ -931,7 +843,7 @@ On device loss, invalidate all GPU handles. Keep asset handles and source data v
 
 The step is complete when repeated load, reload, unload, and shutdown tests have no stale access.
 
-### Step 26: Fix Startup and Shutdown Order
+### Step 24: Fix Startup and Shutdown Order
 
 Use this startup order:
 
@@ -942,16 +854,14 @@ Asset manager
 Render resource manager
 Render world
 Renderer
-ECS render synchronization
 ImGui backend integration
-Scene and editor content
+Editor content
 ```
 
 Use the reverse dependency order for shutdown:
 
 ```text
-Stop new scene and user submissions
-Destroy ECS render connections
+Stop new user submissions
 Destroy direct render instances
 Finish or cancel transient render items
 Finish the active renderer frame
@@ -971,7 +881,7 @@ Add partial-startup cleanup. Test failure after each startup stage.
 
 The step is complete when every startup failure releases its completed stages.
 
-### Step 27: Add Diagnostics and Profiling
+### Step 25: Add Diagnostics and Profiling
 
 Add a label to each render instance, asset, GPU resource, render pass, and pipeline.
 
@@ -998,7 +908,7 @@ Add stale-handle and wrong-device errors. Include the handle type, index, and ge
 
 The step is complete when both backends report the same renderer counters.
 
-### Step 28: Add Automated Tests
+### Step 26: Add Automated Tests
 
 Add a test target. Do not require a window for unit tests.
 
@@ -1009,7 +919,6 @@ Add these test groups:
 - Typed handle tests
 - Resource table tests
 - Render-instance lifetime tests
-- ECS synchronization tests
 - Asset reload tests
 - Fallback resource tests
 - Queue culling tests
@@ -1029,7 +938,7 @@ Add image checks for the fallback texture, manual model, and sprite batch.
 
 The step is complete when the automated checks cover both user entry paths.
 
-### Step 29: Remove the Old API
+### Step 27: Remove the Old API
 
 Remove these public concepts after all callers use the new API:
 
@@ -1043,7 +952,7 @@ Remove these public concepts after all callers use the new API:
 - Public `VertexArray`
 - `RenderResourceResolver`
 - Asset getters that return graphics pointers
-- Backend checks in game, scene, ECS, and editor code
+- Backend checks in game and editor code
 
 Keep OpenGL implementation types private under `graphics/opengl/`.
 
@@ -1068,7 +977,7 @@ Only backend files and approved platform integration files can contain backend t
 
 The step is complete when the engine builds without the old public headers.
 
-### Step 30: Update the Architecture Documents
+### Step 28: Update the Architecture Documents
 
 Update these documents:
 
@@ -1089,8 +998,7 @@ Change Vulkan stages so that they implement `VulkanGraphicsDevice`.
 Add the final dependency rules:
 
 ```text
-scene and ECS -> rendering
-editor -> scene, ECS, and rendering
+editor -> rendering
 rendering -> assets and graphics interfaces
 assets -> import data and file services
 graphics interfaces -> no backend
@@ -1108,21 +1016,18 @@ Do not continue after a failed checkpoint.
 2. Asset registries work without a graphics device.
 3. Direct persistent instances render with OpenGL.
 4. Transient instances render with OpenGL.
-5. ECS components render through the same render world.
-6. Persistent and transient sprites use the same batch path.
-7. Vulkan creates all fallback resources without validation errors.
-8. Vulkan renders the indexed manual model.
-9. OpenGL and Vulkan use the same render items and material assets.
-10. ImGui works with both backends.
-11. Resize, minimize, reload, and shutdown tests pass.
-12. The old public graphics API has no caller.
+5. Persistent and transient sprites use the same batch path.
+6. Vulkan creates all fallback resources without validation errors.
+7. Vulkan renders the indexed manual model.
+8. OpenGL and Vulkan use the same render items and material assets.
+9. ImGui works with both backends.
+10. Resize, minimize, reload, and shutdown tests pass.
+11. The old public graphics API has no caller.
 
 ## 7. Final Acceptance Conditions
 
 The conversion is complete only when all conditions are true.
 
-- An editor operation adds a mesh or sprite component without backend data.
-- The ECS system creates a render instance from that component.
 - User code creates the same render instance without an entity.
 - User code submits the same description for one frame.
 - All paths create the same internal render-item types.

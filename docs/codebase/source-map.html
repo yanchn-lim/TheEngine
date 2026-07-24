@@ -26,9 +26,7 @@
           <li><code>GameEngine/src/graphics/opengl</code><span>OpenGL graphics device and OpenGL ImGui backend.</span></li>
           <li><code>GameEngine/src/graphics/vulkan</code><span>Vulkan context, device, swapchain, frame resources, graphics device, and ImGui backend.</span></li>
           <li><code>GameEngine/src/assets</code><span>Asset manager, registries, records, importers, and primitive mesh data.</span></li>
-          <li><code>GameEngine/src/components</code><span>Transform, sprite, and mesh renderer component data.</span></li>
-          <li><code>GameEngine/src/systems</code><span>Adapters that convert component data into runtime subsystem data.</span></li>
-          <li><code>GameEngine/src/scene</code><span>Minimal scene and game-object structures.</span></li>
+          <li><code>GameEngine/src/ecs</code><span>Entity handles, world ownership, sparse-set component pools, views, and typed queries.</span></li>
           <li><code>GameEngine/src/debug</code><span>Profiler, memory tracker, profiler UI, log, and debug console.</span></li>
           <li><code>GameEngine/src/tests</code><span>Graphics API, render-world, resource-table, and renderer tests.</span></li>
         </ul>
@@ -84,16 +82,16 @@
       </section>
 
       <section id="data-files">
-        <h2>Assets and component entry points</h2>
+        <h2>Assets and ECS entry points</h2>
         <ul class="path-list">
           <li><code>GameEngine/src/assets/asset_manager.*</code><span>Provides central access to asset registries.</span></li>
           <li><code>GameEngine/src/assets/asset_handle.hpp</code><span>Defines typed CPU asset handles.</span></li>
           <li><code>GameEngine/src/assets/asset_records.hpp</code><span>Defines the stored texture, shader, mesh, and material records.</span></li>
           <li><code>GameEngine/src/assets/obj_importer.*</code><span>Imports OBJ model data.</span></li>
-          <li><code>GameEngine/src/components/sprite_component.hpp</code><span>Defines sprite source data and runtime render connection.</span></li>
-          <li><code>GameEngine/src/components/mesh_renderer_component.hpp</code><span>Defines mesh source data and runtime render connection.</span></li>
-          <li><code>GameEngine/src/components/transform2d.*</code><span>Defines 2D transform data and matrix conversion.</span></li>
-          <li><code>GameEngine/src/systems/render_system.*</code><span>Converts component lifecycle events into persistent render instances.</span></li>
+          <li><code>GameEngine/src/ecs/ecs_world.*</code><span>Defines entity lifecycle, public component access, views, and <code>ForEach</code> queries.</span></li>
+          <li><code>GameEngine/src/ecs/ecs_entity.hpp</code><span>Defines the generation-checked entity handle.</span></li>
+          <li><code>GameEngine/src/ecs/ecs_component_view.hpp</code><span>Defines aligned non-owning entity and component spans.</span></li>
+          <li><code>GameEngine/src/ecs/ecs_component_pool*.hpp</code><span>Implements internal sparse-set storage and type-erased iteration support.</span></li>
         </ul>
       </section>
 
@@ -136,7 +134,7 @@
       <a href="#render-files">rendering entry points</a>
       <a href="#graphics-files">graphics API entry points</a>
       <a href="#backend-files">backend entry points</a>
-      <a href="#data-files">assets and components</a>
+      <a href="#data-files">assets and ECS</a>
       <a href="#debug-files">diagnostic entry points</a>
       <a href="#glossary">glossary</a>
     </aside>

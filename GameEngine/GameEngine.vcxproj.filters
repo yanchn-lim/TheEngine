@@ -46,17 +46,8 @@
     <Filter Include="Source Files\rendering">
       <UniqueIdentifier>{ad2b4fa4-8870-4daf-b4fa-a45248970083}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\systems">
-      <UniqueIdentifier>{970dd83f-7cdf-48e2-bacb-416fa57dd99c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\tests">
       <UniqueIdentifier>{7f6a6787-fdfb-4876-b40f-07c06771d33f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\scene">
-      <UniqueIdentifier>{d6ee8196-0b28-4f0f-8533-d7074d4e4fa4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\components">
-      <UniqueIdentifier>{e65eb7fa-52b8-46af-b80f-6957d4f76829}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\assets">
       <UniqueIdentifier>{30b62276-5469-4fb9-a0c3-884373c3d040}</UniqueIdentifier>
@@ -76,12 +67,6 @@
     <Filter Include="Header Files\graphics\opengl">
       <UniqueIdentifier>{ce4f31a5-e418-4e30-a8ac-f8aeef4865bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\scene">
-      <UniqueIdentifier>{e33e24b6-6d2e-4bb2-88ed-8fbba5d0ab37}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\components">
-      <UniqueIdentifier>{29dd3267-aa60-4f81-ab18-18db6cfacbd3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\assets">
       <UniqueIdentifier>{cf83a7d4-d5d6-471f-88b6-866f63a58078}</UniqueIdentifier>
     </Filter>
@@ -96,9 +81,6 @@
     </Filter>
     <Filter Include="Header Files\rendering">
       <UniqueIdentifier>{59e84e8c-f369-48a1-8d83-eece00ec775e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\systems">
-      <UniqueIdentifier>{6e0317e3-7150-4ae2-bce5-a969330db529}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\tests">
       <UniqueIdentifier>{fbafc4b2-099e-4fe0-bacc-ed02697be1b9}</UniqueIdentifier>
@@ -167,12 +149,6 @@
     </ClCompile>
     <ClCompile Include="src\core\file_system.cpp">
       <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scene\scene.cpp">
-      <Filter>Source Files\scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\components\transform2d.cpp">
-      <Filter>Source Files\components</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\vertex_layout.cpp">
       <Filter>Source Files\graphics</Filter>
@@ -243,9 +219,6 @@
     <ClCompile Include="src\rendering\render_world.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="src\systems\render_system.cpp">
-      <Filter>Source Files\systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\tests\graphics_api_tests.cpp">
       <Filter>Source Files\tests</Filter>
     </ClCompile>
@@ -296,20 +269,8 @@
     <ClInclude Include="src\core\file_system.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\gameobject.hpp">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scene\scene.hpp">
-      <Filter>Header Files\scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\components\sprite_component.hpp">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\time.hpp">
       <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\components\transform2d.hpp">
-      <Filter>Header Files\components</Filter>
     </ClInclude>
     <ClInclude Include="src\debug\profiler_ui.hpp">
       <Filter>Header Files\debug</Filter>
@@ -401,9 +362,6 @@
     <ClInclude Include="src\assets\asset_records.hpp">
       <Filter>Header Files\assets</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\mesh_renderer_component.hpp">
-      <Filter>Header Files\components</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics\graphics_command_list.hpp">
       <Filter>Header Files\graphics</Filter>
     </ClInclude>
@@ -445,9 +403,6 @@
     </ClInclude>
     <ClInclude Include="src\rendering\render_world.hpp">
       <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\systems\render_system.hpp">
-      <Filter>Header Files\systems</Filter>
     </ClInclude>
     <ClInclude Include="src\tests\graphics_api_tests.hpp">
       <Filter>Header Files\tests</Filter>

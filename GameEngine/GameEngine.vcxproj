@@ -168,7 +168,6 @@
     <ClCompile Include="src\assets\shader_registry.cpp" />
     <ClCompile Include="src\assets\texture_registry.cpp" />
     <ClCompile Include="src\core\file_system.cpp" />
-    <ClCompile Include="src\components\transform2d.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\debug\memory_overrides.cpp" />
     <ClCompile Include="src\debug\memory_tracker.cpp" />
@@ -195,8 +194,6 @@
     <ClCompile Include="src\rendering\renderer.cpp" />
     <ClCompile Include="src\rendering\render_resource_manager.cpp" />
     <ClCompile Include="src\rendering\render_world.cpp" />
-    <ClCompile Include="src\scene\scene.cpp" />
-    <ClCompile Include="src\systems\render_system.cpp" />
     <ClCompile Include="src\tests\graphics_api_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -225,8 +222,6 @@
     <ClInclude Include="src\assets\shader_registry.hpp" />
     <ClInclude Include="src\assets\texture_registry.hpp" />
     <ClInclude Include="src\core\file_system.hpp" />
-    <ClInclude Include="src\components\sprite_component.hpp" />
-    <ClInclude Include="src\components\transform2d.hpp" />
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\debug\memory_tracker.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
@@ -266,10 +261,6 @@
     <ClInclude Include="src\rendering\render_resource_manager.hpp" />
     <ClInclude Include="src\rendering\render_world.hpp" />
     <ClInclude Include="src\rendering\renderer.hpp" />
-    <ClInclude Include="src\scene\gameobject.hpp" />
-    <ClInclude Include="src\scene\scene.hpp" />
-    <ClInclude Include="src\components\mesh_renderer_component.hpp" />
-    <ClInclude Include="src\systems\render_system.hpp" />
     <ClInclude Include="src\tests\graphics_api_tests.hpp" />
   </ItemGroup>
   <ItemGroup>

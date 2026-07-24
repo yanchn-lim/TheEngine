@@ -9,7 +9,7 @@
 - [x] Add a shared renderer and command-list contract.
 - [x] Convert OpenGL resource ownership, drawing, and presentation to `OpenGLGraphicsDevice`.
 - [x] Convert Vulkan resource ownership, drawing, synchronization, and presentation to `VulkanGraphicsDevice`.
-- [x] Add an ECS render synchronization adapter.
+- [x] Add generation-checked ECS entities, sparse-set component storage, views, and typed queries.
 - [x] Remove the pointer-based renderer and graphics resource API.
 - [x] Add OpenGL and Vulkan command-line selection.
 - [x] Add Vulkan ImGui rendering with dynamic rendering and shared frame submission.
@@ -21,3 +21,4 @@
 - [ ] Add deferred GPU destruction for live asset reload.
 - [ ] Add frustum culling, render views, and expanded frame counters.
 - [ ] Move self-tests into a separate headless test target.
+- [ ] Redesign the ECS-to-render adapter around the public `ECS::World` query API.

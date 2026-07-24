@@ -1,4 +1,3 @@
-#include "ecs_def.hpp"
 #include "ecs_world.hpp"
 
 #include <limits>

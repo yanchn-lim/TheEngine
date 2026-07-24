@@ -20,12 +20,12 @@ TO-DO LIST :
 - Audio System
 
 // ===== CORE =====
-- ECS? E-CS?
+- ECS core (DONE!)
 - Input System
-- Scene
+- Gameplay systems on ECS
 - Time
 - Editor
-- Transform
+- Transform component
 
 // ===== DEBUG =====
 - Loggers (DONE!)

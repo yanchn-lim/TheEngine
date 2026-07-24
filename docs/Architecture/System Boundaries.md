@@ -1,6 +1,6 @@
 # System Boundaries
 
-Scene and ECS code can depend on rendering descriptions and asset handles. It cannot depend on graphics devices or backend headers.
+ECS storage is independent of rendering, assets, graphics devices, and backend headers. Integration adapters can depend on the public ECS and rendering APIs.
 
 Rendering can depend on assets and graphics interfaces. It converts render intent into GPU commands.
 
@@ -11,8 +11,8 @@ Graphics interfaces cannot depend on a backend. The OpenGL and Vulkan implementa
 The required direction is:
 
 ```text
-scene and ECS -> rendering
-editor -> scene, ECS, and rendering
+integration adapters -> ECS and rendering
+editor -> ECS and rendering
 rendering -> assets and graphics interfaces
 assets -> import data and file services
 OpenGL backend -> graphics interfaces

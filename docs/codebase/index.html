@@ -26,10 +26,10 @@
 
       <section id="status">
         <h2>Current status</h2>
-        <p>The graphics API supports the current engine scope. It provides one front-facing render path and two graphics backends. The ECS connection is the main incomplete integration.</p>
+        <p>The graphics API supports one front-facing render path and two graphics backends. The ECS provides generation-checked entities, sparse-set component storage, views, and typed queries.</p>
 
         <div class="callout success">
-          <p><strong>Use <code>Rendering::RenderWorld</code> for render submission.</strong> Components use it through <code>RenderSystem</code>. Direct code can use it without an entity.</p>
+          <p><strong>Use <code>ECS::World</code> for entity and component storage.</strong> A replacement ECS-to-render adapter is not implemented yet.</p>
         </div>
 
         <p>The API supports one swapchain color target, one internal depth target, one texture and sampler per draw, mesh draws, sprite draws, and ImGui. It does not yet support compute work, instanced draws, indirect draws, or shadow passes.</p>
@@ -79,14 +79,13 @@
           </article>
 
           <article class="system-card">
-            <div><h3>ECS integration</h3><code>namespace Systems</code></div>
+            <div><h3>Entity component system</h3><code>namespace ECS</code></div>
             <div>
-              <p>Converts component lifecycle events into persistent render instances.</p>
+              <p>Owns generation-checked entities and sparse-set component storage, then exposes dense views and typed queries.</p>
               <ul class="type-list">
-                <li><a href="systems-rendersystem.html"><code>RenderSystem</code></a></li>
-                <li><a href="ecs.html#components"><code>SpriteComponent</code></a></li>
-                <li><a href="ecs.html#components"><code>MeshRendererComponent</code></a></li>
-                <li><a href="ecs.html#components"><code>Transform2D</code></a></li>
+                <li><a href="ecs-world.html"><code>ECS::World</code></a></li>
+                <li><a href="ecs.html#entities"><code>ECS::Entity</code></a></li>
+                <li><a href="ecs-world.html#views"><code>ECS::ComponentView</code></a></li>
               </ul>
             </div>
           </article>
@@ -119,9 +118,9 @@
             <a href="graphics-api.html">open the graphics API</a>
           </article>
           <article class="card">
-            <h3>I want to connect the ECS</h3>
-            <p>Read the component data and <code>RenderSystem</code> lifecycle.</p>
-            <a href="ecs.html">open ECS integration</a>
+            <h3>I want to use the ECS</h3>
+            <p>Read the entity, component storage, view, and query contracts.</p>
+            <a href="ecs.html">open the ECS overview</a>
           </article>
           <article class="card">
             <h3>I need to find an implementation</h3>
@@ -136,8 +135,7 @@
         <p>Each layer has one responsibility. Backend types stay behind the graphics device interface.</p>
 
         <div class="flow" aria-label="render data flow">
-          <span>user code or component</span><b>→</b>
-          <span>RenderSystem</span><b>→</b>
+          <span>user code</span><b>→</b>
           <span>RenderWorld</span><b>→</b>
           <span>Renderer</span><b>→</b>
           <span>RenderResourceManager</span><b>→</b>
@@ -146,8 +144,6 @@
         </div>
 
         <dl class="api-list">
-          <dt>RenderSystem</dt>
-          <dd>Converts component changes into persistent render instances.</dd>
           <dt>RenderWorld</dt>
           <dd>Owns persistent render instances and one-frame submissions.</dd>
           <dt>Renderer</dt>
@@ -179,7 +175,8 @@
           <li><a href="graphics-api.html">graphics API</a><span>Device, command list, handles, frame status, and current limits.</span></li>
           <li><a href="backends.html">OpenGL and Vulkan</a><span>Backend behavior, ImGui, resize handling, and backend selection.</span></li>
           <li><a href="assets.html">assets and GPU resources</a><span>Asset registries, import, GPU caching, and invalidation.</span></li>
-          <li><a href="ecs.html">components and RenderSystem</a><span>Component fields, lifecycle operations, and the pending ECS connection.</span></li>
+          <li><a href="ecs.html">entity component system</a><span>Entities, sparse-set storage, component views, queries, and current limits.</span></li>
+          <li><a href="ecs-world.html">ECS::World</a><span>Public entity and component API reference.</span></li>
           <li><a href="diagnostics.html">diagnostics and tests</a><span>Profiler, memory tracking, shortcuts, tests, and failure checks.</span></li>
           <li><a href="source-map.html">source map</a><span>Directories, key source files, and common terms.</span></li>
         </ul>

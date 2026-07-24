@@ -2,7 +2,7 @@
 
 ## User API
 
-Use `Rendering::RenderWorld` for all world drawing. Do not select a graphics backend in game, editor, scene, or ECS code.
+Use `Rendering::RenderWorld` for all world drawing. Do not select a graphics backend in game, editor, or ECS integration code.
 
 Create a persistent mesh without an entity:
 
@@ -22,7 +22,7 @@ renderWorld.DrawMeshOnce(mesh);
 
 Use `CreateSpriteInstance()` and `DrawSpriteOnce()` in the same way for sprites. `RenderWorld` copies transient descriptions and clears them after the frame.
 
-An ECS or editor component does not send a low-level draw command. `Systems::RenderSystem` adds, updates, or removes the same persistent render instance that direct code creates. A component stores asset handles and a runtime-only render-instance handle. It does not store a GPU handle.
+The current ECS has no render adapter. A future adapter must translate ECS component data into the same persistent `RenderWorld` instances that direct code creates. ECS storage must not depend on graphics devices or backend headers.
 
 ## Ownership and Calls
 

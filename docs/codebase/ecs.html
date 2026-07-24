@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>ECS integration · TheEngine</title>
+  <title>ECS overview · TheEngine</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="ecs">
@@ -13,118 +13,149 @@
 
   <div class="page-shell">
     <main class="page-content">
-      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / ECS integration</div>
-      <h1>ECS integration</h1>
-      <p class="lead">Components store render source data. <code>RenderSystem</code> converts component lifecycle events into persistent <code>RenderWorld</code> instances.</p>
+      <div class="breadcrumbs"><a href="index.html">TheEngine</a> / ECS</div>
+      <h1>Entity component system</h1>
+      <p class="lead"><code>ECS::World</code> owns generation-checked entities and sparse-set component storage. Systems read components through views or typed queries.</p>
 
-      <div class="callout warning">
-        <p>The adapter code is present. A complete ECS query or lifecycle dispatcher does not call it yet.</p>
+      <div class="callout success">
+        <p><strong>Use <code>ECS::World</code> as the public API.</strong> Component pools and type IDs are internal storage details.</p>
       </div>
 
-      <section id="boundary">
-        <h2>System boundary</h2>
-        <div class="flow" aria-label="component render flow">
-          <span>entity components</span><b>→</b>
-          <span>RenderSystem</span><b>→</b>
-          <span>persistent RenderWorld instance</span>
+      <section id="architecture">
+        <h2>Architecture</h2>
+        <div class="flow" aria-label="ECS data flow">
+          <span>Entity</span><b>→</b>
+          <span>ECS::World</span><b>→</b>
+          <span>component pool</span><b>→</b>
+          <span>view or ForEach</span>
         </div>
 
-        <p>The component remains the serialized source of truth. <code>RenderWorld</code> owns the runtime copy that the renderer reads.</p>
-      </section>
-
-      <section id="classes">
-        <h2>Classes and structures</h2>
         <dl class="api-list">
-          <dt><a href="systems-rendersystem.html"><code>Systems::RenderSystem</code></a></dt><dd>Converts component lifecycle events into persistent render instances.</dd>
-          <dt><code>SpriteComponent</code></dt><dd>Stores serialized sprite data and a runtime render connection.</dd>
-          <dt><code>MeshRendererComponent</code></dt><dd>Stores serialized mesh data and a runtime render connection.</dd>
-          <dt><code>Transform2D</code></dt><dd>Provides the model matrix used by render descriptions.</dd>
+          <dt><a href="ecs-world.html"><code>ECS::World</code></a></dt><dd>Owns entity slots, component pools, component access, views, and queries.</dd>
+          <dt><code>ECS::Entity</code></dt><dd>Contains an entity ID and generation. Both values must be nonzero.</dd>
+          <dt><code>ECS::ComponentView&lt;T&gt;</code></dt><dd>Contains aligned spans of entities and components without owning their storage.</dd>
+          <dt><code>ECS::Internal::ComponentPool&lt;T&gt;</code></dt><dd>Stores one component type in dense arrays with a sparse entity-to-index map.</dd>
         </dl>
       </section>
 
-      <section id="components">
-        <h2>Component types</h2>
-        <h3><code>SpriteComponent</code></h3>
-        <p>The serialized fields define visibility, texture, material, color, UV bounds, pivot, and sorting order.</p>
+      <section id="entities">
+        <h2>Entity lifecycle</h2>
+        <p><code>World::CreateEntity</code> returns an ID and generation. Removing an entity clears all of its components, marks its slot dead, and makes the ID available for reuse.</p>
 
-        <p>The runtime fields store a <code>RenderInstanceHandle</code> and a render version. Do not serialize these runtime fields.</p>
+        <p>When a slot is reused, its generation changes. <code>World::IsEntityAlive</code> compares both fields, so an older handle does not address the replacement entity during normal generation reuse.</p>
 
-        <h3><code>MeshRendererComponent</code></h3>
-        <p>The serialized fields define mesh, material, layer mask, and visibility. The runtime fields store a <code>RenderInstanceHandle</code> and a render version.</p>
+        <pre><code>ECS::World world;
+ECS::Entity entity = world.CreateEntity();
 
-        <h3><code>Transform2D</code></h3>
-        <p>The transform provides the model matrix for the render description. <code>RenderSystem</code> combines it with the render component data.</p>
+if (world.IsEntityAlive(entity)) {
+    world.RemoveEntity(entity);
+}</code></pre>
       </section>
 
-      <section id="lifecycle">
-        <h2>Lifecycle summary</h2>
-        <p>For the complete contract, read the <a href="systems-rendersystem.html"><code>RenderSystem</code> reference</a>.</p>
-        <dl class="api-list">
-          <dt>Add(entityId, transform, component, ...)</dt>
-          <dd>Builds a render description, creates a persistent instance, and stores its handle in the component.</dd>
-          <dt>Update(entityId, transform, component, ...)</dt>
-          <dd>Applies changed transform or component data to the existing instance.</dd>
-          <dt>Remove(component)</dt>
-          <dd>Destroys the persistent instance and clears its runtime connection.</dd>
-        </dl>
+      <section id="storage">
+        <h2>Component storage</h2>
+        <p>Each component type has one sparse-set pool. The dense entity array and dense component array use the same index. The sparse array maps an entity ID to that dense index.</p>
 
-        <p>The sprite overload accepts a fallback material. This value lets the system submit a sprite when the component does not select its own material.</p>
+        <p>Removal swaps the last dense element into the removed position, updates its sparse index, and then shrinks both dense arrays. This operation is constant-time, but dense order is not stable.</p>
+
+        <ul>
+          <li>Lookup and membership checks are constant-time.</li>
+          <li>Dense iteration is contiguous and cache-friendly.</li>
+          <li>Adding a component copies the supplied component into its pool.</li>
+          <li>Adding the same component type twice throws an exception.</li>
+        </ul>
       </section>
 
-      <section id="integration">
-        <h2>Connect an ECS</h2>
-        <p>The ECS integration must detect three events.</p>
+      <section id="views">
+        <h2>Single-component views</h2>
+        <p><code>GetComponentView&lt;T&gt;</code> returns aligned entity and component spans. A mutable world returns mutable components. A const world returns const components. If the component pool does not exist, both spans are empty.</p>
 
-        <ol class="steps">
-          <li>When a matching component enters the query, call <code>Add</code>.</li>
-          <li>When its transform or render data changes, call <code>Update</code>.</li>
-          <li>Before the component or entity leaves the query, call <code>Remove</code>.</li>
-        </ol>
+        <pre><code>auto view = world.GetComponentView&lt;Position&gt;();
 
-        <p>Use a change version to avoid a full render update when the source data did not change. Keep entity iteration and change detection in the ECS layer. Keep render-description conversion in <code>RenderSystem</code>.</p>
+for (std::size_t index = 0; index &lt; view.components.size(); ++index) {
+    ECS::Entity entity = view.entities[index];
+    Position&amp; position = view.components[index];
+    position.x += 1.0f;
+}</code></pre>
 
-        <div class="callout">
-          <p>Call <code>Remove</code> before component storage becomes invalid. The operation needs the stored <code>RenderInstanceHandle</code>.</p>
+        <div class="callout warning">
+          <p>A view does not own storage. Adding or removing the viewed component type, or removing an entity that has it, can invalidate both spans.</p>
         </div>
       </section>
 
-      <section id="direct-code">
-        <h2>Draw without an entity</h2>
-        <p>Direct code does not use <code>RenderSystem</code>. It submits to the same <code>RenderWorld</code>.</p>
+      <section id="queries">
+        <h2>Multi-component queries</h2>
+        <p><code>ForEach&lt;Components...&gt;</code> finds every requested pool and selects the smallest pool as the candidate set. It uses sparse lookups in the other pools and invokes the callback only when an entity has every requested component.</p>
 
-        <p>Create a persistent instance when the code owns a long-lived object. Call <code>DrawMeshOnce</code> or <code>DrawSpriteOnce</code> when the object exists for one frame.</p>
+        <pre><code>world.ForEach&lt;Position, Velocity&gt;(
+    [](ECS::Entity entity, Position&amp; position, Velocity&amp; velocity) {
+        position.x += velocity.x;
+        position.y += velocity.y;
+    });</code></pre>
 
-        <pre><code>Rendering::MeshInstanceDesc desc{};
-desc.mesh = customMesh;
-desc.material = customMaterial;
-desc.transform = transform;
+        <p>The const overload passes const component references. Template argument order determines callback argument order, but it does not determine which pool drives iteration.</p>
 
-renderWorld.DrawMeshOnce(desc);</code></pre>
-
-        <p>This path does not create an entity. It still uses the same sorting, layer filtering, resource resolution, and backend execution.</p>
+        <div class="callout warning">
+          <p>Do not add or remove entities or components inside a <code>ForEach</code> callback. Structural changes can invalidate the dense entity span being iterated.</p>
+        </div>
       </section>
 
-      <section id="scene">
-        <h2>Scene status</h2>
-        <p><code>Scene</code> and <code>GameObject</code> are minimal. They do not provide the full ECS integration. Do not place graphics-backend work in these classes.</p>
+      <section id="example">
+        <h2>Complete example</h2>
+        <pre><code>struct Position {
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
+struct Velocity {
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
+ECS::World world;
+ECS::Entity moving = world.CreateEntity();
+ECS::Entity stationary = world.CreateEntity();
+
+world.AddComponent(moving, Position{ 10.0f, 5.0f });
+world.AddComponent(moving, Velocity{ 1.0f, -0.5f });
+world.AddComponent(stationary, Position{ 0.0f, 0.0f });
+
+world.ForEach&lt;Position, Velocity&gt;(
+    [](ECS::Entity, Position&amp; position, Velocity&amp; velocity) {
+        position.x += velocity.x;
+        position.y += velocity.y;
+    });</code></pre>
+
+        <p>The query updates <code>moving</code> and skips <code>stationary</code> because it has no <code>Velocity</code>.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Current limits</h2>
+        <ul>
+          <li>The world is not thread-safe.</li>
+          <li>There is no scheduler, command buffer, serialization layer, lifecycle event stream, or query cache.</li>
+          <li>Structural changes are not supported during view or query iteration.</li>
+          <li>Component references and spans can be invalidated by dense-vector reallocation or swap removal.</li>
+          <li>The add API copies components; direct emplacement and move-only components are not supported.</li>
+        </ul>
       </section>
 
       <div class="next-links">
         <a href="assets.html"><small>previous</small>assets and GPU resources</a>
-        <a href="diagnostics.html"><small>next</small>diagnostics and tests</a>
+        <a href="ecs-world.html"><small>API reference</small>ECS::World</a>
       </div>
-      <footer>Source: <code>GameEngine/src/components</code>, <code>GameEngine/src/systems/render_system.*</code>, and <code>GameEngine/src/scene</code>.</footer>
+      <footer>Source: <code>GameEngine/src/ecs</code>.</footer>
     </main>
 
     <aside class="toc" aria-label="on this page">
       <strong>on this page</strong>
-      <a href="#boundary">system boundary</a>
-      <a href="#classes">classes and structures</a>
-      <a href="#components">component types</a>
-      <a href="#lifecycle">lifecycle summary</a>
-      <a href="#integration">connect an ECS</a>
-      <a href="#direct-code">draw without an entity</a>
-      <a href="#scene">scene status</a>
+      <a href="#architecture">architecture</a>
+      <a href="#entities">entity lifecycle</a>
+      <a href="#storage">component storage</a>
+      <a href="#views">views</a>
+      <a href="#queries">queries</a>
+      <a href="#example">complete example</a>
+      <a href="#limits">current limits</a>
     </aside>
   </div>
 

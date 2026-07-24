@@ -81,7 +81,7 @@ OpenGL values are one-level storage estimates, labeled `GPU Estimated`: vertex-b
 - [x] Named GPU Estimated rows cover vertex buffers, index buffers, and RGB8/RGBA8 textures.
 - [x] Resource usage transfers through buffer and texture moves and is released on destruction.
 - [x] Debug x64, Release x64, and Release opt-in builds pass.
-- [x] The tracker has no dependency on graphics, assets, Scene, ECS, ImGui, or `Profiler`.
+- [x] The tracker has no dependency on graphics, assets, ECS, ImGui, or `Profiler`.
 - [x] The profiler UI keeps scope hierarchy visible through an expandable selected-frame tree while retaining per-scope timing and share-of-frame data.
 
 This completes the memory-profiler milestone. Do not expand it before a Vulkan buffer/image ownership path exists; Vulkan can later add exact engine-recorded allocation sizes through the existing resource-accounting and UI boundary.
