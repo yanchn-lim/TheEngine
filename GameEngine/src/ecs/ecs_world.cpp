@@ -36,7 +36,7 @@ namespace ECS
 	void World::RemoveEntity(Entity entity)
 	{
 		//find entity
-		if (!entity.IsValid())
+		if (!IsEntityAlive(entity))
 			return;
 
 		auto& slot = _entitySlots[entity.id];
@@ -50,9 +50,14 @@ namespace ECS
 
 	bool World::IsEntityAlive(Entity entity) const
 	{
-		if (!entity.IsValid() || entity.id >= _entitySlots.size())
+		if (!entity.IsValid())
 			return false;
 
-		return _entitySlots[entity.id].alive;
+		if (entity.id >= _entitySlots.size())
+			return false;
+
+		const EntitySlot& slot = _entitySlots[entity.id];
+
+		return slot.alive && slot.generation == entity.generation;
 	}
 }

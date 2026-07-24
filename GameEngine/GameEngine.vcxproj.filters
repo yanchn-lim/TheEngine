@@ -252,9 +252,6 @@
     <ClCompile Include="src\ecs\ecs_world.cpp">
       <Filter>Source Files\ecs</Filter>
     </ClCompile>
-    <ClCompile Include="src\ecs\ecs_component_registry.cpp">
-      <Filter>Source Files\ecs</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -464,7 +461,10 @@
     <ClInclude Include="src\ecs\ecs_entity.hpp">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
-    <ClInclude Include="src\ecs\ecs_component_registry.hpp">
+    <ClInclude Include="src\ecs\escs_component_pool.hpp">
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ecs\ecs_component_pool_interface.hpp">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
   </ItemGroup>
