@@ -197,5 +197,59 @@ namespace ECS
 
 			return { pool->_denseEntities, pool->_denseComponents };
 		}
+
+		template<typename... Components, typename Func>
+		void ForEach(Func&& func)
+		{
+			static_assert(sizeof...(Components) > 0, "ForEach requires at least one component type");
+
+			//look for pools
+			std::array<Internal::IComponentPool*, sizeof...(Components)> pools
+			{
+				FindPool<Components>()... //unpack and find
+			};
+
+			for (Internal::IComponentPool* pool : pools)
+			{
+				//check if any pool doesnt exist
+				if (!pool)
+					return;
+			}
+
+			Internal::IComponentPool* iterationPool = pools[0];
+
+			for (Internal::IComponentPool* pool : pools)
+			{
+				if (pool->GetSize() < iterationPool->GetSize())
+					iterationPool = pool;
+			}
+
+			for (Entity entity : iterationPool->GetEntities())
+			{
+				std::tuple<Components*...> components
+				{
+					TryGetComponent<Components>(entity)...
+				};
+
+				//check if the entity has all components
+				const bool hasAllComponents = std::apply(
+					[](auto*... component)
+					{
+						return ((component != nullptr) && ...);
+					},
+					components);
+
+				//skip if doesnt include all
+				if (!hasAllComponents)
+					continue;
+
+				std::apply(
+					[&](auto*... component)
+					{
+						std::invoke(func, entity, *component...);
+					},
+					components);
+			}
+		}
 	};
 }

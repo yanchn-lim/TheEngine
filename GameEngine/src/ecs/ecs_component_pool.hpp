@@ -121,6 +121,16 @@ namespace ECS::Internal
 			return true;
 		}
 
+		std::size_t GetSize() const noexcept override
+		{
+			return _denseComponents.size();
+		}
+
+		std::span<const Entity> GetEntities() const noexcept override
+		{
+			return _denseEntities;
+		}
+
 		bool Contains(Entity entity) const
 		{
 			if (!_validEntity(entity))
