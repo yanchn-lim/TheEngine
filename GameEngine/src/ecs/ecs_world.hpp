@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ecs_entity.hpp"
+#include "ecs_component_pool.hpp"
 #include "ecs_component_pool_interface.hpp"
 
 #include <cstdint>
@@ -36,11 +37,14 @@ namespace ECS
 		{
 			if (!IsEntityAlive(entity))
 				throw std::runtime_error("Entity is not alive");
+
 			uint32_t componentTypeId = GetComponentTypeId<Component>();
 			if (componentTypeId >= _componentPools.size())
 				_componentPools.resize(componentTypeId + 1);
+
 			if (!_componentPools[componentTypeId])
 				_componentPools[componentTypeId] = std::make_unique<ComponentPool<Component>>();
+
 			auto* pool = static_cast<ComponentPool<Component>*>(_componentPools[componentTypeId].get());
 			return pool->AddComponent(entity, component);
 		}

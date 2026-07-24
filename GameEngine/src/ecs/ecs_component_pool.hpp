@@ -1,6 +1,12 @@
 #pragma once
 
 #include "ecs_component_pool_interface.hpp"
+#include "ecs_entity.hpp"
+#include <vector>
+#include <cstdint>
+#include <algorithm>
+#include <limits>
+#include <exception>
 
 namespace ECS
 {
@@ -16,9 +22,7 @@ namespace ECS
 
 		bool _validEntity(const Entity& entity) const
 		{
-			return	entity.IsValid() && 
-					entity.id < _sparseIndices.size() && 
-					entity.generation == _denseEntities[_sparseIndices[entity.id]].generation;
+			return entity.IsValid() && entity.id < _sparseIndices.size();
 		}
 
 	public:
@@ -30,14 +34,17 @@ namespace ECS
 			if (!entity.IsValid())
 				throw std::runtime_error("Invalid entity");
 
-			uint32_t _denseIndex = _denseComponents.size();
+			if(Contains(entity))
+				return GetComponent(entity);
+
+			uint32_t denseIndex = _denseComponents.size();
 			//should be same index for both
 			_denseComponents.push_back(component);
 			_denseEntities.push_back(entity);
 
 			//resize sparse indices if needed
 			_sparseIndices.resize(std::max(_sparseIndices.size(), static_cast<size_t>(entity.id + 1)), INVALID_COMPONENT_INDEX);
-			_sparseIndices[entity.id] = _denseIndex;
+			_sparseIndices[entity.id] = denseIndex;
 			return _denseComponents.back();
 		}
 
@@ -46,39 +53,39 @@ namespace ECS
 			if (!_validEntity(entity))
 				throw std::runtime_error("Invalid entity");
 
-			uint32_t componentIndex = _sparseIndices[entity.id];
-			if (componentIndex >= _denseComponents.size())
-				throw std::runtime_error("Invalid component index (index >= size)");
-
-			if(componentIndex == INVALID_COMPONENT_INDEX)
+			if(!Contains(entity))
 				throw std::runtime_error("Entity does not have this component");
 
-			return _denseComponents[componentIndex];
+			uint32_t denseIndex = _sparseIndices[entity.id];
+			if (denseIndex >= _denseComponents.size())
+				throw std::runtime_error("Invalid component index (index >= size)");
+
+			if(denseIndex == INVALID_COMPONENT_INDEX)
+				throw std::runtime_error("Entity does not have this component");
+
+			return _denseComponents[denseIndex];
 		}
 
 		void RemoveIfPresent(Entity entity) override
 		{
-			if (!_validEntity(entity))
-				throw std::runtime_error("Invalid entity");
-
 			if(!Contains(entity))
-				throw std::runtime_error("Entity does not have this component");
+				throw std::runtime_error("Entity does not exist or have this component");
 
-			uint32_t componentIndex = _sparseIndices[entity.id];
-			//swap
-			std::swap(_denseComponents[componentIndex], _denseComponents.back());
-			std::swap(_denseEntities[componentIndex], _denseEntities.back());
+			const uint32_t removedIndex = static_cast<uint32_t>(_sparseIndices[entity.id]);
+			const uint32_t lastIndex = static_cast<uint32_t>(_denseComponents.size() - 1);
+
+			if (removedIndex != lastIndex)
+			{
+				//swap
+				std::swap(_denseComponents[removedIndex], _denseComponents[lastIndex]);
+				std::swap(_denseEntities[removedIndex], _denseEntities[lastIndex]);
+				const Entity& movedEntity = _denseEntities[removedIndex];
+				_sparseIndices[movedEntity.id] = removedIndex;
+			}
+
 			_denseComponents.pop_back();
 			_denseEntities.pop_back();
-
 			_sparseIndices[entity.id] = INVALID_COMPONENT_INDEX;
-
-			//update sparse index of the swapped entity
-			if(componentIndex >= _denseComponents.size())
-				componentIndex = _denseComponents.size() - 1;
-
-			Entity swappedEntity = _denseEntities[componentIndex];
-			_sparseIndices[swappedEntity.id] = componentIndex;
 		}
 
 		bool Contains(Entity entity) const override
@@ -86,8 +93,11 @@ namespace ECS
 			if (!_validEntity(entity))
 				return false;
 
-			uint32_t componentIndex = _sparseIndices[entity.id];
-			return componentIndex != INVALID_COMPONENT_INDEX && componentIndex < _denseComponents.size();
+			const uint32_t denseIndex = _sparseIndices[entity.id];
+			if (denseIndex == INVALID_COMPONENT_INDEX || denseIndex >= _denseEntities.size())
+				return false;
+
+			return _denseEntities[denseIndex] == entity;
 		}
 	};
 }

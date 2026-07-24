@@ -42,15 +42,17 @@ namespace ECS
 		auto& slot = _entitySlots[entity.id];
 		if (slot.alive)
 		{
+			//remove components
+			for(auto& pool : _componentPools)
+			{
+				if(pool->Contains(entity) && pool)
+					pool->RemoveIfPresent(entity);
+			}
+
 			slot.alive = false;
 			_freeSlots.push_back(entity.id);
 			_entityAliveCount--;
 
-			//remove components
-			for(auto& pool : _componentPools)
-			{
-				pool->RemoveIfPresent(entity);
-			}
 		}
 	}
 
