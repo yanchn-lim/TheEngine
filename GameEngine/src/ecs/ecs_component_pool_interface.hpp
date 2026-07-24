@@ -11,6 +11,6 @@ namespace ECS
 		//functions of generic component pool
 		virtual ~IComponentPool() = default;
 		virtual void RemoveIfPresent(Entity entity) = 0;
-		virtual void Contains(Entity entity) const = 0;
+		virtual bool Contains(Entity entity) const = 0;
 	};
 }

@@ -30,5 +30,19 @@ namespace ECS
 		uint32_t GetEntityCount() const;
 		void RemoveEntity(Entity entity);
 		bool IsEntityAlive(Entity entity) const;
+
+		template<typename Component>
+		Component& AddComponent(Entity entity, const Component& component)
+		{
+			if (!IsEntityAlive(entity))
+				throw std::runtime_error("Entity is not alive");
+			uint32_t componentTypeId = GetComponentTypeId<Component>();
+			if (componentTypeId >= _componentPools.size())
+				_componentPools.resize(componentTypeId + 1);
+			if (!_componentPools[componentTypeId])
+				_componentPools[componentTypeId] = std::make_unique<ComponentPool<Component>>();
+			auto* pool = static_cast<ComponentPool<Component>*>(_componentPools[componentTypeId].get());
+			return pool->AddComponent(entity, component);
+		}
 	};
 }
