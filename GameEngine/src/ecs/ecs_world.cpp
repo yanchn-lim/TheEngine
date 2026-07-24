@@ -1,6 +1,8 @@
 #include "ecs_def.hpp"
 #include "ecs_world.hpp"
 
+#include <limits>
+
 namespace ECS
 {
 	Entity World::CreateEntity()
@@ -13,9 +15,20 @@ namespace ECS
 		{
 			entityId = _freeSlots.back();
 			_freeSlots.pop_back();
-			_entitySlots[entityId].alive = true;
-			_entitySlots[entityId].generation++;
-			generation = _entitySlots[entityId].generation;
+
+			Internal::EntitySlot& slot = _entitySlots[entityId];
+
+			if (slot.generation == std::numeric_limits<uint32_t>::max())
+			{
+				slot.generation = 1;
+			}
+			else
+			{
+				++slot.generation;
+			}
+
+			slot.alive = true;
+			generation = slot.generation;
 		}
 		else
 		{
@@ -45,7 +58,7 @@ namespace ECS
 			//remove components
 			for(auto& pool : _componentPools)
 			{
-				if(pool && pool->Contains(entity))
+				if(pool)
 					pool->RemoveIfPresent(entity);
 			}
 
@@ -64,7 +77,7 @@ namespace ECS
 		if (entity.id >= _entitySlots.size())
 			return false;
 
-		const EntitySlot& slot = _entitySlots[entity.id];
+		const Internal::EntitySlot& slot = _entitySlots[entity.id];
 
 		return slot.alive && slot.generation == entity.generation;
 	}

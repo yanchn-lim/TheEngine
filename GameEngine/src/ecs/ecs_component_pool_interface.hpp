@@ -4,13 +4,19 @@
 
 namespace ECS
 {
-	//every type of component pool should inherit from this interface
-	class IComponentPool
+	class World;
+
+	namespace Internal
 	{
-	public:
-		//functions of generic component pool
-		virtual ~IComponentPool() = default;
-		virtual void RemoveIfPresent(Entity entity) = 0;
-		virtual bool Contains(Entity entity) const = 0;
-	};
+		class IComponentPool
+		{
+			friend class ECS::World;
+
+		public:
+			virtual ~IComponentPool() = default;
+
+		private:
+			virtual bool RemoveIfPresent(Entity entity) = 0;
+		};
+	}
 }

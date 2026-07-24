@@ -231,6 +231,7 @@
     <ClInclude Include="src\debug\memory_tracker.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
     <ClInclude Include="src\ecs\ecs_component_pool_interface.hpp" />
+    <ClInclude Include="src\ecs\ecs_component_view.hpp" />
     <ClInclude Include="src\ecs\ecs_def.hpp" />
     <ClInclude Include="src\ecs\ecs_entity.hpp" />
     <ClInclude Include="src\ecs\ecs_world.hpp" />
