@@ -410,9 +410,6 @@
     <ClInclude Include="src\ecs\ecs_world.hpp">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
-    <ClInclude Include="src\ecs\ecs_def.hpp">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
     <ClInclude Include="src\ecs\ecs_entity.hpp">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
@@ -422,9 +419,12 @@
     <ClInclude Include="src\ecs\ecs_component_pool_interface.hpp">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
-	<ClInclude Include="src\ecs\ecs_component_view.hpp">
-	  <Filter>Header Files\ecs</Filter>
-	</ClInclude>
+    <ClInclude Include="src\ecs\ecs_component_view.hpp">
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ecs\ecs_system.hpp">
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\models\test_quad.obj">

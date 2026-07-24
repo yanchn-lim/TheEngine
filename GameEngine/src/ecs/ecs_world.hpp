@@ -308,5 +308,46 @@ namespace ECS
 					components);
 			}
 		}
+	
+		//checks if any entity matches the required components
+		template<typename... Components>
+		bool HasAnyEntityWith() const
+		{
+			static_assert(
+				sizeof...(Components) > 0,
+				"HasAnyEntityWith requires at least one component type");
+
+			std::array<
+				const Internal::IComponentPool*,
+				sizeof...(Components)> pools
+			{
+				FindPool<Components>()...
+			};
+
+			for (const Internal::IComponentPool* pool : pools)
+			{
+				if (!pool)
+					return false;
+			}
+
+			const Internal::IComponentPool* iterationPool = pools[0];
+
+			for (const Internal::IComponentPool* pool : pools)
+			{
+				if (pool->GetSize() < iterationPool->GetSize())
+					iterationPool = pool;
+			}
+
+			for (Entity entity : iterationPool->GetEntities())
+			{
+				const bool hasAllComponents =
+					(TryGetComponent<Components>(entity) != nullptr && ...);
+
+				if (hasAllComponents)
+					return true;
+			}
+
+			return false;
+		}
 	};
 }
