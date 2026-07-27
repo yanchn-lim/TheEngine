@@ -14,7 +14,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{65f46bcd-0342-423b-8cc8-09f1c1823d8a}</ProjectGuid>
-    <RootNamespace>GameEngine</RootNamespace>
+    <RootNamespace>Ludus</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -168,6 +168,7 @@
     <ClCompile Include="src\assets\shader_registry.cpp" />
     <ClCompile Include="src\assets\texture_registry.cpp" />
     <ClCompile Include="src\core\file_system.cpp" />
+    <ClCompile Include="src\debug\debug_overlay.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
     <ClCompile Include="src\debug\memory_overrides.cpp" />
     <ClCompile Include="src\debug\memory_tracker.cpp" />
@@ -175,6 +176,7 @@
     <ClCompile Include="src\ecs\ecs_world.cpp" />
     <ClCompile Include="src\graphics\graphics_device_factory.cpp" />
     <ClCompile Include="src\graphics\imgui_backend.cpp" />
+    <ClCompile Include="src\graphics\imgui_layer.cpp" />
     <ClCompile Include="src\graphics\opengl\opengl_graphics_device.cpp" />
     <ClCompile Include="src\graphics\opengl\opengl_imgui_backend.cpp" />
     <ClCompile Include="src\graphics\vertex_layout.cpp" />
@@ -184,6 +186,7 @@
     <ClCompile Include="src\graphics\vulkan\vulkan_imgui_backend.cpp" />
     <ClCompile Include="src\graphics\vulkan\vulkan_swapchain.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\platform\window.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -194,7 +197,11 @@
     <ClCompile Include="src\rendering\renderer.cpp" />
     <ClCompile Include="src\rendering\render_resource_manager.cpp" />
     <ClCompile Include="src\rendering\render_world.cpp" />
+    <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\tests\graphics_api_tests.cpp" />
+    <ClCompile Include="src\tests\manual_render_test.cpp" />
+    <ClCompile Include="src\tests\movement_system.cpp" />
+    <ClCompile Include="src\tests\sandbox_application.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
@@ -222,6 +229,9 @@
     <ClInclude Include="src\assets\shader_registry.hpp" />
     <ClInclude Include="src\assets\texture_registry.hpp" />
     <ClInclude Include="src\core\file_system.hpp" />
+    <ClInclude Include="src\core\application.hpp" />
+    <ClInclude Include="src\core\engine_config.hpp" />
+    <ClInclude Include="src\debug\debug_overlay.hpp" />
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\debug\memory_tracker.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
@@ -229,6 +239,7 @@
     <ClInclude Include="src\ecs\ecs_component_view.hpp" />
     <ClInclude Include="src\ecs\ecs_entity.hpp" />
     <ClInclude Include="src\ecs\ecs_system.hpp" />
+    <ClInclude Include="src\ecs\ecs_system_registry.hpp" />
     <ClInclude Include="src\ecs\ecs_world.hpp" />
     <ClInclude Include="src\ecs\ecs_component_pool.hpp" />
     <ClInclude Include="src\graphics\blend_mode.hpp" />
@@ -239,6 +250,7 @@
     <ClInclude Include="src\graphics\graphics_device_factory.hpp" />
     <ClInclude Include="src\graphics\graphics_handles.hpp" />
     <ClInclude Include="src\graphics\imgui_backend.hpp" />
+    <ClInclude Include="src\graphics\imgui_layer.hpp" />
     <ClInclude Include="src\graphics\resource_table.hpp" />
     <ClInclude Include="src\graphics\primitive_topology.hpp" />
     <ClInclude Include="src\graphics\render_state.hpp" />
@@ -251,6 +263,7 @@
     <ClInclude Include="src\graphics\vulkan\vulkan_imgui_backend.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_swapchain.hpp" />
     <ClInclude Include="src\pch.hpp" />
+    <ClInclude Include="src\platform\window.hpp" />
     <ClInclude Include="src\debug\profiler.hpp" />
     <ClInclude Include="src\debug\profiler_ui.hpp" />
     <ClInclude Include="src\core\time.hpp" />
@@ -262,7 +275,13 @@
     <ClInclude Include="src\rendering\render_resource_manager.hpp" />
     <ClInclude Include="src\rendering\render_world.hpp" />
     <ClInclude Include="src\rendering\renderer.hpp" />
+    <ClInclude Include="src\scene\scene.hpp" />
     <ClInclude Include="src\tests\graphics_api_tests.hpp" />
+    <ClInclude Include="src\tests\manual_render_test.hpp" />
+    <ClInclude Include="src\tests\movement_system.hpp" />
+    <ClInclude Include="src\tests\position.hpp" />
+    <ClInclude Include="src\tests\sandbox_application.hpp" />
+    <ClInclude Include="src\tests\velocity.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\models\test_quad.obj" />

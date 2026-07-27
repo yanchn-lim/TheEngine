@@ -1,7 +1,10 @@
 #pragma once
 
-struct Time
+namespace Ludus
 {
-	double deltaTime;
-	double totalTime;
-};
+	struct Time
+	{
+		double deltaTime;
+		double totalTime;
+	};
+}

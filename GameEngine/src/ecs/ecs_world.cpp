@@ -1,6 +1,7 @@
 #include "ecs_world.hpp"
 
 #include <limits>
+#include <algorithm>
 
 namespace ECS
 {
@@ -79,5 +80,44 @@ namespace ECS
 		const Internal::EntitySlot& slot = _entitySlots[entity.id];
 
 		return slot.alive && slot.generation == entity.generation;
+	}
+
+	void World::SortSystems()
+	{
+		std::ranges::sort(
+			_systems,
+			{},
+			[](const SystemEntry& entry)
+			{
+				return std::tuple{
+					entry.phase,
+					entry.order,
+					entry.insertionIndex 
+				};
+			});
+
+		_systemsNeedSorting = false;
+	}
+
+	void World::UpdateSystems()
+	{
+		if (_systemsNeedSorting)
+			SortSystems();
+
+		for (SystemEntry& entry : _systems)
+		{
+			entry.instance->OnUpdate(*this);
+		}
+	}
+
+	void World::FixedUpdateSystems()
+	{
+		if (_systemsNeedSorting)
+			SortSystems();
+
+		for (SystemEntry& entry : _systems)
+		{
+			//entry.instance->OnUpdate(*this);
+		}
 	}
 }

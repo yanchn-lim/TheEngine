@@ -1,19 +1,21 @@
 #pragma once
 
 #include <type_traits>
+#include <typeindex>
+#include <string>
+#include <memory>
 
 namespace ECS
 {
+	class World;
+
 	enum class SystemPhase : uint8_t
 	{
-		Initialization,
-		Update,
-		LateUpdate,
-		Render
+		PREUPDATE,
+		UPDATE,
+		LATEUPDATE,
+		RENDER
 	};
-
-
-	class World;
 
 	//future system classes inherits this
 	class ISystem
@@ -33,13 +35,11 @@ namespace ECS
 		virtual void OnDestroy(World&){}
 	};
 
-	//every 
-	template<typename... Components>
-	struct ComponentList
+	struct SystemEntry
 	{
-		static_assert(sizeof...(Components) > 0, "ComponentList requires at least one component type");
-		static_assert(
-			(std::is_same_v<Components, std::remove_cvref_t<Components>> && ...),
-			"Component types must not be const, volatile or references");
+		SystemPhase phase;
+		int order;
+		std::size_t insertionIndex;
+		std::unique_ptr<ISystem> instance;
 	};
 }

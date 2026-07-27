@@ -1,83 +1,62 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include "assets/asset_manager.hpp"
-#include "debug/profiler_ui.hpp"
-#include "graphics/graphics_device.hpp"
-#include "graphics/imgui_backend.hpp"
-#include "graphics/renderer_backend.hpp"
-#include "rendering/renderer.hpp"
+#include "engine_config.hpp"
+#include "graphics/imgui_layer.hpp"
+#include "platform/window.hpp"
 #include "rendering/render_world.hpp"
 #include "time.hpp"
 
-struct GLFWwindow;
-
-struct Window
+namespace Graphics
 {
-    GLFWwindow* handle = nullptr;
-    int width = 1600;
-    int height = 900;
-    const char* title = "Engine";
-    bool vsync = false;
-    bool resizePending = false;
+    class IGraphicsDevice;
+}
 
-    bool Init(Graphics::RendererBackend backend);
-    void Shutdown();
-};
-
-struct ImGuiLayer
+namespace Rendering
 {
-    bool Init(GLFWwindow* window, Graphics::RendererBackend backend, Graphics::IGraphicsDevice& device);
-    void Begin();
-    void End();
-    void Shutdown();
-    bool IsInitialized() const { return _initialized; }
+    class Renderer;
+}
 
-private:
-    bool _initialized = false;
-    std::unique_ptr<Graphics::IImGuiBackend> _backend;
-};
-
-struct ManualRenderTest
+namespace Ludus
 {
-    Assets::ModelHandle model;
-    Assets::MaterialHandle material;
-    Assets::MeshHandle spriteMesh;
-    std::vector<Rendering::RenderInstanceHandle> instances;
-    float rotation = 0.0f;
+    class IApplication;
 
-    bool Initialize(Assets::AssetManager& assets, Rendering::RenderWorld& renderWorld);
-    void Update(Rendering::RenderWorld& renderWorld, double deltaTime);
-    void Shutdown(Rendering::RenderWorld& renderWorld);
-};
+    class Engine
+    {
+    public:
+        explicit Engine(EngineConfig config);
+        ~Engine();
 
-class Engine
-{
-public:
-    static Engine& Get();
-    Engine(const Engine&) = delete;
-    Engine& operator=(const Engine&) = delete;
-    int Run();
+        Engine(const Engine&) = delete;
+        Engine& operator=(const Engine&) = delete;
+        Engine(Engine&&) = delete;
+        Engine& operator=(Engine&&) = delete;
 
-    Time time;
-    Window window;
-    ImGuiLayer imgui;
-    ProfilerUI profilerUI;
-    //Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;
-    Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
+        int Run(IApplication& application);
+        void RequestStop() noexcept;
 
-    Assets::AssetManager assets;
-    Rendering::RenderWorld renderWorld;
-    std::unique_ptr<Graphics::IGraphicsDevice> graphicsDevice;
-    std::unique_ptr<Rendering::Renderer> renderer;
-    ManualRenderTest manualRenderTest;
-    bool running = false;
+        const Time& GetTime() const noexcept;
+        Assets::AssetManager& GetAssets() noexcept;
+        Rendering::RenderWorld& GetRenderWorld() noexcept;
+        Rendering::Renderer& GetRenderer() noexcept;
 
-private:
-    Engine() = default;
-    bool Initialize();
-    void Update();
-    void Shutdown();
-};
+    private:
+        bool Initialize();
+        void Update();
+        void Shutdown();
+        void HandleKey(int key, int action);
+
+        EngineConfig _config;
+        Time _time{};
+        Platform::Window _window;
+        Graphics::ImGuiLayer _imgui;
+        Assets::AssetManager _assets;
+        Rendering::RenderWorld _renderWorld;
+        std::unique_ptr<Graphics::IGraphicsDevice> _graphicsDevice;
+        std::unique_ptr<Rendering::Renderer> _renderer;
+        IApplication* _application = nullptr;
+        bool _running = false;
+    };
+}

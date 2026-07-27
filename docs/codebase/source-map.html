@@ -27,18 +27,23 @@
           <li><code>GameEngine/src/graphics/vulkan</code><span>Vulkan context, device, swapchain, frame resources, graphics device, and ImGui backend.</span></li>
           <li><code>GameEngine/src/assets</code><span>Asset manager, registries, records, importers, and primitive mesh data.</span></li>
           <li><code>GameEngine/src/ecs</code><span>Entity handles, world ownership, sparse-set component pools, views, and typed queries.</span></li>
+          <li><code>GameEngine/src/platform</code><span>GLFW window ownership, events, and resize state.</span></li>
           <li><code>GameEngine/src/debug</code><span>Profiler, memory tracker, profiler UI, log, and debug console.</span></li>
-          <li><code>GameEngine/src/tests</code><span>Graphics API, render-world, resource-table, and renderer tests.</span></li>
+          <li><code>GameEngine/src/tests</code><span>Graphics tests and the current sandbox application.</span></li>
         </ul>
       </section>
 
       <section id="engine-files">
         <h2>Engine entry points</h2>
         <ul class="path-list">
-          <li><code>GameEngine/src/main.cpp</code><span>Creates and starts the engine.</span></li>
-          <li><code>GameEngine/src/core/engine.hpp</code><span>Defines subsystem ownership and selects the graphics backend.</span></li>
-          <li><code>GameEngine/src/core/engine.cpp</code><span>Implements window setup, initialization, update, ImGui, presentation, and shutdown.</span></li>
-          <li><code>GameEngine/GameEngine.vcxproj</code><span>Defines the compiler version, C++ language version, includes, libraries, and source files.</span></li>
+          <li><code>GameEngine/src/main.cpp</code><span>Creates the engine configuration, engine, and sandbox application.</span></li>
+          <li><code>GameEngine/src/core/application.hpp</code><span>Defines the callbacks that connect an application to the engine loop.</span></li>
+          <li><code>GameEngine/src/core/engine_config.hpp</code><span>Defines window and graphics startup configuration.</span></li>
+          <li><code>GameEngine/src/core/engine.hpp</code><span>Defines runtime service ownership and the application-facing engine API.</span></li>
+          <li><code>GameEngine/src/core/engine.cpp</code><span>Coordinates initialization, application callbacks, rendering, presentation, and shutdown.</span></li>
+          <li><code>GameEngine/src/platform/window.*</code><span>Owns GLFW setup, events, resize state, and the native window.</span></li>
+          <li><code>GameEngine/src/tests/sandbox_application.*</code><span>Owns the manual render test and debug overlay used by the executable.</span></li>
+          <li><code>GameEngine/Ludus.vcxproj</code><span>Defines the compiler version, C++ language version, includes, libraries, and source files.</span></li>
         </ul>
       </section>
 

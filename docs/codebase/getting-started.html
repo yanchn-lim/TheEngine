@@ -32,26 +32,27 @@
       <section id="build">
         <h2>Build the engine</h2>
         <ol class="steps">
-          <li>Open <code>GameEngine/GameEngine.sln</code>.</li>
+          <li>Open <code>GameEngine/Ludus.sln</code>.</li>
           <li>Select an x64 configuration.</li>
           <li>Build the <code>GameEngine</code> project.</li>
           <li>Start the executable from Visual Studio.</li>
         </ol>
 
         <div class="callout">
-          <p>Debug builds call <code>Tests::RunGraphicsApiTests()</code> during engine startup. A test failure can stop startup before the window loop begins.</p>
+          <p>Debug builds call <code>Tests::RunGraphicsApiTests()</code> during sandbox application startup. A test failure stops startup before the window loop begins.</p>
         </div>
       </section>
 
       <section id="backend">
         <h2>Select a backend</h2>
-        <p><code>Engine::renderbackend</code> selects the graphics backend. The current default is Vulkan.</p>
+        <p><code>Ludus::EngineConfig::rendererBackend</code> selects the graphics backend. The current default is Vulkan. The executable also accepts <code>--opengl</code> and <code>--vulkan</code>.</p>
 
-        <pre><code>// GameEngine/src/core/engine.hpp
-Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
+        <pre><code>// GameEngine/src/main.cpp
+Ludus::EngineConfig config;
+config.rendererBackend = Graphics::RendererBackend::VULKAN;
 
 // select this value to use OpenGL
-// Graphics::RendererBackend renderbackend = Graphics::RendererBackend::OPENGL;</code></pre>
+// config.rendererBackend = Graphics::RendererBackend::OPENGL;</code></pre>
 
         <p>The selection controls window setup, graphics device creation, and ImGui backend creation. User render code does not change.</p>
       </section>
@@ -64,10 +65,11 @@ Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
           <li>The device creates its native context and graphics resources.</li>
           <li>The engine creates <code>RenderWorld</code>, <code>RenderResourceManager</code>, and <code>Renderer</code>.</li>
           <li>The ImGui factory creates the matching <code>IImGuiBackend</code>.</li>
+          <li>The sandbox application initializes its test content.</li>
           <li>The engine enters the update loop.</li>
         </ol>
 
-        <p><code>GameEngine/src/main.cpp</code> is the application entry point. <code>GameEngine/src/core/engine.cpp</code> owns the lifecycle.</p>
+        <p><code>GameEngine/src/main.cpp</code> creates the engine and sandbox application. <code>GameEngine/src/core/engine.cpp</code> owns the runtime lifecycle. The application owns test and debug state.</p>
       </section>
 
       <section id="update-loop">
@@ -95,7 +97,7 @@ Graphics::RendererBackend renderbackend = Graphics::RendererBackend::VULKAN;
         <a href="index.html"><small>previous</small>codebase overview</a>
         <a href="rendering.html"><small>next</small>render submission</a>
       </div>
-      <footer>Source: <code>GameEngine/src/main.cpp</code>, <code>GameEngine/src/core/engine.*</code>, and <code>GameEngine/GameEngine.vcxproj</code>.</footer>
+      <footer>Source: <code>GameEngine/src/main.cpp</code>, <code>GameEngine/src/core/engine.*</code>, and <code>GameEngine/Ludus.vcxproj</code>.</footer>
     </main>
 
     <aside class="toc" aria-label="on this page">

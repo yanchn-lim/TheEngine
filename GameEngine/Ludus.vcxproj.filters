@@ -91,6 +91,27 @@
     <Filter Include="Source Files\ecs">
       <UniqueIdentifier>{1aaf3660-06e5-491a-b326-5fbd0ea33f8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\platform">
+      <UniqueIdentifier>{42f86c45-812c-4e9a-a394-5f4a245c7127}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\platform">
+      <UniqueIdentifier>{b9977b08-bda8-44d9-88e8-bc7964f33472}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scene">
+      <UniqueIdentifier>{690a3a79-a3f9-4535-b4ee-b2cb2d1db2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene">
+      <UniqueIdentifier>{528345d2-c392-439d-93aa-33cfcb52c2d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tests\comp">
+      <UniqueIdentifier>{f6a3c1b9-d5e4-4bfa-b01b-fe0fe90ad019}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tests\systems">
+      <UniqueIdentifier>{30a9397f-3268-49da-abef-6ad774ceeb60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tests\systems">
+      <UniqueIdentifier>{1f159b4b-03ae-4cef-8de5-1a1cf88f05d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -128,6 +149,21 @@
     </ClCompile>
     <ClCompile Include="src\core\engine.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\window.cpp">
+      <Filter>Source Files\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\imgui_layer.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\debug_overlay.cpp">
+      <Filter>Source Files\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\manual_render_test.cpp">
+      <Filter>Source Files\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\sandbox_application.cpp">
+      <Filter>Source Files\tests</Filter>
     </ClCompile>
     <ClCompile Include="src\debug\profiler_ui.cpp">
       <Filter>Source Files\debug</Filter>
@@ -225,6 +261,12 @@
     <ClCompile Include="src\ecs\ecs_world.cpp">
       <Filter>Source Files\ecs</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\scene.cpp">
+      <Filter>Source Files\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\movement_system.cpp">
+      <Filter>Source Files\tests\systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\imconfig.h">
@@ -262,6 +304,27 @@
     </ClInclude>
     <ClInclude Include="src\core\engine.hpp">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\application.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\engine_config.hpp">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform\window.hpp">
+      <Filter>Header Files\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\imgui_layer.hpp">
+      <Filter>Header Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\debug_overlay.hpp">
+      <Filter>Header Files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\manual_render_test.hpp">
+      <Filter>Header Files\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\sandbox_application.hpp">
+      <Filter>Header Files\tests</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ring_buffer.hpp">
       <Filter>Header Files\core</Filter>
@@ -424,6 +487,21 @@
     </ClInclude>
     <ClInclude Include="src\ecs\ecs_system.hpp">
       <Filter>Header Files\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ecs\ecs_system_registry.hpp">
+      <Filter>Header Files\ecs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\scene.hpp">
+      <Filter>Header Files\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\position.hpp">
+      <Filter>Header Files\tests\comp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\velocity.hpp">
+      <Filter>Header Files\tests\comp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\movement_system.hpp">
+      <Filter>Header Files\tests\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

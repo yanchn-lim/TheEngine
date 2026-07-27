@@ -74,7 +74,7 @@
 
       <section id="selection">
         <h2>Select and test a backend</h2>
-        <p>Change only <code>Engine::renderbackend</code> in <code>GameEngine/src/core/engine.hpp</code>. Then rebuild and start the engine.</p>
+        <p>Pass <code>--opengl</code> or <code>--vulkan</code> to the executable. Embedded applications can set <code>Ludus::EngineConfig::rendererBackend</code> before they construct the engine.</p>
 
         <p>When you add a graphics feature, test the same render case on both backends. A backend must translate the common contract. It must not change the front-facing render API.</p>
       </section>
@@ -83,7 +83,7 @@
         <a href="graphics-api.html"><small>previous</small>graphics API</a>
         <a href="assets.html"><small>next</small>assets and GPU resources</a>
       </div>
-      <footer>Source: <code>GameEngine/src/graphics/opengl</code>, <code>GameEngine/src/graphics/vulkan</code>, and <code>GameEngine/src/graphics/imgui_backend.*</code>.</footer>
+      <footer>Source: <code>GameEngine/src/graphics/opengl</code>, <code>GameEngine/src/graphics/vulkan</code>, <code>GameEngine/src/graphics/imgui_backend.*</code>, and <code>GameEngine/src/core/engine_config.hpp</code>.</footer>
     </main>
 
     <aside class="toc" aria-label="on this page">

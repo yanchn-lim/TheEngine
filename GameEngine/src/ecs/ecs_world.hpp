@@ -4,6 +4,7 @@
 #include "ecs_component_pool.hpp"
 #include "ecs_component_pool_interface.hpp"
 #include "ecs_component_view.hpp"
+#include "ecs_system.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -55,6 +56,10 @@ namespace ECS
 		std::vector<uint32_t> _freeSlots;
 		std::vector<std::unique_ptr<Internal::IComponentPool>> _componentPools;
 		uint32_t _entityAliveCount = 0;
+
+		std::vector<SystemEntry> _systems;
+		std::size_t _nextSystemInsertionIndex = 0;
+		bool _systemsNeedSorting = false;
 
 		template<typename Component>
 		Internal::ComponentPool<Component>& GetOrCreatePool()
@@ -341,7 +346,7 @@ namespace ECS
 			for (Entity entity : iterationPool->GetEntities())
 			{
 				const bool hasAllComponents =
-					(TryGetComponent<Components>(entity) != nullptr && ...);
+					((TryGetComponent<Components>(entity) != nullptr) && ...);
 
 				if (hasAllComponents)
 					return true;
@@ -349,5 +354,26 @@ namespace ECS
 
 			return false;
 		}
+	
+		template<typename SystemType, typename... Arguments>
+		SystemType& AddSystem(Arguments&&... args)
+		{
+			static_assert(std::derived_from<SystemType, ISystem>);
+
+			auto system = std::make_unique<SystemType>(std::forward<Arguments>(args)...);
+			SystemType& result = *system;
+			SystemEntry entry{ SystemType::Phase, SystemType::Order, _nextSystemInsertionIndex++, std::move(system) };
+
+			_systems.push_back(std::move(entry));
+			_systemsNeedSorting = true;
+			result.OnCreate(*this);
+
+			return result;
+		}
+		
+		void SortSystems();
+
+		void UpdateSystems();
+		void FixedUpdateSystems();
 	};
 }
