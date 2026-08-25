@@ -11,9 +11,10 @@ namespace Ludus
 		ECS::World& GetWorld() noexcept;
 		const ECS::World& GetWorld() const noexcept;
 
+		void FixedUpdate(double fixedDeltaTime);
 		void Update();
 	
 	private:
-		ECS::World _world;
+		ECS::World _world{};
 	};
 }

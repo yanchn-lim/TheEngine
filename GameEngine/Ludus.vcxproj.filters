@@ -112,6 +112,15 @@
     <Filter Include="Source Files\tests\systems">
       <UniqueIdentifier>{1f159b4b-03ae-4cef-8de5-1a1cf88f05d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\components">
+      <UniqueIdentifier>{d5e071aa-8f6f-4d94-a0f2-5c218a7d13b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\systems">
+      <UniqueIdentifier>{c1e45ee9-aacc-49f1-aeab-df2751f67296}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\systems">
+      <UniqueIdentifier>{7592bd16-8949-46f2-a535-e23ba623d10d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="external\glad\src\glad.c">
@@ -158,9 +167,6 @@
     </ClCompile>
     <ClCompile Include="src\debug\debug_overlay.cpp">
       <Filter>Source Files\debug</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tests\manual_render_test.cpp">
-      <Filter>Source Files\tests</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\sandbox_application.cpp">
       <Filter>Source Files\tests</Filter>
@@ -252,9 +258,6 @@
     <ClCompile Include="src\rendering\render_resource_manager.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="src\rendering\render_world.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\tests\graphics_api_tests.cpp">
       <Filter>Source Files\tests</Filter>
     </ClCompile>
@@ -266,6 +269,12 @@
     </ClCompile>
     <ClCompile Include="src\tests\movement_system.cpp">
       <Filter>Source Files\tests\systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\components\transform.hpp">
+      <Filter>Header Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\render_system.cpp">
+      <Filter>Source Files\systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -319,9 +328,6 @@
     </ClInclude>
     <ClInclude Include="src\debug\debug_overlay.hpp">
       <Filter>Header Files\debug</Filter>
-    </ClInclude>
-    <ClInclude Include="src\tests\manual_render_test.hpp">
-      <Filter>Header Files\tests</Filter>
     </ClInclude>
     <ClInclude Include="src\tests\sandbox_application.hpp">
       <Filter>Header Files\tests</Filter>
@@ -464,9 +470,6 @@
     <ClInclude Include="src\rendering\render_resource_manager.hpp">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\render_world.hpp">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\tests\graphics_api_tests.hpp">
       <Filter>Header Files\tests</Filter>
     </ClInclude>
@@ -502,6 +505,12 @@
     </ClInclude>
     <ClInclude Include="src\tests\movement_system.hpp">
       <Filter>Header Files\tests\systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\components\renderable.hpp">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\render_system.hpp">
+      <Filter>Header Files\systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

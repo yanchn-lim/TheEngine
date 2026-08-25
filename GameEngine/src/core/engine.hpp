@@ -6,7 +6,6 @@
 #include "engine_config.hpp"
 #include "graphics/imgui_layer.hpp"
 #include "platform/window.hpp"
-#include "rendering/render_world.hpp"
 #include "time.hpp"
 
 namespace Graphics
@@ -39,7 +38,6 @@ namespace Ludus
 
         const Time& GetTime() const noexcept;
         Assets::AssetManager& GetAssets() noexcept;
-        Rendering::RenderWorld& GetRenderWorld() noexcept;
         Rendering::Renderer& GetRenderer() noexcept;
 
     private:
@@ -53,7 +51,6 @@ namespace Ludus
         Platform::Window _window;
         Graphics::ImGuiLayer _imgui;
         Assets::AssetManager _assets;
-        Rendering::RenderWorld _renderWorld;
         std::unique_ptr<Graphics::IGraphicsDevice> _graphicsDevice;
         std::unique_ptr<Rendering::Renderer> _renderer;
         IApplication* _application = nullptr;

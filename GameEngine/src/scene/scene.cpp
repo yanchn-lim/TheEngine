@@ -12,6 +12,11 @@ namespace Ludus
 		return _world;
 	}
 
+	void Scene::FixedUpdate(double fixedDeltaTime)
+	{
+		_world.FixedUpdateSystems(fixedDeltaTime);
+	}
+
 	void Scene::Update()
 	{
 		_world.UpdateSystems();

@@ -28,6 +28,7 @@ namespace Graphics
         if (!_glfwInitialized) return false;
 
         _colorFormat = static_cast<VkFormat>(_device->SwapchainFormat());
+        _depthFormat = static_cast<VkFormat>(_device->DepthFormat());
         ImGui_ImplVulkan_InitInfo info{};
         info.ApiVersion = VK_API_VERSION_1_3;
         info.Instance = static_cast<VkInstance>(_device->NativeInstance());
@@ -44,6 +45,7 @@ namespace Graphics
             VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
         info.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         info.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
+        info.PipelineInfoMain.PipelineRenderingCreateInfo.depthAttachmentFormat = _depthFormat;
         info.CheckVkResultFn = CheckVulkanResult;
         info.MinAllocationSize = 1024 * 1024;
 
@@ -81,5 +83,6 @@ namespace Graphics
         _glfwInitialized = false;
         _device = nullptr;
         _colorFormat = VK_FORMAT_UNDEFINED;
+        _depthFormat = VK_FORMAT_UNDEFINED;
     }
 }

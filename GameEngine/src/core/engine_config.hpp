@@ -13,5 +13,6 @@ namespace Ludus
         int windowHeight = 900;
         std::string windowTitle = "Ludus";
         bool vsync = false;
+        double fixedTimeStep = 1.0 / 60.0;
     };
 }

@@ -5,6 +5,17 @@
 
 namespace ECS
 {
+	World::~World()
+	{
+		if (_systemsNeedSorting)
+			SortSystems();
+
+		for (auto system = _systems.rbegin(); system != _systems.rend(); ++system)
+		{
+			system->instance->OnDestroy(*this);
+		}
+	}
+
 	Entity World::CreateEntity()
 	{
 		uint32_t entityId = 0;
@@ -110,14 +121,14 @@ namespace ECS
 		}
 	}
 
-	void World::FixedUpdateSystems()
+	void World::FixedUpdateSystems(double fixedDeltaTime)
 	{
 		if (_systemsNeedSorting)
 			SortSystems();
 
 		for (SystemEntry& entry : _systems)
 		{
-			//entry.instance->OnUpdate(*this);
+			entry.instance->OnFixedUpdate(*this, fixedDeltaTime);
 		}
 	}
 }

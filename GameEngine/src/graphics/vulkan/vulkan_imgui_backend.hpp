@@ -21,6 +21,7 @@ namespace Graphics
     private:
         VulkanGraphicsDevice* _device = nullptr;
         VkFormat _colorFormat = VK_FORMAT_UNDEFINED;
+        VkFormat _depthFormat = VK_FORMAT_UNDEFINED;
         bool _glfwInitialized = false;
         bool _rendererInitialized = false;
     };

@@ -9,8 +9,10 @@ namespace Rendering
     {
     }
 
-    bool RenderResourceManager::Resolve(Assets::MeshHandle meshHandle, Assets::MaterialHandle materialHandle,
-        ResolvedDraw& output, Assets::TextureHandle textureOverride)
+    bool RenderResourceManager::Resolve(
+        Assets::MeshHandle meshHandle,
+        Assets::MaterialHandle materialHandle,
+        ResolvedDraw& output)
     {
         // resolve logical assets before assembling the final draw data
         MeshGpu* mesh = ResolveMesh(meshHandle);
@@ -39,10 +41,8 @@ namespace Rendering
 
         output.vertexBuffer = mesh->vertexBuffer;
         output.indexBuffer = mesh->indexBuffer;
-        TextureGpu* selectedTexture = textureOverride ? ResolveTexture(textureOverride) : &material->texture;
-        if (!selectedTexture) return false;
-        output.texture = selectedTexture->texture;
-        output.sampler = selectedTexture->sampler;
+        output.texture = material->texture.texture;
+        output.sampler = material->texture.sampler;
         output.pipeline = pipeline;
         output.layout = mesh->layout;
         output.vertexCount = mesh->vertexCount;
@@ -117,98 +117,12 @@ namespace Rendering
         const Assets::MaterialAsset* asset = _assets.Get(handle);
         if (!asset) return nullptr;
         MaterialGpu gpu;
-        gpu.shaderAsset = asset->shader;
-        gpu.textureAsset = asset->texture;
         gpu.shader = ResolveShader(asset->shader);
         TextureGpu* texture = ResolveTexture(asset->texture);
         if (!gpu.shader || !texture) return nullptr;
         gpu.texture = *texture;
         gpu.state = asset->state;
         return &_materials.emplace(handle.id, std::move(gpu)).first->second;
-    }
-
-    void RenderResourceManager::Invalidate(Assets::MeshHandle handle)
-    {
-        if (!handle) return;
-        _device.WaitIdle();
-        DestroyPipelinesForMesh(handle.id);
-        if (const auto found = _meshes.find(handle.id); found != _meshes.end())
-        {
-            _device.DestroyBuffer(found->second.indexBuffer);
-            _device.DestroyBuffer(found->second.vertexBuffer);
-            _meshes.erase(found);
-        }
-    }
-
-    void RenderResourceManager::Invalidate(Assets::TextureHandle handle)
-    {
-        if (!handle) return;
-        _device.WaitIdle();
-        for (auto material = _materials.begin(); material != _materials.end();)
-        {
-            if (material->second.textureAsset.id == handle.id) material = _materials.erase(material);
-            else ++material;
-        }
-        if (const auto found = _textures.find(handle.id); found != _textures.end())
-        {
-            _device.DestroySampler(found->second.sampler);
-            _device.DestroyTexture(found->second.texture);
-            _textures.erase(found);
-        }
-    }
-
-    void RenderResourceManager::Invalidate(Assets::ShaderHandle handle)
-    {
-        if (!handle) return;
-        _device.WaitIdle();
-        for (auto material = _materials.begin(); material != _materials.end();)
-        {
-            if (material->second.shaderAsset.id == handle.id)
-            {
-                DestroyPipelinesForMaterial(material->first);
-                material = _materials.erase(material);
-            }
-            else ++material;
-        }
-        if (const auto found = _shaders.find(handle.id); found != _shaders.end())
-        {
-            _device.DestroyShader(found->second);
-            _shaders.erase(found);
-        }
-    }
-
-    void RenderResourceManager::Invalidate(Assets::MaterialHandle handle)
-    {
-        if (!handle) return;
-        _device.WaitIdle();
-        DestroyPipelinesForMaterial(handle.id);
-        _materials.erase(handle.id);
-    }
-
-    void RenderResourceManager::DestroyPipelinesForMesh(Assets::AssetId id)
-    {
-        for (auto pipeline = _pipelines.begin(); pipeline != _pipelines.end();)
-        {
-            if (static_cast<Assets::AssetId>(pipeline->first >> 32) == id)
-            {
-                _device.DestroyPipeline(pipeline->second);
-                pipeline = _pipelines.erase(pipeline);
-            }
-            else ++pipeline;
-        }
-    }
-
-    void RenderResourceManager::DestroyPipelinesForMaterial(Assets::AssetId id)
-    {
-        for (auto pipeline = _pipelines.begin(); pipeline != _pipelines.end();)
-        {
-            if (static_cast<Assets::AssetId>(pipeline->first) == id)
-            {
-                _device.DestroyPipeline(pipeline->second);
-                pipeline = _pipelines.erase(pipeline);
-            }
-            else ++pipeline;
-        }
     }
 
     void RenderResourceManager::Clear()

@@ -31,8 +31,9 @@ namespace ECS
 		ISystem& operator=(ISystem&&) = delete;
 
 		virtual void OnCreate(World&){}
-		virtual void OnUpdate(World&) = 0;
-		virtual void OnDestroy(World&){}
+		virtual void OnUpdate(World&) {}
+		virtual void OnFixedUpdate(World&, double) {}
+		virtual void OnDestroy(World&) noexcept {}
 	};
 
 	struct SystemEntry

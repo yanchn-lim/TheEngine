@@ -60,11 +60,6 @@ Assets::AssetManager& Engine::GetAssets() noexcept
     return _assets;
 }
 
-Rendering::RenderWorld& Engine::GetRenderWorld() noexcept
-{
-    return _renderWorld;
-}
-
 Rendering::Renderer& Engine::GetRenderer() noexcept
 {
     return *_renderer;
@@ -72,6 +67,9 @@ Rendering::Renderer& Engine::GetRenderer() noexcept
 
 bool Engine::Initialize()
 {
+    if (_config.fixedTimeStep <= 0.0)
+        return false;
+
     if (!_window.Initialize(
         _config.rendererBackend,
         _config.windowWidth,
@@ -92,7 +90,7 @@ bool Engine::Initialize()
     if (!_graphicsDevice || !_graphicsDevice->Initialize({ _window.GetNativeHandle(), _config.vsync }))
         return false;
 
-    _renderer = std::make_unique<Rendering::Renderer>(*_graphicsDevice, _assets, _renderWorld);
+    _renderer = std::make_unique<Rendering::Renderer>(*_graphicsDevice, _assets);
 
     if (!_imgui.Initialize(_window.GetNativeHandle(), _config.rendererBackend, *_graphicsDevice))
         return false;
@@ -108,6 +106,8 @@ bool Engine::Initialize()
 void Engine::Update()
 {
     _time.totalTime = _window.GetTime();
+    double fixedAccumulator = 0.0;
+
     while (!_window.ShouldClose() && _running)
     {
         Profiler::Get().BeginFrame();
@@ -121,6 +121,13 @@ void Engine::Update()
                 _time.deltaTime = current - _time.totalTime;
                 _time.totalTime = current;
                 _window.PollEvents();
+
+                fixedAccumulator += _time.deltaTime;
+                while (fixedAccumulator >= _config.fixedTimeStep)
+                {
+                    _application->OnFixedUpdate(*this, _config.fixedTimeStep);
+                    fixedAccumulator -= _config.fixedTimeStep;
+                }
 
                 if (_window.IsResizePending())
                 {
@@ -162,13 +169,8 @@ void Engine::Update()
 
             if (frameStatus == Graphics::FrameStatus::Success)
             {
-                PROFILE_SCOPE("Command Submission");
+                PROFILE_SCOPE("Frame Completion");
                 frameStatus = _renderer->EndFrame();
-            }
-            if (frameStatus == Graphics::FrameStatus::Success)
-            {
-                PROFILE_SCOPE("Presentation");
-                frameStatus = _renderer->Present();
             }
 
             if (frameStatus == Graphics::FrameStatus::DeviceLost ||
@@ -188,7 +190,6 @@ void Engine::Shutdown()
     _imgui.Shutdown();
     if (_renderer)
         _renderer->Shutdown();
-    _renderWorld.Clear();
     _assets.Clear();
     if (_graphicsDevice)
         _graphicsDevice->Shutdown();

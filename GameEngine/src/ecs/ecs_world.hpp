@@ -104,9 +104,12 @@ namespace ECS
 
 			return static_cast<const Internal::ComponentPool<Component>*>(_componentPools[typeID].get());
 		}
+
+		void SortSystems();
+
 	public:
 		World() = default;
-		~World() = default;
+		~World();
 
 		Entity CreateEntity();
 		uint32_t GetEntityCount() const;
@@ -371,9 +374,7 @@ namespace ECS
 			return result;
 		}
 		
-		void SortSystems();
-
 		void UpdateSystems();
-		void FixedUpdateSystems();
+		void FixedUpdateSystems(double fixedDeltaTime);
 	};
 }

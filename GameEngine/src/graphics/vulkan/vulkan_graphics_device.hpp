@@ -55,6 +55,7 @@ namespace Graphics
         vk::Queue NativeGraphicsQueue() const { return *_device.GraphicsQueue(); }
         uint32_t NativeGraphicsQueueFamily() const { return _device.GraphicsQueueFamily(); }
         vk::Format SwapchainFormat() const { return _swapchain.Format(); }
+        vk::Format DepthFormat() const { return _depthFormat; }
         uint32_t SwapchainImageCount() const { return _swapchain.ImageCount(); }
         vk::CommandBuffer ActiveCommandBuffer() const { return *_frames[_frameIndex].commandBuffer; }
 

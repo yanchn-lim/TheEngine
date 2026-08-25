@@ -1,13 +1,10 @@
 #include "graphics_api_tests.hpp"
 
-#include <vector>
-
 #include "assets/asset_manager.hpp"
 #include "graphics/graphics_command_list.hpp"
 #include "graphics/graphics_device.hpp"
 #include "graphics/graphics_handles.hpp"
 #include "graphics/resource_table.hpp"
-#include "rendering/render_world.hpp"
 #include "rendering/renderer.hpp"
 
 namespace
@@ -21,7 +18,6 @@ namespace
         Graphics::FrameStatus presentStatus = Graphics::FrameStatus::Success;
         uint32_t renderPassBegins = 0;
         uint32_t renderPassEnds = 0;
-        uint32_t waits = 0;
 
         bool Initialize(const Graphics::GraphicsDeviceDesc&) override { return true; }
         const Graphics::GraphicsCapabilities& GetCapabilities() const override { return capabilities; }
@@ -40,7 +36,7 @@ namespace
         Graphics::FrameStatus EndFrame(Graphics::FrameContext&) override { return endStatus; }
         Graphics::FrameStatus Present(Graphics::FrameContext&) override { return presentStatus; }
         void OnResize(uint32_t, uint32_t) override {}
-        void WaitIdle() override { ++waits; }
+        void WaitIdle() override {}
         void Shutdown() override {}
 
         void BeginRenderPass(const Graphics::RenderPassDesc&) override { ++renderPassBegins; }
@@ -74,22 +70,10 @@ namespace Tests
         const Graphics::GpuBufferHandle replacement = first.Create(20);
         if (!replacement || replacement == original || first.Get(original)) return false;
 
-        Rendering::RenderWorld world;
-        Rendering::MeshInstanceDesc mesh;
-        mesh.mesh = Assets::MeshHandle{ 1 };
-        const Rendering::RenderInstanceHandle persistent = world.CreateMeshInstance(mesh);
-        world.DrawMeshOnce(mesh);
-        std::vector<Rendering::RenderItem> items;
-        world.Collect(Rendering::DefaultRenderLayer, items);
-        if (items.size() != 2 || !world.Destroy(persistent) || world.SetVisible(persistent, true)) return false;
-        world.EndFrame();
-        world.Collect(Rendering::DefaultRenderLayer, items);
-        if (!items.empty()) return false;
-
         // verify that Renderer preserves recoverable and fatal device statuses
         TestGraphicsDevice device;
         Assets::AssetManager assets;
-        Rendering::Renderer renderer(device, assets, world);
+        Rendering::Renderer renderer(device, assets);
         Graphics::Camera2D camera;
         camera.SetViewport(16.0f, 16.0f);
 
@@ -100,18 +84,14 @@ namespace Tests
         device.beginStatus = Graphics::FrameStatus::Success;
         device.endStatus = Graphics::FrameStatus::DeviceLost;
         if (renderer.Render(camera, 16, 16) != Graphics::FrameStatus::Success ||
-            renderer.EndFrame() != Graphics::FrameStatus::DeviceLost ||
-            renderer.Present() != Graphics::FrameStatus::Skip) return false;
+            renderer.EndFrame() != Graphics::FrameStatus::DeviceLost) return false;
 
         device.endStatus = Graphics::FrameStatus::Success;
         device.presentStatus = Graphics::FrameStatus::ResizeRequired;
         if (renderer.Render(camera, 16, 16) != Graphics::FrameStatus::Success ||
-            renderer.EndFrame() != Graphics::FrameStatus::Success ||
-            renderer.Present() != Graphics::FrameStatus::ResizeRequired) return false;
+            renderer.EndFrame() != Graphics::FrameStatus::ResizeRequired) return false;
 
-        const uint32_t waitsBeforeInvalidation = device.waits;
-        renderer.Invalidate(Assets::MeshHandle{ 99 });
-        return device.waits == waitsBeforeInvalidation + 1 &&
-            device.renderPassBegins == 2 && device.renderPassEnds == 2;
+        return device.renderPassBegins == 2 &&
+            device.renderPassEnds == 2;
     }
 }
