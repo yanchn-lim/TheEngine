@@ -269,7 +269,7 @@ namespace Tests
 
         ECS::World& world = _scene.GetWorld();
         world.AddSystem<MovingQuadSystem>();
-        world.AddSystem<Systems::RenderSystem>(engine.GetRenderer());
+        world.AddSystem<Systems::RenderSystem>(engine.GetRenderEngine());
 
         constexpr int columns = 8;
         constexpr int rows = 5;

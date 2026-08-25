@@ -44,26 +44,17 @@ namespace Rendering
             uint32_t indexCount = 0;
         };
 
-        struct TextureGpu { Graphics::GpuTextureHandle texture; Graphics::GpuSamplerHandle sampler; };
-        struct MaterialGpu
-        {
-            Graphics::GpuShaderHandle shader;
-            TextureGpu texture;
-            Graphics::RenderState state{};
-        };
-
         const Assets::AssetManager& _assets;
         Graphics::IGraphicsDevice& _device;
         std::unordered_map<Assets::AssetId, MeshGpu> _meshes;
-        std::unordered_map<Assets::AssetId, TextureGpu> _textures;
+        std::unordered_map<Assets::AssetId, Graphics::GpuTextureHandle> _textures;
         std::unordered_map<Assets::AssetId, Graphics::GpuShaderHandle> _shaders;
-        std::unordered_map<Assets::AssetId, MaterialGpu> _materials;
         std::unordered_map<uint64_t, Graphics::GpuPipelineHandle> _pipelines;
+        Graphics::GpuSamplerHandle _sampler;
 
         // private resolvers keep asset lookup and upload outside the renderer loop
         MeshGpu* ResolveMesh(Assets::MeshHandle handle);
-        TextureGpu* ResolveTexture(Assets::TextureHandle handle);
+        Graphics::GpuTextureHandle ResolveTexture(Assets::TextureHandle handle);
         Graphics::GpuShaderHandle ResolveShader(Assets::ShaderHandle handle);
-        MaterialGpu* ResolveMaterial(Assets::MaterialHandle handle);
     };
 }

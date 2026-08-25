@@ -7,8 +7,7 @@
 #include "debug/debug.hpp"
 #include "debug/memory_tracker.hpp"
 #include "debug/profiler.hpp"
-#include "graphics/graphics_device_factory.hpp"
-#include "rendering/renderer.hpp"
+#include "rendering/render_engine.hpp"
 
 namespace Ludus
 {
@@ -60,9 +59,9 @@ Assets::AssetManager& Engine::GetAssets() noexcept
     return _assets;
 }
 
-Rendering::Renderer& Engine::GetRenderer() noexcept
+Rendering::RenderEngine& Engine::GetRenderEngine() noexcept
 {
-    return *_renderer;
+    return *_renderEngine;
 }
 
 bool Engine::Initialize()
@@ -86,16 +85,15 @@ bool Engine::Initialize()
         },
         this);
 
-    _graphicsDevice = Graphics::CreateGraphicsDevice(_config.rendererBackend);
-    if (!_graphicsDevice || !_graphicsDevice->Initialize({ _window.GetNativeHandle(), _config.vsync }))
+    _renderEngine = Rendering::RenderEngine::Create(
+        _config.rendererBackend,
+        { _window.GetNativeHandle(), _config.vsync },
+        _assets);
+
+    if (!_renderEngine)
         return false;
 
-    _renderer = std::make_unique<Rendering::Renderer>(*_graphicsDevice, _assets);
-
-    if (!_imgui.Initialize(_window.GetNativeHandle(), _config.rendererBackend, *_graphicsDevice))
-        return false;
-
-    _renderer->OnResize(
+    _renderEngine->OnResize(
         static_cast<uint32_t>(_window.GetWidth()),
         static_cast<uint32_t>(_window.GetHeight()));
 
@@ -131,7 +129,7 @@ void Engine::Update()
 
                 if (_window.IsResizePending())
                 {
-                    _renderer->OnResize(
+                    _renderEngine->OnResize(
                         static_cast<uint32_t>(_window.GetWidth()),
                         static_cast<uint32_t>(_window.GetHeight()));
                     _window.ClearResizePending();
@@ -153,24 +151,24 @@ void Engine::Update()
                 camera.SetViewport(
                     static_cast<float>(_window.GetWidth()),
                     static_cast<float>(_window.GetHeight()));
-                frameStatus = _renderer->Render(
+                frameStatus = _renderEngine->Render(
                     camera,
                     static_cast<uint32_t>(_window.GetWidth()),
                     static_cast<uint32_t>(_window.GetHeight()));
             }
 
-            if (frameStatus == Graphics::FrameStatus::Success && _imgui.IsInitialized())
+            if (frameStatus == Graphics::FrameStatus::Success)
             {
                 PROFILE_SCOPE("ImGui");
-                _imgui.Begin();
+                _renderEngine->BeginImGui();
                 _application->OnImGui(*this);
-                _imgui.End();
+                _renderEngine->EndImGui();
             }
 
             if (frameStatus == Graphics::FrameStatus::Success)
             {
                 PROFILE_SCOPE("Frame Completion");
-                frameStatus = _renderer->EndFrame();
+                frameStatus = _renderEngine->EndFrame();
             }
 
             if (frameStatus == Graphics::FrameStatus::DeviceLost ||
@@ -187,14 +185,10 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
-    _imgui.Shutdown();
-    if (_renderer)
-        _renderer->Shutdown();
+    if (_renderEngine)
+        _renderEngine->Shutdown();
     _assets.Clear();
-    if (_graphicsDevice)
-        _graphicsDevice->Shutdown();
-    _renderer.reset();
-    _graphicsDevice.reset();
+    _renderEngine.reset();
     _window.Shutdown();
     _running = false;
 }

@@ -6,11 +6,14 @@
 #include "components/renderable.hpp"
 #include "components/transform.hpp"
 #include "ecs/ecs_world.hpp"
-#include "rendering/renderer.hpp"
+#include "rendering/render_engine.hpp"
 
 namespace Systems
 {
-	RenderSystem::RenderSystem(Rendering::Renderer& renderer) : _renderer(renderer) {}
+	RenderSystem::RenderSystem(Rendering::RenderEngine& renderEngine)
+		: _renderEngine(renderEngine)
+	{
+	}
 
 	void RenderSystem::OnUpdate(ECS::World& world)
 	{
@@ -25,7 +28,7 @@ namespace Systems
 					mesh.material = renderable.material;
 
 					mesh.transform = glm::translate(glm::mat4(1.f), transform.position) * glm::mat4_cast(transform.rotation) * glm::scale(glm::mat4(1.f), transform.scale);
-					_renderer.Submit(mesh);
+					_renderEngine.Submit(mesh);
 				}
 			);
 	}

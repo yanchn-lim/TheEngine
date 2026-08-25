@@ -77,7 +77,7 @@ namespace Graphics
         GLuint id = 0;
         glCreateBuffers(1, &id);
         glNamedBufferData(id, static_cast<GLsizeiptr>(desc.size), desc.data, GL_STATIC_DRAW);
-        return id ? _buffers.Create(BufferResource{ id, desc.size }) : GpuBufferHandle{};
+        return id ? _buffers.Create(BufferResource{ id }) : GpuBufferHandle{};
     }
 
     GpuTextureHandle OpenGLGraphicsDevice::CreateTexture(const TextureDesc& desc)
@@ -172,16 +172,13 @@ namespace Graphics
         _pipelines.Destroy(handle);
     }
 
-    FrameStatus OpenGLGraphicsDevice::BeginFrame(FrameContext&)
+    FrameStatus OpenGLGraphicsDevice::BeginFrame()
     {
         _activePipeline = {};
         return FrameStatus::Success;
     }
 
-    IGraphicsCommandList& OpenGLGraphicsDevice::GetCommandList(FrameContext&) { return *this; }
-    FrameStatus OpenGLGraphicsDevice::EndFrame(FrameContext&) { return FrameStatus::Success; }
-
-    FrameStatus OpenGLGraphicsDevice::Present(FrameContext&)
+    FrameStatus OpenGLGraphicsDevice::EndFrame()
     {
         glfwSwapBuffers(_window);
         return FrameStatus::Success;
@@ -225,21 +222,14 @@ namespace Graphics
         if (desc.clearDepthTarget)
             flags |= GL_DEPTH_BUFFER_BIT;
         glClear(flags);
-        _renderPassActive = true;
     }
 
-    void OpenGLGraphicsDevice::EndRenderPass() { _renderPassActive = false; }
+    void OpenGLGraphicsDevice::EndRenderPass() {}
 
     void OpenGLGraphicsDevice::SetViewport(const ViewportDesc& viewport)
     {
         glViewport(static_cast<GLint>(viewport.x), static_cast<GLint>(viewport.y),
             static_cast<GLsizei>(viewport.width), static_cast<GLsizei>(viewport.height));
-    }
-
-    void OpenGLGraphicsDevice::SetScissor(const ScissorDesc& scissor)
-    {
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(scissor.x, scissor.y, static_cast<GLsizei>(scissor.width), static_cast<GLsizei>(scissor.height));
     }
 
     void OpenGLGraphicsDevice::SetPipeline(GpuPipelineHandle pipeline)
@@ -277,7 +267,7 @@ namespace Graphics
         }
     }
 
-    void OpenGLGraphicsDevice::SetIndexBuffer(GpuBufferHandle buffer, IndexFormat)
+    void OpenGLGraphicsDevice::SetIndexBuffer(GpuBufferHandle buffer)
     {
         if (BufferResource* resource = _buffers.Get(buffer))
             glVertexArrayElementBuffer(_vertexArray, resource->id);
@@ -322,21 +312,15 @@ namespace Graphics
     void OpenGLGraphicsDevice::Draw(uint32_t vertexCount)
     {
         const PipelineResource* pipeline = _pipelines.Get(_activePipeline);
-        if (_renderPassActive && pipeline)
+        if (pipeline)
             glDrawArrays(ToTopology(pipeline->desc.topology), 0, static_cast<GLsizei>(vertexCount));
     }
 
     void OpenGLGraphicsDevice::DrawIndexed(uint32_t indexCount)
     {
         const PipelineResource* pipeline = _pipelines.Get(_activePipeline);
-        if (_renderPassActive && pipeline)
+        if (pipeline)
             glDrawElements(ToTopology(pipeline->desc.topology), static_cast<GLsizei>(indexCount), GL_UNSIGNED_INT, nullptr);
-    }
-
-    void OpenGLGraphicsDevice::AddDebugMarker(const char* label)
-    {
-        if (label && GLAD_GL_VERSION_4_3) glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION,
-            GL_DEBUG_TYPE_MARKER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, -1, label);
     }
 
     uint32_t OpenGLGraphicsDevice::ActiveProgram() const

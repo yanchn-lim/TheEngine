@@ -15,22 +15,12 @@
 namespace Graphics
 {
     // backend-neutral enums describe intent without exposing OpenGL or Vulkan values
-    enum class BufferUsage { Vertex, Index, Uniform };
-    enum class TextureFormat { RGBA8 };
-    enum class ShaderStage { Vertex, Fragment };
-    enum class IndexFormat { UInt32 };
+    enum class BufferUsage { Vertex, Index };
 
     struct GraphicsDeviceDesc
     {
         void* window = nullptr;
         bool vsync = true;
-    };
-
-    // reports optional behavior that the selected graphics device supports
-    struct GraphicsCapabilities
-    {
-        const char* backendName = "Unknown";
-        bool supportsDynamicRendering = false;
     };
 
     // resource descriptions carry CPU source data and a diagnostic label into the device
@@ -39,7 +29,6 @@ namespace Graphics
         const void* data = nullptr;
         size_t size = 0;
         BufferUsage usage = BufferUsage::Vertex;
-        std::string label;
     };
 
     struct TextureDesc
@@ -47,15 +36,12 @@ namespace Graphics
         const unsigned char* pixels = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
-        TextureFormat format = TextureFormat::RGBA8;
-        std::string label;
     };
 
     struct SamplerDesc
     {
         bool linear = true;
         bool repeat = true;
-        std::string label;
     };
 
     struct ShaderProgramDesc
@@ -73,7 +59,6 @@ namespace Graphics
         VertexLayout vertexLayout;
         PrimitiveTopology topology = PrimitiveTopology::TRIANGLES;
         RenderState renderState{};
-        std::string label;
     };
 
     // frame constants are shared by all draws in one camera view
@@ -107,11 +92,4 @@ namespace Graphics
         float height = 0.0f;
     };
 
-    struct ScissorDesc
-    {
-        int32_t x = 0;
-        int32_t y = 0;
-        uint32_t width = 0;
-        uint32_t height = 0;
-    };
 }

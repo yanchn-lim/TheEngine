@@ -9,7 +9,7 @@ namespace ECS
 
 namespace Rendering
 {
-	class Renderer;
+	class RenderEngine;
 }
 
 namespace Systems
@@ -20,11 +20,11 @@ namespace Systems
 		static constexpr ECS::SystemPhase Phase = ECS::SystemPhase::RENDER;
 		static constexpr int Order = 100;
 
-		explicit RenderSystem(Rendering::Renderer& renderer);
+		explicit RenderSystem(Rendering::RenderEngine& renderEngine);
 		void OnUpdate(ECS::World& world) override;
 
 	private:
-		Rendering::Renderer& _renderer;
+		Rendering::RenderEngine& _renderEngine;
 
 	};
 }

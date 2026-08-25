@@ -4,18 +4,12 @@
 
 #include "assets/asset_manager.hpp"
 #include "engine_config.hpp"
-#include "graphics/imgui_layer.hpp"
 #include "platform/window.hpp"
 #include "time.hpp"
 
-namespace Graphics
-{
-    class IGraphicsDevice;
-}
-
 namespace Rendering
 {
-    class Renderer;
+    class RenderEngine;
 }
 
 namespace Ludus
@@ -38,7 +32,7 @@ namespace Ludus
 
         const Time& GetTime() const noexcept;
         Assets::AssetManager& GetAssets() noexcept;
-        Rendering::Renderer& GetRenderer() noexcept;
+        Rendering::RenderEngine& GetRenderEngine() noexcept;
 
     private:
         bool Initialize();
@@ -49,10 +43,8 @@ namespace Ludus
         EngineConfig _config;
         Time _time{};
         Platform::Window _window;
-        Graphics::ImGuiLayer _imgui;
         Assets::AssetManager _assets;
-        std::unique_ptr<Graphics::IGraphicsDevice> _graphicsDevice;
-        std::unique_ptr<Rendering::Renderer> _renderer;
+        std::unique_ptr<Rendering::RenderEngine> _renderEngine;
         IApplication* _application = nullptr;
         bool _running = false;
     };

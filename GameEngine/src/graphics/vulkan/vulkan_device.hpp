@@ -5,15 +5,6 @@
 
 namespace Graphics
 {
-    // records the queue families required for rendering and presentation
-    struct QueueFamilyIndices
-    {
-        std::optional<uint32_t> graphics;
-        std::optional<uint32_t> present;
-        bool Complete() const { return graphics && present; }
-    };
-    
-
     class VulkanContext;
 
     // selects a physical device and owns its logical device and queues
@@ -34,6 +25,14 @@ namespace Graphics
         uint32_t PresentQueueFamily() const { return _presentQueueFamily; }
 
     private:
+        struct QueueFamilyIndices
+        {
+            std::optional<uint32_t> graphics;
+            std::optional<uint32_t> present;
+
+            bool Complete() const { return graphics && present; }
+        };
+
         vk::raii::PhysicalDevice _physicalDevice{ nullptr };
         vk::raii::Device _device{ nullptr };
         vk::raii::Queue _graphicsQueue{ nullptr };

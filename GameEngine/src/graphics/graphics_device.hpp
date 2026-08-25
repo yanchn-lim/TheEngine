@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics_command_list.hpp"
+#include "graphics_descriptions.hpp"
 
 namespace Graphics
 {
@@ -14,11 +14,6 @@ namespace Graphics
         Fatal
     };
 
-    struct FrameContext
-    {
-        uint64_t frameNumber = 0;
-    };
-
     // owns GPU resources, frame submission, and presentation for one backend
     class IGraphicsDevice
     {
@@ -26,7 +21,6 @@ namespace Graphics
         virtual ~IGraphicsDevice() = default;
 
         virtual bool Initialize(const GraphicsDeviceDesc& desc) = 0;
-        virtual const GraphicsCapabilities& GetCapabilities() const = 0;
 
         // creation returns typed handles instead of native OpenGL or Vulkan objects
         virtual GpuBufferHandle CreateBuffer(const BufferDesc& desc) = 0;
@@ -42,10 +36,21 @@ namespace Graphics
         virtual void DestroyPipeline(GpuPipelineHandle handle) = 0;
 
         // frame methods keep acquire, recording, submission, and presentation ordered
-        virtual FrameStatus BeginFrame(FrameContext& context) = 0;
-        virtual IGraphicsCommandList& GetCommandList(FrameContext& context) = 0;
-        virtual FrameStatus EndFrame(FrameContext& context) = 0;
-        virtual FrameStatus Present(FrameContext& context) = 0;
+        virtual FrameStatus BeginFrame() = 0;
+        virtual FrameStatus EndFrame() = 0;
+
+        // pass and draw methods operate on the active frame
+        virtual void BeginRenderPass(const RenderPassDesc& desc) = 0;
+        virtual void EndRenderPass() = 0;
+        virtual void SetViewport(const ViewportDesc& viewport) = 0;
+        virtual void SetPipeline(GpuPipelineHandle pipeline) = 0;
+        virtual void SetVertexBuffer(GpuBufferHandle buffer, const VertexLayout& layout) = 0;
+        virtual void SetIndexBuffer(GpuBufferHandle buffer) = 0;
+        virtual void SetFrameConstants(const FrameConstants& constants) = 0;
+        virtual void SetMaterialResources(GpuTextureHandle texture, GpuSamplerHandle sampler) = 0;
+        virtual void SetDrawConstants(const DrawConstants& constants) = 0;
+        virtual void Draw(uint32_t vertexCount) = 0;
+        virtual void DrawIndexed(uint32_t indexCount) = 0;
 
         virtual void OnResize(uint32_t width, uint32_t height) = 0;
         virtual void WaitIdle() = 0;

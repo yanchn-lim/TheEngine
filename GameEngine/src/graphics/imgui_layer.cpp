@@ -11,8 +11,8 @@ namespace Graphics
     bool ImGuiLayer::Initialize(GLFWwindow* window, RendererBackend backend, IGraphicsDevice& device)
     {
         _backend = CreateImGuiBackend(backend);
-        if (!_backend || !_backend->IsAvailable())
-            return true;
+        if (!_backend)
+            return false;
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -56,8 +56,4 @@ namespace Graphics
         _backend.reset();
     }
 
-    bool ImGuiLayer::IsInitialized() const noexcept
-    {
-        return _initialized;
-    }
 }

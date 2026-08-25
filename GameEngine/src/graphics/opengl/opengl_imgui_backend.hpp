@@ -8,7 +8,6 @@ namespace Graphics
     class OpenGLImGuiBackend final : public IImGuiBackend
     {
     public:
-        bool IsAvailable() const override { return true; }
         bool SupportsViewports() const override { return true; }
         bool Initialize(GLFWwindow* window, IGraphicsDevice& device) override;
         void BeginFrame() override;

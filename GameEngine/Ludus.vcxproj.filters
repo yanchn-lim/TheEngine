@@ -252,7 +252,7 @@
     <ClCompile Include="src\graphics\vulkan\vulkan_imgui_backend.cpp">
       <Filter>Source Files\graphics\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\rendering\renderer.cpp">
+    <ClCompile Include="src\rendering\render_engine.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\rendering\render_resource_manager.cpp">
@@ -425,14 +425,8 @@
     <ClInclude Include="src\graphics\vulkan\vulkan_swapchain.hpp">
       <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\vulkan\vulkan_frameresources.hpp">
-      <Filter>Header Files\graphics\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="src\assets\asset_records.hpp">
       <Filter>Header Files\assets</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\graphics_command_list.hpp">
-      <Filter>Header Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\graphics_descriptions.hpp">
       <Filter>Header Files\graphics</Filter>
@@ -464,7 +458,7 @@
     <ClInclude Include="src\graphics\vulkan\vulkan_imgui_backend.hpp">
       <Filter>Header Files\graphics\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\renderer.hpp">
+    <ClInclude Include="src\rendering\render_engine.hpp">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\rendering\render_resource_manager.hpp">

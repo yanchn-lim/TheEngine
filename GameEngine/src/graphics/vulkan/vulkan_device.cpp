@@ -43,7 +43,8 @@ namespace Graphics
             _device.waitIdle();
     }
 
-    QueueFamilyIndices VulkanDevice::FindQueueFamilies(const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface) const
+    VulkanDevice::QueueFamilyIndices VulkanDevice::FindQueueFamilies(
+        const vk::raii::PhysicalDevice& candidate, vk::SurfaceKHR surface) const
     {
         // rendering and presentation can use the same family or separate families
         QueueFamilyIndices result;

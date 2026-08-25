@@ -67,7 +67,7 @@ namespace Graphics
 
     void VulkanImGuiBackend::Render(ImDrawData* drawData)
     {
-        // append ImGui commands to the render pass already opened by Renderer
+        // append ImGui commands to the render pass already opened by RenderEngine
         if (_rendererInitialized && drawData)
             ImGui_ImplVulkan_RenderDrawData(drawData,
                 static_cast<VkCommandBuffer>(_device->ActiveCommandBuffer()));

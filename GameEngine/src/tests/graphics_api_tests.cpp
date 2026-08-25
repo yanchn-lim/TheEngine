@@ -1,26 +1,23 @@
 #include "graphics_api_tests.hpp"
 
 #include "assets/asset_manager.hpp"
-#include "graphics/graphics_command_list.hpp"
 #include "graphics/graphics_device.hpp"
 #include "graphics/graphics_handles.hpp"
 #include "graphics/resource_table.hpp"
-#include "rendering/renderer.hpp"
+#include "rendering/render_engine.hpp"
 
 namespace
 {
     // records frame and command flow without requiring a window or native graphics API
-    class TestGraphicsDevice final : public Graphics::IGraphicsDevice, public Graphics::IGraphicsCommandList
+    class TestGraphicsDevice final : public Graphics::IGraphicsDevice
     {
     public:
         Graphics::FrameStatus beginStatus = Graphics::FrameStatus::Success;
         Graphics::FrameStatus endStatus = Graphics::FrameStatus::Success;
-        Graphics::FrameStatus presentStatus = Graphics::FrameStatus::Success;
         uint32_t renderPassBegins = 0;
         uint32_t renderPassEnds = 0;
 
         bool Initialize(const Graphics::GraphicsDeviceDesc&) override { return true; }
-        const Graphics::GraphicsCapabilities& GetCapabilities() const override { return capabilities; }
         Graphics::GpuBufferHandle CreateBuffer(const Graphics::BufferDesc&) override { return {}; }
         Graphics::GpuTextureHandle CreateTexture(const Graphics::TextureDesc&) override { return {}; }
         Graphics::GpuSamplerHandle CreateSampler(const Graphics::SamplerDesc&) override { return {}; }
@@ -31,10 +28,8 @@ namespace
         void DestroySampler(Graphics::GpuSamplerHandle) override {}
         void DestroyShader(Graphics::GpuShaderHandle) override {}
         void DestroyPipeline(Graphics::GpuPipelineHandle) override {}
-        Graphics::FrameStatus BeginFrame(Graphics::FrameContext&) override { return beginStatus; }
-        Graphics::IGraphicsCommandList& GetCommandList(Graphics::FrameContext&) override { return *this; }
-        Graphics::FrameStatus EndFrame(Graphics::FrameContext&) override { return endStatus; }
-        Graphics::FrameStatus Present(Graphics::FrameContext&) override { return presentStatus; }
+        Graphics::FrameStatus BeginFrame() override { return beginStatus; }
+        Graphics::FrameStatus EndFrame() override { return endStatus; }
         void OnResize(uint32_t, uint32_t) override {}
         void WaitIdle() override {}
         void Shutdown() override {}
@@ -42,19 +37,14 @@ namespace
         void BeginRenderPass(const Graphics::RenderPassDesc&) override { ++renderPassBegins; }
         void EndRenderPass() override { ++renderPassEnds; }
         void SetViewport(const Graphics::ViewportDesc&) override {}
-        void SetScissor(const Graphics::ScissorDesc&) override {}
         void SetPipeline(Graphics::GpuPipelineHandle) override {}
         void SetVertexBuffer(Graphics::GpuBufferHandle, const Graphics::VertexLayout&) override {}
-        void SetIndexBuffer(Graphics::GpuBufferHandle, Graphics::IndexFormat) override {}
+        void SetIndexBuffer(Graphics::GpuBufferHandle) override {}
         void SetFrameConstants(const Graphics::FrameConstants&) override {}
         void SetMaterialResources(Graphics::GpuTextureHandle, Graphics::GpuSamplerHandle) override {}
         void SetDrawConstants(const Graphics::DrawConstants&) override {}
         void Draw(uint32_t) override {}
         void DrawIndexed(uint32_t) override {}
-        void AddDebugMarker(const char*) override {}
-
-    private:
-        Graphics::GraphicsCapabilities capabilities{ "test", false };
     };
 }
 
@@ -69,29 +59,33 @@ namespace Tests
         if (!first.Destroy(original) || first.Get(original) || first.Destroy(original)) return false;
         const Graphics::GpuBufferHandle replacement = first.Create(20);
         if (!replacement || replacement == original || first.Get(original)) return false;
+        first.Clear();
+        const Graphics::GpuBufferHandle afterClear = first.Create(30);
+        if (!afterClear || first.Get(replacement) || afterClear == replacement)
+            return false;
 
-        // verify that Renderer preserves recoverable and fatal device statuses
-        TestGraphicsDevice device;
+        // verify that RenderEngine preserves recoverable and fatal device statuses
+        auto device = std::make_unique<TestGraphicsDevice>();
+        TestGraphicsDevice* deviceView = device.get();
         Assets::AssetManager assets;
-        Rendering::Renderer renderer(device, assets);
+        Rendering::RenderEngine renderEngine(std::move(device), assets);
         Graphics::Camera2D camera;
         camera.SetViewport(16.0f, 16.0f);
 
-        device.beginStatus = Graphics::FrameStatus::ResizeRequired;
-        if (renderer.Render(camera, 16, 16) != Graphics::FrameStatus::ResizeRequired ||
-            device.renderPassBegins != 0) return false;
+        deviceView->beginStatus = Graphics::FrameStatus::ResizeRequired;
+        if (renderEngine.Render(camera, 16, 16) != Graphics::FrameStatus::ResizeRequired ||
+            deviceView->renderPassBegins != 0) return false;
 
-        device.beginStatus = Graphics::FrameStatus::Success;
-        device.endStatus = Graphics::FrameStatus::DeviceLost;
-        if (renderer.Render(camera, 16, 16) != Graphics::FrameStatus::Success ||
-            renderer.EndFrame() != Graphics::FrameStatus::DeviceLost) return false;
+        deviceView->beginStatus = Graphics::FrameStatus::Success;
+        deviceView->endStatus = Graphics::FrameStatus::DeviceLost;
+        if (renderEngine.Render(camera, 16, 16) != Graphics::FrameStatus::Success ||
+            renderEngine.EndFrame() != Graphics::FrameStatus::DeviceLost) return false;
 
-        device.endStatus = Graphics::FrameStatus::Success;
-        device.presentStatus = Graphics::FrameStatus::ResizeRequired;
-        if (renderer.Render(camera, 16, 16) != Graphics::FrameStatus::Success ||
-            renderer.EndFrame() != Graphics::FrameStatus::ResizeRequired) return false;
+        deviceView->endStatus = Graphics::FrameStatus::ResizeRequired;
+        if (renderEngine.Render(camera, 16, 16) != Graphics::FrameStatus::Success ||
+            renderEngine.EndFrame() != Graphics::FrameStatus::ResizeRequired) return false;
 
-        return device.renderPassBegins == 2 &&
-            device.renderPassEnds == 2;
+        return deviceView->renderPassBegins == 2 &&
+            deviceView->renderPassEnds == 2;
     }
 }

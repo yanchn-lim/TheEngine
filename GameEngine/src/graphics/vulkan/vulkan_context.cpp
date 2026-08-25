@@ -60,12 +60,6 @@ namespace Graphics
         }
     }
 
-    // release context owners if explicit shutdown was skipped
-    VulkanContext::~VulkanContext()
-    {
-        Shutdown();
-    }
-
     // initialize instance-level Vulkan state for the supplied window
     bool VulkanContext::Init(GLFWwindow* window)
     {

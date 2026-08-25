@@ -11,7 +11,6 @@ namespace Graphics
 	{
 	public:
         VulkanContext() = default;
-        ~VulkanContext();
 
         VulkanContext(const VulkanContext&) = delete;
         VulkanContext& operator=(const VulkanContext&) = delete;
@@ -20,9 +19,7 @@ namespace Graphics
         void Shutdown() noexcept;
 
         const vk::raii::Instance& Instance() const { return _instance; }
-        vk::Instance InstanceHandle() { return *_instance;  }
-        const vk::SurfaceKHR SurfaceHandle() const { return *_surface; }
-		vk::SurfaceKHR SurfaceHandle() { return *_surface; }
+        vk::SurfaceKHR SurfaceHandle() const { return *_surface; }
     private:
         // construction is split so each Vulkan dependency is created in order
         bool ValidationLayerAvailable() const;

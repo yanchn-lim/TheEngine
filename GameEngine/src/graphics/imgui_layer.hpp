@@ -24,7 +24,6 @@ namespace Graphics
         void Begin();
         void End();
         void Shutdown();
-        bool IsInitialized() const noexcept;
 
     private:
         bool _initialized = false;

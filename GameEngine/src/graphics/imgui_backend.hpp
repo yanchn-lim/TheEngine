@@ -15,7 +15,6 @@ namespace Graphics
     {
     public:
         virtual ~IImGuiBackend() = default;
-        virtual bool IsAvailable() const = 0;
         virtual bool SupportsViewports() const = 0;
         virtual bool Initialize(GLFWwindow* window, IGraphicsDevice& device) = 0;
         virtual void BeginFrame() = 0;

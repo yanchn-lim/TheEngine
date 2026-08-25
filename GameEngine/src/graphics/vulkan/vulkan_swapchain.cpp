@@ -184,13 +184,6 @@ namespace Graphics
 		}
 	}
 
-	bool VulkanSwapchain::Recreate(const VulkanDevice& device, vk::SurfaceKHR surface, vk::Extent2D requestedExtent)
-	{
-		device.WaitIdle();
-		Shutdown();
-		return Create(device, surface, requestedExtent);
-	}
-
 	void VulkanSwapchain::Shutdown() noexcept
 	{
 		_imageViews.clear();

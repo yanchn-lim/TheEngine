@@ -74,6 +74,7 @@ namespace Graphics
         void Clear()
         {
             _slots.clear();
+            _owner = ++_nextOwner;
         }
 
         template<typename Function>

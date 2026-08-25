@@ -195,7 +195,7 @@
     <ClCompile Include="src\debug\profiler.cpp" />
     <ClCompile Include="src\debug\profiler_ui.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
-    <ClCompile Include="src\rendering\renderer.cpp" />
+    <ClCompile Include="src\rendering\render_engine.cpp" />
     <ClCompile Include="src\rendering\render_resource_manager.cpp" />
     <ClCompile Include="src\scene\scene.cpp" />
     <ClCompile Include="src\systems\render_system.cpp" />
@@ -245,7 +245,6 @@
     <ClInclude Include="src\ecs\ecs_component_pool.hpp" />
     <ClInclude Include="src\graphics\blend_mode.hpp" />
     <ClInclude Include="src\graphics\renderer_backend.hpp" />
-    <ClInclude Include="src\graphics\graphics_command_list.hpp" />
     <ClInclude Include="src\graphics\graphics_descriptions.hpp" />
     <ClInclude Include="src\graphics\graphics_device.hpp" />
     <ClInclude Include="src\graphics\graphics_device_factory.hpp" />
@@ -258,7 +257,6 @@
     <ClInclude Include="src\graphics\vertex_layout.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_context.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_device.hpp" />
-    <ClInclude Include="src\graphics\vulkan\vulkan_frameresources.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_include.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_graphics_device.hpp" />
     <ClInclude Include="src\graphics\vulkan\vulkan_imgui_backend.hpp" />
@@ -274,7 +272,7 @@
     <ClInclude Include="src\core\ring_buffer.hpp" />
     <ClInclude Include="src\rendering\render_item.hpp" />
     <ClInclude Include="src\rendering\render_resource_manager.hpp" />
-    <ClInclude Include="src\rendering\renderer.hpp" />
+    <ClInclude Include="src\rendering\render_engine.hpp" />
     <ClInclude Include="src\scene\scene.hpp" />
     <ClInclude Include="src\systems\render_system.hpp" />
     <ClInclude Include="src\tests\graphics_api_tests.hpp" />

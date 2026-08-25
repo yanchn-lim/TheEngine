@@ -79,8 +79,8 @@ namespace Graphics
         int height = 0;
         glfwGetFramebufferSize(_window, &width, &height);
         if (width <= 0 || height <= 0) return false;
-        _requestedExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-        if (!_swapchain.Create(_device, _context.SurfaceHandle(), _requestedExtent)) return false;
+        const vk::Extent2D extent{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+        if (!_swapchain.Create(_device, _context.SurfaceHandle(), extent)) return false;
         try
         {
             _depthFormat = FindDepthFormat();
@@ -102,7 +102,6 @@ namespace Graphics
         if (!desc.data || desc.size == 0) return {};
         vk::BufferUsageFlags usage = desc.usage == BufferUsage::Index
             ? vk::BufferUsageFlagBits::eIndexBuffer : vk::BufferUsageFlagBits::eVertexBuffer;
-        if (desc.usage == BufferUsage::Uniform) usage = vk::BufferUsageFlagBits::eUniformBuffer;
         try
         {
             return _buffers.Create(CreateBufferResource(desc.data, desc.size, usage,
@@ -136,7 +135,7 @@ namespace Graphics
             imageInfo.tiling = vk::ImageTiling::eOptimal;
             imageInfo.usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled;
             imageInfo.initialLayout = vk::ImageLayout::eUndefined;
-            TextureResource texture;
+            ImageResource texture;
             texture.image = vk::raii::Image(_device.Device(), imageInfo);
             const vk::MemoryRequirements requirements = texture.image.getMemoryRequirements();
             vk::MemoryAllocateInfo allocation{};
@@ -206,7 +205,7 @@ namespace Graphics
             info.addressModeV = info.addressModeU;
             info.addressModeW = info.addressModeU;
             info.maxLod = 0.0f;
-            return _samplers.Create(SamplerResource{ vk::raii::Sampler(_device.Device(), info) });
+            return _samplers.Create(vk::raii::Sampler(_device.Device(), info));
         }
         catch (...) { return {}; }
     }
@@ -380,14 +379,14 @@ namespace Graphics
     void VulkanGraphicsDevice::DestroyShader(GpuShaderHandle handle) { _shaders.Destroy(handle); }
     void VulkanGraphicsDevice::DestroyPipeline(GpuPipelineHandle handle) { _pipelines.Destroy(handle); }
 
-    FrameStatus VulkanGraphicsDevice::BeginFrame(FrameContext&)
+    FrameStatus VulkanGraphicsDevice::BeginFrame()
     {
         // wait for this frame slot before acquiring and resetting its command buffer
         _frameReady = false;
         try
         {
             if (!RecreateSwapchain()) return FrameStatus::Skip;
-            VulkanFrameResources& frame = _frames[_frameIndex];
+            FrameResources& frame = _frames[_frameIndex];
             if (_device.Device().waitForFences(*frame.inFlightFence, vk::True, UINT64_MAX) != vk::Result::eSuccess)
                 return FrameStatus::Fatal;
             const auto [result, image] = _swapchain.Swapchain().acquireNextImage(UINT64_MAX, *frame.imageAvailable, nullptr);
@@ -414,15 +413,13 @@ namespace Graphics
         }
     }
 
-    IGraphicsCommandList& VulkanGraphicsDevice::GetCommandList(FrameContext&) { return *this; }
-
-    FrameStatus VulkanGraphicsDevice::EndFrame(FrameContext&)
+    FrameStatus VulkanGraphicsDevice::EndFrame()
     {
         // submit recorded commands and signal the semaphore used by presentation
         if (!_frameReady) return FrameStatus::Skip;
         try
         {
-            VulkanFrameResources& frame = _frames[_frameIndex];
+            FrameResources& frame = _frames[_frameIndex];
             frame.commandBuffer.end();
             vk::CommandBufferSubmitInfo commandInfo{};
             commandInfo.commandBuffer = *frame.commandBuffer;
@@ -440,7 +437,7 @@ namespace Graphics
             submit.signalSemaphoreInfoCount = 1;
             submit.pSignalSemaphoreInfos = &signalInfo;
             _device.GraphicsQueue().submit2(submit, *frame.inFlightFence);
-            return FrameStatus::Success;
+            return Present();
         }
         catch (const vk::SystemError& error)
         {
@@ -455,7 +452,7 @@ namespace Graphics
         }
     }
 
-    FrameStatus VulkanGraphicsDevice::Present(FrameContext&)
+    FrameStatus VulkanGraphicsDevice::Present()
     {
         // present the acquired image and defer swapchain recreation to the next frame
         if (!_frameReady) return FrameStatus::Skip;
@@ -489,9 +486,8 @@ namespace Graphics
         }
     }
 
-    void VulkanGraphicsDevice::OnResize(uint32_t width, uint32_t height)
+    void VulkanGraphicsDevice::OnResize(uint32_t, uint32_t)
     {
-        _requestedExtent = { width, height };
         _resizePending = true;
     }
 
@@ -509,7 +505,7 @@ namespace Graphics
         _descriptorPool = nullptr;
         _textureSetLayout = nullptr;
         _renderFinished.clear();
-        for (VulkanFrameResources& frame : _frames)
+        for (FrameResources& frame : _frames)
         {
             frame.commandBuffer = nullptr;
             frame.commandPool = nullptr;
@@ -573,14 +569,6 @@ namespace Graphics
         CurrentCommands().setScissor(0, scissor);
     }
 
-    void VulkanGraphicsDevice::SetScissor(const ScissorDesc& scissor)
-    {
-        vk::Rect2D native{};
-        native.offset = { scissor.x, scissor.y };
-        native.extent = { scissor.width, scissor.height };
-        CurrentCommands().setScissor(0, native);
-    }
-
     void VulkanGraphicsDevice::SetPipeline(GpuPipelineHandle pipeline)
     {
         if (PipelineResource* resource = _pipelines.Get(pipeline))
@@ -600,7 +588,7 @@ namespace Graphics
         }
     }
 
-    void VulkanGraphicsDevice::SetIndexBuffer(GpuBufferHandle buffer, IndexFormat)
+    void VulkanGraphicsDevice::SetIndexBuffer(GpuBufferHandle buffer)
     {
         if (BufferResource* resource = _buffers.Get(buffer))
             CurrentCommands().bindIndexBuffer(*resource->buffer, 0, vk::IndexType::eUint32);
@@ -611,8 +599,8 @@ namespace Graphics
     void VulkanGraphicsDevice::SetMaterialResources(GpuTextureHandle texture, GpuSamplerHandle sampler)
     {
         // allocate one stable descriptor set for each texture and sampler pair
-        TextureResource* image = _textures.Get(texture);
-        SamplerResource* nativeSampler = _samplers.Get(sampler);
+        ImageResource* image = _textures.Get(texture);
+        vk::raii::Sampler* nativeSampler = _samplers.Get(sampler);
         PipelineResource* pipeline = _pipelines.Get(_activePipeline);
         if (!image || !nativeSampler || !pipeline) return;
         const TextureSetKey key{ texture, sampler };
@@ -626,7 +614,7 @@ namespace Graphics
             allocation.pSetLayouts = &layout;
             auto sets = _device.Device().allocateDescriptorSets(allocation);
             vk::raii::DescriptorSet set = std::move(sets.front());
-            vk::DescriptorImageInfo imageInfo{ *nativeSampler->sampler, *image->view, vk::ImageLayout::eShaderReadOnlyOptimal };
+            vk::DescriptorImageInfo imageInfo{ **nativeSampler, *image->view, vk::ImageLayout::eShaderReadOnlyOptimal };
             vk::WriteDescriptorSet write{};
             write.dstSet = *set;
             write.dstBinding = 0;
@@ -634,11 +622,9 @@ namespace Graphics
             write.descriptorType = vk::DescriptorType::eCombinedImageSampler;
             write.pImageInfo = &imageInfo;
             _device.Device().updateDescriptorSets(write, {});
-            TextureSet textureSet;
-            textureSet.set = std::move(set);
-            found = _textureSets.emplace(key, std::move(textureSet)).first;
+            found = _textureSets.emplace(key, std::move(set)).first;
         }
-        const vk::DescriptorSet set = *found->second.set;
+        const vk::DescriptorSet set = *found->second;
         CurrentCommands().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipeline->layout, 0, set, {});
     }
 
@@ -663,11 +649,6 @@ namespace Graphics
     void VulkanGraphicsDevice::DrawIndexed(uint32_t indexCount)
     {
         if (_renderPassActive && _activePipeline) CurrentCommands().drawIndexed(indexCount, 1, 0, 0, 0);
-    }
-
-    void VulkanGraphicsDevice::AddDebugMarker(const char*)
-    {
-        // Vulkan debug labels require an optional device extension; shared labels stay backend-neutral
     }
 
     uint32_t VulkanGraphicsDevice::FindMemoryType(uint32_t bits, vk::MemoryPropertyFlags properties) const
@@ -710,7 +691,6 @@ namespace Graphics
             std::memcpy(destination, data, size);
             resource.memory.unmapMemory();
         }
-        resource.size = size;
         return resource;
     }
 
@@ -743,7 +723,7 @@ namespace Graphics
 
     void VulkanGraphicsDevice::CreateFrameResources()
     {
-        for (VulkanFrameResources& frame : _frames)
+        for (FrameResources& frame : _frames)
         {
             vk::CommandPoolCreateInfo poolInfo{};
             poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
@@ -768,7 +748,7 @@ namespace Graphics
     void VulkanGraphicsDevice::CreateDepthResources()
     {
         // keep one depth image per swapchain image so frames in flight never share it
-        std::vector<DepthResource> replacements;
+        std::vector<ImageResource> replacements;
         replacements.reserve(_swapchain.ImageCount());
         for (uint32_t index = 0; index < _swapchain.ImageCount(); ++index)
         {
@@ -783,7 +763,7 @@ namespace Graphics
             imageInfo.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
             imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 
-            DepthResource depth;
+            ImageResource depth;
             depth.image = vk::raii::Image(_device.Device(), imageInfo);
             const vk::MemoryRequirements requirements = depth.image.getMemoryRequirements();
             vk::MemoryAllocateInfo allocation{};
@@ -806,7 +786,7 @@ namespace Graphics
         {
             std::vector<vk::ImageMemoryBarrier2> barriers;
             barriers.reserve(replacements.size());
-            for (const DepthResource& depth : replacements)
+            for (const ImageResource& depth : replacements)
             {
                 vk::ImageMemoryBarrier2 barrier{};
                 barrier.dstStageMask = vk::PipelineStageFlagBits2::eEarlyFragmentTests |
@@ -859,8 +839,8 @@ namespace Graphics
         glfwGetFramebufferSize(_window, &width, &height);
         if (width <= 0 || height <= 0) return false;
         WaitIdle();
-        _requestedExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-        if (!_swapchain.Recreate(_device, _context.SurfaceHandle(), _requestedExtent)) return false;
+        const vk::Extent2D extent{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+        if (!_swapchain.Create(_device, _context.SurfaceHandle(), extent)) return false;
         CreateDepthResources();
         _renderFinished.clear();
         for (uint32_t index = 0; index < _swapchain.ImageCount(); ++index)
