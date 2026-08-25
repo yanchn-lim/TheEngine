@@ -167,7 +167,6 @@
     <ClCompile Include="src\assets\primitives\primitive_mesh2d.cpp" />
     <ClCompile Include="src\assets\shader_registry.cpp" />
     <ClCompile Include="src\assets\texture_registry.cpp" />
-    <ClCompile Include="src\components\transform.hpp" />
     <ClCompile Include="src\core\file_system.cpp" />
     <ClCompile Include="src\debug\debug_overlay.cpp" />
     <ClCompile Include="src\debug\debug.cpp" />
@@ -229,6 +228,7 @@
     <ClInclude Include="src\assets\shader_registry.hpp" />
     <ClInclude Include="src\assets\texture_registry.hpp" />
     <ClInclude Include="src\components\renderable.hpp" />
+    <ClInclude Include="src\components\transform.hpp" />
     <ClInclude Include="src\core\file_system.hpp" />
     <ClInclude Include="src\core\application.hpp" />
     <ClInclude Include="src\core\engine_config.hpp" />
@@ -294,7 +294,6 @@
     <None Include="assets\shaders\standard_vk.vert" />
     <None Include="assets\shaders\standard_vk.vert.spv" />
     <None Include="tools\compile_shaders.ps1" />
-    <None Include="todo.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

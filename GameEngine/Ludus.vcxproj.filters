@@ -270,9 +270,6 @@
     <ClCompile Include="src\tests\movement_system.cpp">
       <Filter>Source Files\tests\systems</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\transform.hpp">
-      <Filter>Header Files\components</Filter>
-    </ClCompile>
     <ClCompile Include="src\systems\render_system.cpp">
       <Filter>Source Files\systems</Filter>
     </ClCompile>
@@ -503,6 +500,9 @@
     <ClInclude Include="src\components\renderable.hpp">
       <Filter>Header Files\components</Filter>
     </ClInclude>
+    <ClInclude Include="src\components\transform.hpp">
+      <Filter>Header Files\components</Filter>
+    </ClInclude>
     <ClInclude Include="src\systems\render_system.hpp">
       <Filter>Header Files\systems</Filter>
     </ClInclude>
@@ -542,9 +542,6 @@
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
     <None Include="tools\compile_shaders.ps1">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="todo.md">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
