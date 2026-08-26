@@ -93,6 +93,18 @@ namespace ECS
 		return slot.alive && slot.generation == entity.generation;
 	}
 
+	void World::Swap(World& other) noexcept
+	{
+		using std::swap;
+		swap(_entitySlots, other._entitySlots);
+		swap(_freeSlots, other._freeSlots);
+		swap(_componentPools, other._componentPools);
+		swap(_entityAliveCount, other._entityAliveCount);
+		swap(_systems, other._systems);
+		swap(_nextSystemInsertionIndex, other._nextSystemInsertionIndex);
+		swap(_systemsNeedSorting, other._systemsNeedSorting);
+	}
+
 	void World::SortSystems()
 	{
 		std::ranges::sort(

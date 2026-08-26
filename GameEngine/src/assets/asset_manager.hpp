@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string_view>
 #include <vector>
 
 #include "graphics/render_state.hpp"
@@ -9,8 +10,6 @@
 #include "material_registry.hpp"
 #include "mesh_registry.hpp"
 #include "model_importer_registry.hpp"
-#include "model_asset.hpp"
-#include "model_registry.hpp"
 
 
 namespace Assets
@@ -23,7 +22,6 @@ namespace Assets
 		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath,
 			const std::string& vertexSpirvPath = {}, const std::string& fragmentSpirvPath = {});
 		MeshHandle LoadMesh(const std::string& name, const std::string& path);
-		ModelHandle LoadModel(const std::string& name, const std::string& path);
 
 		MaterialHandle CreateMaterial(
 			const std::string& name,
@@ -32,14 +30,14 @@ namespace Assets
 			Graphics::RenderState state
 		);
 
-		MeshHandle CreateMesh(const std::string& name, const MeshImportData& data);
+		MeshHandle CreateMesh(const std::string& name, const MeshSurface& surface);
+		bool SetSurfaceMaterial(MeshHandle mesh, std::string_view surface, MaterialHandle material);
 
 		const TextureAsset* Get(TextureHandle handle) const;
 		const ShaderAsset* Get(ShaderHandle handle) const;
 		const MaterialAsset* Get(MaterialHandle handle) const;
 		const MaterialAsset* Get(const std::string& name) const;
 		const MeshAsset* Get(MeshHandle handle) const;
-		const ModelAsset* Get(ModelHandle handle) const;
 
 		void Clear();
 
@@ -50,7 +48,6 @@ namespace Assets
 		TextureRegistry _textures;
 		MaterialRegistry _materials;
 		MeshRegistry _meshes;
-		ModelRegistry _models;
 		ModelImporterRegistry _modelImporters;
 
 	};

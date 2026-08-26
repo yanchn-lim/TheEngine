@@ -24,14 +24,14 @@ namespace Graphics
 	glm::mat4 Camera2D::GetProjection() const
 	{
 		// zoom controls vertical half-size while aspect ratio expands horizontal range
-		return glm::ortho
+		return glm::orthoRH_ZO
 		(
 			-aspectRatio * zoom,
 			aspectRatio * zoom,
 			-zoom,
 			zoom,
-			-1.f,
-			1.f
+			-10.f,
+			10.f
 		);
 	}
 }

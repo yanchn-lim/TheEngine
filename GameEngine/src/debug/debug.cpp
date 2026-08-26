@@ -20,8 +20,7 @@ void DebugConsole::PushLog(LogLevel level, std::string message)
 
 void DebugConsole::Clear()
 {
-    // Reset the fixed-size ring buffer by assigning a fresh instance.
-	_entries = {};
+	_entries.Clear();
 }
 
 bool& DebugConsole::IsOpen()

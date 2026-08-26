@@ -6,20 +6,28 @@ namespace Assets
 	MeshHandle MeshRegistry::Create(const std::string& name, const MeshImportData& data)
 	{
 		// mesh names act as simple deduplication keys inside the registry
-		if (data.vertices.empty() || data.indices.empty())
+		if (data.surfaces.empty())
 		{
-			Debug::LogError("MeshRegistry::Create : Mesh vertices or indices is empty");
-			return MeshHandle();
-		}
-		const auto it = _nameToHandle.find(name);
-		if (it != _nameToHandle.end())
-		{
-			return it->second;
+			Debug::LogError("MeshRegistry::Create : Mesh has no surfaces");
+			return {};
 		}
 
-		MeshHandle handle{ _nextId++ };
+		for (const MeshSurface& surface : data.surfaces)
+		{
+			if (surface.vertices.empty() || surface.indices.empty())
+			{
+				Debug::LogError("MeshRegistry::Create : Mesh surface has no geometry");
+				return {};
+			}
+		}
+
+		const auto it = _nameToHandle.find(name);
+		if (it != _nameToHandle.end())
+			return it->second;
+
+		const MeshHandle handle{ _nextId++ };
 		_nameToHandle[name] = handle;
-		_meshes[handle.id] = MeshAsset{ data, name };
+		_meshes[handle.id] = MeshAsset{ data.surfaces, name };
 
 		return handle;
 	}
@@ -41,6 +49,27 @@ namespace Assets
 		}
 
 		return &it->second;
+	}
+
+	bool MeshRegistry::SetSurfaceMaterial(
+		MeshHandle mesh,
+		std::string_view surface,
+		MaterialHandle material)
+	{
+		const auto found = _meshes.find(mesh.id);
+		if (found == _meshes.end() || !material)
+			return false;
+
+		for (MeshSurface& candidate : found->second.surfaces)
+		{
+			if (candidate.name == surface)
+			{
+				candidate.material = material;
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	void MeshRegistry::Clear()

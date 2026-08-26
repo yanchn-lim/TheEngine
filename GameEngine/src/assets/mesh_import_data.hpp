@@ -2,10 +2,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <vector>
-#include "glm/glm.hpp"
 
-#include "debug/debug.hpp"
+#include <glm/glm.hpp>
+
+#include "asset_handle.hpp"
 #include "graphics/primitive_topology.hpp"
 #include "graphics/vertex_layout.hpp"
 
@@ -19,20 +21,21 @@ namespace Assets
 		glm::vec2 texCoord0{};
 	};
 
-	// keeps imported geometry on the CPU until the render resource manager needs it
-	struct MeshImportData
+	// one independently drawable section of a mesh
+	struct MeshSurface
 	{
+		std::string name;
 		std::vector<MeshVertex> vertices;
 		std::vector<uint32_t> indices;
 		Graphics::PrimitiveTopology topology = Graphics::PrimitiveTopology::TRIANGLES;
+		MaterialHandle material;
+	};
+
+	// temporary result produced by a mesh importer
+	struct MeshImportData
+	{
+		std::vector<MeshSurface> surfaces;
 	};
 
 	Graphics::VertexLayout CreateMeshVertexLayout();
-
-	// one imported model can contain several independently drawable meshes
-	struct ModelImportData
-	{
-		std::vector<MeshImportData> meshes;
-	};
-
 }

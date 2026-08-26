@@ -125,6 +125,7 @@ namespace Graphics
         bool _frameReady = false;
         bool _renderPassActive = false;
         bool _resizePending = false;
+        bool _vsync = false;
 
         // helpers own allocation, upload, descriptor, and layout-transition details
         uint32_t FindMemoryType(uint32_t bits, vk::MemoryPropertyFlags properties) const;

@@ -11,20 +11,13 @@ namespace Rendering
 
     bool RenderResourceManager::Resolve(
         Assets::MeshHandle meshHandle,
-        Assets::MaterialHandle materialHandle,
-        ResolvedDraw& output)
+        Assets::MaterialHandle materialOverride,
+        std::vector<ResolvedDraw>& output)
     {
-        // resolve logical assets before assembling the final draw data
         MeshGpu* mesh = ResolveMesh(meshHandle);
-        const Assets::MaterialAsset* material = _assets.Get(materialHandle);
+        const Assets::MeshAsset* asset = _assets.Get(meshHandle);
 
-        if (!mesh || !material)
-            return false;
-
-        const Graphics::GpuShaderHandle shader = ResolveShader(material->shader);
-        const Graphics::GpuTextureHandle texture = ResolveTexture(material->texture);
-
-        if (!shader || !texture)
+        if (!mesh || !asset || mesh->surfaces.size() != asset->surfaces.size())
             return false;
 
         if (!_sampler)
@@ -33,35 +26,66 @@ namespace Rendering
         if (!_sampler)
             return false;
 
-        const uint64_t key = (static_cast<uint64_t>(meshHandle.id) << 32) | materialHandle.id;
+        output.clear();
+        output.reserve(mesh->surfaces.size());
 
-        // one pipeline is cached for each current mesh and material pair
-        Graphics::GpuPipelineHandle pipeline;
-        if (const auto existing = _pipelines.find(key); existing != _pipelines.end())
-            pipeline = existing->second;
-        else
+        for (size_t index = 0; index < mesh->surfaces.size(); ++index)
         {
-            Graphics::GraphicsPipelineDesc desc;
-            desc.shader = shader;
-            desc.vertexLayout = mesh->layout;
-            desc.topology = mesh->topology;
-            desc.renderState = material->state;
-            pipeline = _device.CreateGraphicsPipeline(desc);
+            SurfaceGpu& surface = mesh->surfaces[index];
+            const Assets::MeshSurface& source = asset->surfaces[index];
+            const Assets::MaterialHandle materialHandle =
+                materialOverride ? materialOverride : source.material;
+            const Assets::MaterialAsset* material = _assets.Get(materialHandle);
 
-            if (!pipeline)
+            if (!material)
+            {
+                output.clear();
                 return false;
+            }
 
-            _pipelines.emplace(key, pipeline);
+            const Graphics::GpuShaderHandle shader = ResolveShader(material->shader);
+            const Graphics::GpuTextureHandle texture = ResolveTexture(material->texture);
+
+            if (!shader || !texture)
+            {
+                output.clear();
+                return false;
+            }
+
+            Graphics::GpuPipelineHandle pipeline;
+            const auto existing = surface.pipelines.find(materialHandle.id);
+            if (existing != surface.pipelines.end())
+                pipeline = existing->second;
+            else
+            {
+                Graphics::GraphicsPipelineDesc desc;
+                desc.shader = shader;
+                desc.vertexLayout = surface.layout;
+                desc.topology = surface.topology;
+                desc.renderState = material->state;
+                pipeline = _device.CreateGraphicsPipeline(desc);
+
+                if (!pipeline)
+                {
+                    output.clear();
+                    return false;
+                }
+
+                surface.pipelines.emplace(materialHandle.id, pipeline);
+            }
+
+            ResolvedDraw draw;
+            draw.vertexBuffer = surface.vertexBuffer;
+            draw.indexBuffer = surface.indexBuffer;
+            draw.texture = texture;
+            draw.sampler = _sampler;
+            draw.pipeline = pipeline;
+            draw.layout = surface.layout;
+            draw.vertexCount = surface.vertexCount;
+            draw.indexCount = surface.indexCount;
+            output.push_back(draw);
         }
 
-        output.vertexBuffer = mesh->vertexBuffer;
-        output.indexBuffer = mesh->indexBuffer;
-        output.texture = texture;
-        output.sampler = _sampler;
-        output.pipeline = pipeline;
-        output.layout = mesh->layout;
-        output.vertexCount = mesh->vertexCount;
-        output.indexCount = mesh->indexCount;
         return true;
     }
 
@@ -73,29 +97,44 @@ namespace Rendering
 
         const Assets::MeshAsset* asset = _assets.Get(handle);
 
-        if (!asset || asset->data.vertices.empty())
+        if (!asset || asset->surfaces.empty())
             return nullptr;
 
-        MeshGpu gpu;
-        gpu.layout = Assets::CreateMeshVertexLayout();
-        gpu.topology = asset->data.topology;
-        gpu.vertexCount = static_cast<uint32_t>(asset->data.vertices.size());
-        gpu.indexCount = static_cast<uint32_t>(asset->data.indices.size());
-        gpu.vertexBuffer = _device.CreateBuffer({ asset->data.vertices.data(),
-            asset->data.vertices.size() * sizeof(Assets::MeshVertex), Graphics::BufferUsage::Vertex });
+        MeshGpu mesh;
+        mesh.surfaces.reserve(asset->surfaces.size());
 
-        if (!asset->data.indices.empty())
-            gpu.indexBuffer = _device.CreateBuffer({ asset->data.indices.data(),
-                asset->data.indices.size() * sizeof(uint32_t), Graphics::BufferUsage::Index });
-
-        if (!gpu.vertexBuffer || (gpu.indexCount && !gpu.indexBuffer))
+        for (const Assets::MeshSurface& source : asset->surfaces)
         {
-            _device.DestroyBuffer(gpu.indexBuffer);
-            _device.DestroyBuffer(gpu.vertexBuffer);
-            return nullptr;
+            SurfaceGpu surface;
+            surface.layout = Assets::CreateMeshVertexLayout();
+            surface.topology = source.topology;
+            surface.vertexCount = static_cast<uint32_t>(source.vertices.size());
+            surface.indexCount = static_cast<uint32_t>(source.indices.size());
+            surface.vertexBuffer = _device.CreateBuffer({ source.vertices.data(),
+                source.vertices.size() * sizeof(Assets::MeshVertex), Graphics::BufferUsage::Vertex });
+
+            if (!source.indices.empty())
+                surface.indexBuffer = _device.CreateBuffer({ source.indices.data(),
+                    source.indices.size() * sizeof(uint32_t), Graphics::BufferUsage::Index });
+
+            if (!surface.vertexBuffer || (surface.indexCount && !surface.indexBuffer))
+            {
+                _device.DestroyBuffer(surface.indexBuffer);
+                _device.DestroyBuffer(surface.vertexBuffer);
+
+                for (SurfaceGpu& created : mesh.surfaces)
+                {
+                    _device.DestroyBuffer(created.indexBuffer);
+                    _device.DestroyBuffer(created.vertexBuffer);
+                }
+
+                return nullptr;
+            }
+
+            mesh.surfaces.push_back(std::move(surface));
         }
 
-        return &_meshes.emplace(handle.id, std::move(gpu)).first->second;
+        return &_meshes.emplace(handle.id, std::move(mesh)).first->second;
     }
 
     Graphics::GpuTextureHandle RenderResourceManager::ResolveTexture(Assets::TextureHandle handle)
@@ -146,8 +185,10 @@ namespace Rendering
     {
         // destroy dependent pipelines before the resources they reference
         _device.WaitIdle();
-        for (auto& [key, pipeline] : _pipelines)
-            _device.DestroyPipeline(pipeline);
+        for (auto& [meshId, mesh] : _meshes)
+            for (SurfaceGpu& surface : mesh.surfaces)
+                for (auto& [materialId, pipeline] : surface.pipelines)
+                    _device.DestroyPipeline(pipeline);
 
         for (auto& [key, shader] : _shaders)
             _device.DestroyShader(shader);
@@ -160,11 +201,13 @@ namespace Rendering
 
         for (auto& [key, mesh] : _meshes)
         {
-            _device.DestroyBuffer(mesh.indexBuffer);
-            _device.DestroyBuffer(mesh.vertexBuffer);
+            for (SurfaceGpu& surface : mesh.surfaces)
+            {
+                _device.DestroyBuffer(surface.indexBuffer);
+                _device.DestroyBuffer(surface.vertexBuffer);
+            }
         }
 
-        _pipelines.clear();
         _shaders.clear();
         _textures.clear();
         _meshes.clear();

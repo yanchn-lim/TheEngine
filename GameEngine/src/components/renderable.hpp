@@ -7,7 +7,8 @@ namespace Components
 	struct Renderable
 	{
 		Assets::MeshHandle mesh;
-		Assets::MaterialHandle material;
+		// when valid, this replaces every surface material
+		Assets::MaterialHandle materialOverride;
 		bool visible = true;
 	};
 }

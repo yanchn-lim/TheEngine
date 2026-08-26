@@ -15,6 +15,8 @@ namespace Tests
         void OnImGui(Ludus::Engine& engine) override;
         void OnKey(Ludus::Engine& engine, int key, int action) override;
     private:
+		bool LoadScene(Ludus::Engine& engine, const char* path);
+
         DebugOverlay _debugOverlay;
         Ludus::Scene _scene;
     };

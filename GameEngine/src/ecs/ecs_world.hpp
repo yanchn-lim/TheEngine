@@ -115,6 +115,7 @@ namespace ECS
 		uint32_t GetEntityCount() const;
 		void RemoveEntity(Entity entity);
 		bool IsEntityAlive(Entity entity) const;
+		void Swap(World& other) noexcept;
 
 		template<typename Component>
 		Component& AddComponent(Entity entity, const Component& component)

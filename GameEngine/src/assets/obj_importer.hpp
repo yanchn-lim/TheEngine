@@ -9,6 +9,6 @@ namespace Assets
     {
     public:
         bool CanImport(const std::string& path) const override;
-        bool Import(const std::string& path, ModelImportData& outModel) override;
+        bool Import(const std::string& path, MeshImportData& outMesh) override;
     };
 }

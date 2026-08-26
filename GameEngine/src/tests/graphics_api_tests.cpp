@@ -54,8 +54,11 @@ namespace Tests
     {
         Graphics::ResourceTable<Graphics::GpuBufferHandle, int> first;
         Graphics::ResourceTable<Graphics::GpuBufferHandle, int> second;
+        Graphics::ResourceTable<Graphics::GpuBufferHandle, float> differentResourceType;
         const Graphics::GpuBufferHandle original = first.Create(10);
-        if (!original || !first.Get(original) || second.Get(original)) return false;
+        if (!original || !first.Get(original) ||
+            second.Get(original) || differentResourceType.Get(original))
+            return false;
         if (!first.Destroy(original) || first.Get(original) || first.Destroy(original)) return false;
         const Graphics::GpuBufferHandle replacement = first.Create(20);
         if (!replacement || replacement == original || first.Get(original)) return false;

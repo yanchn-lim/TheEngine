@@ -13,7 +13,7 @@ namespace Assets
     // asset records keep CPU data independent from the selected graphics backend
     struct MeshAsset
     {
-        MeshImportData data;
+        std::vector<MeshSurface> surfaces;
         std::string label;
         uint64_t version = 1;
     };

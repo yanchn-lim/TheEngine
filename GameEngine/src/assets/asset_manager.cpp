@@ -19,46 +19,14 @@ namespace Assets
 
 	MeshHandle AssetManager::LoadMesh(const std::string& name, const std::string& path)
 	{
-		// imported model data is temporary; the registry keeps the first CPU mesh record
-		ModelImportData collection;
-		if (!_modelImporters.Import(path, collection))
+		MeshImportData mesh;
+		if (!_modelImporters.Import(path, mesh))
 		{
 			Debug::LogError("AssetManager::LoadMesh : Failed to load mesh from ", path);
-			return MeshHandle();
+			return {};
 		}
 
-		if (collection.meshes.empty())
-		{
-			Debug::LogError("AssetManager::LoadMesh : No meshes found in ", path);
-			return MeshHandle();
-		}
-
-		return _meshes.Create(name, collection.meshes[0]);
-	}
-
-	ModelHandle AssetManager::LoadModel(const std::string& name, const std::string& path)
-	{
-		ModelImportData collection;
-		if (!_modelImporters.Import(path, collection))
-		{
-			Debug::LogError("AssetManager::LoadModel : Failed to load mesh from ", path);
-			return ModelHandle();
-		}
-
-		if (collection.meshes.empty())
-		{
-			Debug::LogError("AssetManager::LoadModel : No meshes found in ", path);
-			return ModelHandle();
-		}
-
-		std::vector<MeshHandle> meshHandles{};
-		for (size_t i = 0; i < collection.meshes.size(); ++i)
-		{
-			const std::string meshName = name + "_" + std::to_string(i);
-			meshHandles.push_back(_meshes.Create(meshName, collection.meshes[i]));
-		}
-
-		return _models.Create(name, std::move(meshHandles));
+		return _meshes.Create(name, mesh);
 	}
 
 	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
@@ -72,10 +40,20 @@ namespace Assets
 		return _materials.Create(name, shader, texture, state);
 	}
 
-	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshImportData& data)
+	MeshHandle AssetManager::CreateMesh(const std::string& name, const MeshSurface& surface)
 	{
 		// keep procedural mesh data in the asset registry until RenderResourceManager uploads it
-		return _meshes.Create(name, data);
+		MeshImportData mesh;
+		mesh.surfaces.push_back(surface);
+		return _meshes.Create(name, mesh);
+	}
+
+	bool AssetManager::SetSurfaceMaterial(
+		MeshHandle mesh,
+		std::string_view surface,
+		MaterialHandle material)
+	{
+		return Get(material) && _meshes.SetSurfaceMaterial(mesh, surface, material);
 	}
 
 	const TextureAsset* AssetManager::Get(TextureHandle handle) const
@@ -103,15 +81,9 @@ namespace Assets
 		return _meshes.Get(handle);
 	}
 
-	const ModelAsset* AssetManager::Get(ModelHandle handle) const
-	{
-		return _models.Get(handle);
-	}
-
 	void AssetManager::Clear()
 	{
 		// clear dependent asset records before their referenced handles
-		_models.Clear();
 		_meshes.Clear();
 		_materials.Clear();
 		_shaders.Clear();

@@ -21,6 +21,7 @@ namespace Rendering
             const Assets::AssetManager& assets);
 
         RenderEngine(std::unique_ptr<Graphics::IGraphicsDevice> device, const Assets::AssetManager& assets);
+        ~RenderEngine();
         void BeginImGui();
         void EndImGui();
         void Submit(MeshInstanceDesc item);
@@ -36,6 +37,7 @@ namespace Rendering
         RenderResourceManager _resources;
         Graphics::ImGuiLayer _imgui;
         std::vector<MeshInstanceDesc> _items;
+        bool _shutdown = false;
 
         void Draw(const MeshInstanceDesc& item, const Graphics::FrameConstants& frameConstants);
     };

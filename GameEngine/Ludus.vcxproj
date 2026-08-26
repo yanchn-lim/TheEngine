@@ -47,7 +47,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;ENGINE_ENABLE_MEMORY_PROFILER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;ENGINE_ENABLE_MEMORY_PROFILER;GLFW_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)external\imgui\backends;$(SolutionDir)external\imgui;$(SolutionDir)external\glfw\include;$(SolutionDir)external\glad\include;$(SolutionDir)external\glm;$(SolutionDir)external\stb;$(SolutionDir)external\tinyobjloader;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -60,8 +60,11 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)external\glfw\lib-vc2022;$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3dll.lib;opengl32.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)external\glfw\lib-vc2022\glfw3.dll" "$(OutDir)glfw3.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -162,7 +165,6 @@
     <ClCompile Include="src\assets\mesh_registry.cpp" />
     <ClCompile Include="src\assets\mesh_import_data.cpp" />
     <ClCompile Include="src\assets\model_importer_registry.cpp" />
-    <ClCompile Include="src\assets\model_registry.cpp" />
     <ClCompile Include="src\assets\obj_importer.cpp" />
     <ClCompile Include="src\assets\primitives\primitive_mesh2d.cpp" />
     <ClCompile Include="src\assets\shader_registry.cpp" />
@@ -197,10 +199,21 @@
     <ClCompile Include="src\rendering\render_engine.cpp" />
     <ClCompile Include="src\rendering\render_resource_manager.cpp" />
     <ClCompile Include="src\scene\scene.cpp" />
+    <ClCompile Include="src\scene\scene_asset_loader.cpp" />
+    <ClCompile Include="src\scene\scene_component_registry.cpp" />
+    <ClCompile Include="src\scene\scene_loader.cpp" />
+    <ClCompile Include="src\scene\scene_value_reader.cpp" />
+    <ClCompile Include="src\serialization\lscene_parser.cpp" />
     <ClCompile Include="src\systems\render_system.cpp" />
+    <ClCompile Include="src\tests\ecs_tests.cpp" />
     <ClCompile Include="src\tests\graphics_api_tests.cpp" />
+    <ClCompile Include="src\tests\lscene_parser_tests.cpp" />
     <ClCompile Include="src\tests\movement_system.cpp" />
+    <ClCompile Include="src\tests\rotator_system.cpp" />
+    <ClCompile Include="src\tests\scene_asset_loader_tests.cpp" />
+    <ClCompile Include="src\tests\scene_loader_tests.cpp" />
     <ClCompile Include="src\tests\sandbox_application.cpp" />
+    <ClCompile Include="src\tests\test_runner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
@@ -220,9 +233,7 @@
     <ClInclude Include="src\assets\material_registry.hpp" />
     <ClInclude Include="src\assets\mesh_registry.hpp" />
     <ClInclude Include="src\assets\mesh_import_data.hpp" />
-    <ClInclude Include="src\assets\model_asset.hpp" />
     <ClInclude Include="src\assets\model_importer_registry.hpp" />
-    <ClInclude Include="src\assets\model_registry.hpp" />
     <ClInclude Include="src\assets\obj_importer.hpp" />
     <ClInclude Include="src\assets\primitives\primitive_mesh2d.hpp" />
     <ClInclude Include="src\assets\shader_registry.hpp" />
@@ -274,14 +285,41 @@
     <ClInclude Include="src\rendering\render_resource_manager.hpp" />
     <ClInclude Include="src\rendering\render_engine.hpp" />
     <ClInclude Include="src\scene\scene.hpp" />
+    <ClInclude Include="src\scene\scene_asset_context.hpp" />
+    <ClInclude Include="src\scene\scene_asset_loader.hpp" />
+    <ClInclude Include="src\scene\scene_component_registry.hpp" />
+    <ClInclude Include="src\scene\scene_loader.hpp" />
+    <ClInclude Include="src\scene\scene_load_error.hpp" />
+    <ClInclude Include="src\scene\scene_value_reader.hpp" />
+    <ClInclude Include="src\serialization\lscene_parser.hpp" />
+    <ClInclude Include="src\serialization\lscene_value.hpp" />
     <ClInclude Include="src\systems\render_system.hpp" />
+    <ClInclude Include="src\tests\ecs_tests.hpp" />
     <ClInclude Include="src\tests\graphics_api_tests.hpp" />
+    <ClInclude Include="src\tests\lscene_parser_tests.hpp" />
     <ClInclude Include="src\tests\movement_system.hpp" />
     <ClInclude Include="src\tests\position.hpp" />
+    <ClInclude Include="src\tests\rotator.hpp" />
+    <ClInclude Include="src\tests\rotator_system.hpp" />
     <ClInclude Include="src\tests\sandbox_application.hpp" />
+    <ClInclude Include="src\tests\scene_asset_loader_tests.hpp" />
+    <ClInclude Include="src\tests\scene_loader_tests.hpp" />
     <ClInclude Include="src\tests\velocity.hpp" />
+    <ClInclude Include="src\tests\test_runner.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\scenes\maxwell.lscene" />
+    <None Include="assets\scenes\tests\component_order_a.lscene" />
+    <None Include="assets\scenes\tests\component_order_b.lscene" />
+    <None Include="assets\scenes\tests\duplicate_entity.lscene" />
+    <None Include="assets\scenes\tests\float_overflow.lscene" />
+    <None Include="assets\scenes\tests\invalid_component_property.lscene" />
+    <None Include="assets\scenes\tests\missing_material.lscene" />
+    <None Include="assets\scenes\tests\partial_entity.lscene" />
+    <None Include="assets\scenes\tests\unknown_asset.lscene" />
+    <None Include="assets\scenes\tests\unknown_component.lscene" />
+    <None Include="assets\scenes\tests\valid_empty.lscene" />
+    <None Include="assets\scenes\tests\zero_rotator.lscene" />
     <None Include="assets\models\test_quad.obj" />
     <None Include="assets\models\test_triangle.obj" />
     <None Include="assets\models\test_two_shapes.obj" />

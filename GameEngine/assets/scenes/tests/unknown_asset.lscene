@@ -1,0 +1,8 @@
+scene "Unknown Asset"
+version: 1
+
+entities
+	test_entity
+		components
+			Renderable
+				mesh: missing_mesh

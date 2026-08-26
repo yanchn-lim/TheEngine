@@ -14,7 +14,7 @@ namespace Assets
     public:
         virtual ~IModelImporter() = default;
         virtual bool CanImport(const std::string& path) const = 0;
-        virtual bool Import(const std::string& path, ModelImportData& outModel) = 0;
+        virtual bool Import(const std::string& path, MeshImportData& outMesh) = 0;
     };
 
     // selects the first registered importer that accepts a source path
@@ -22,7 +22,7 @@ namespace Assets
     {
     public:
         void RegisterImporter(std::unique_ptr<IModelImporter> importer);
-        bool Import(const std::string& path, ModelImportData& outModel) const;
+        bool Import(const std::string& path, MeshImportData& outMesh) const;
     private:
         std::vector<std::unique_ptr<IModelImporter>> _importers;
     };

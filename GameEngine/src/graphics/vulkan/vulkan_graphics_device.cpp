@@ -74,13 +74,14 @@ namespace Graphics
     {
         // create Vulkan owners from the window outward before frame resources
         _window = static_cast<GLFWwindow*>(desc.window);
+        _vsync = desc.vsync;
         if (!_window || !_context.Init(_window) || !_device.Init(_context)) return false;
         int width = 0;
         int height = 0;
         glfwGetFramebufferSize(_window, &width, &height);
         if (width <= 0 || height <= 0) return false;
         const vk::Extent2D extent{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-        if (!_swapchain.Create(_device, _context.SurfaceHandle(), extent)) return false;
+        if (!_swapchain.Create(_device, _context.SurfaceHandle(), extent, _vsync)) return false;
         try
         {
             _depthFormat = FindDepthFormat();
@@ -840,7 +841,7 @@ namespace Graphics
         if (width <= 0 || height <= 0) return false;
         WaitIdle();
         const vk::Extent2D extent{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-        if (!_swapchain.Create(_device, _context.SurfaceHandle(), extent)) return false;
+        if (!_swapchain.Create(_device, _context.SurfaceHandle(), extent, _vsync)) return false;
         CreateDepthResources();
         _renderFinished.clear();
         for (uint32_t index = 0; index < _swapchain.ImageCount(); ++index)

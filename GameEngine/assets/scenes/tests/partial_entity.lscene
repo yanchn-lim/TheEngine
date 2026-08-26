@@ -1,0 +1,9 @@
+scene "Partial Entity"
+version: 1
+
+entities
+	test_entity
+		components
+			Transform
+
+			ZInvalid

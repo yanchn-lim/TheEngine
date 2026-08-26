@@ -1,0 +1,14 @@
+scene "Component Order A"
+version: 1
+
+entities
+	test_entity
+		components
+			Transform
+				position: [1, 2, 3]
+				rotation_degrees: [10, 20, 30]
+				scale: [2, 3, 4]
+
+			Rotator
+				axis: [0, 1, 0]
+				speed_degrees: 45

@@ -8,12 +8,19 @@
 
 namespace Graphics
 {
+    template<typename HandleType>
+    uint32_t AcquireResourceTableOwner()
+    {
+        static std::atomic<uint32_t> nextOwner{ 0 };
+        return ++nextOwner;
+    }
+
     // owns backend resources and turns slot reuse into generation-safe handles
     template<typename HandleType, typename ResourceType>
     class ResourceTable
     {
     public:
-        ResourceTable() : _owner(++_nextOwner) {}
+        ResourceTable() : _owner(AcquireResourceTableOwner<HandleType>()) {}
         ResourceTable(const ResourceTable&) = delete;
         ResourceTable& operator=(const ResourceTable&) = delete;
 
@@ -74,7 +81,7 @@ namespace Graphics
         void Clear()
         {
             _slots.clear();
-            _owner = ++_nextOwner;
+            _owner = AcquireResourceTableOwner<HandleType>();
         }
 
         template<typename Function>
@@ -93,6 +100,5 @@ namespace Graphics
 
         std::vector<Slot> _slots;
         uint32_t _owner = 0;
-        inline static std::atomic<uint32_t> _nextOwner{ 0 };
     };
 }

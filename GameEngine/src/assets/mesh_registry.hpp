@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 #include "asset_handle.hpp"
 #include "asset_records.hpp"
 #include "mesh_import_data.hpp"
@@ -11,6 +13,7 @@ namespace Assets
 	public:
 		MeshHandle Create(const std::string& name, const MeshImportData& data);
 		const MeshAsset* Get(MeshHandle handle) const;
+		bool SetSurfaceMaterial(MeshHandle mesh, std::string_view surface, MaterialHandle material);
 		void Clear();
 
 	private:

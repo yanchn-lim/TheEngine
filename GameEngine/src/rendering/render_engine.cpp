@@ -45,6 +45,11 @@ namespace Rendering
     {
     }
 
+    RenderEngine::~RenderEngine()
+    {
+        Shutdown();
+    }
+
     void RenderEngine::BeginImGui()
     {
         _imgui.Begin();
@@ -96,6 +101,10 @@ namespace Rendering
 
     void RenderEngine::Shutdown()
     {
+        if (_shutdown)
+            return;
+
+        _shutdown = true;
         _imgui.Shutdown();
         _resources.Clear();
         _items.clear();
@@ -104,27 +113,30 @@ namespace Rendering
 
     void RenderEngine::Draw(const MeshInstanceDesc& item, const Graphics::FrameConstants& frameConstants)
     {
-        ResolvedDraw draw;
-        if (!_resources.Resolve(item.mesh, item.material, draw))
+        std::vector<ResolvedDraw> draws;
+        if (!_resources.Resolve(item.mesh, item.materialOverride, draws))
             return;
 
         Graphics::DrawConstants constants;
         constants.model = item.transform;
 
-        // emit the same command order for OpenGL and Vulkan
-        _device->SetPipeline(draw.pipeline);
-        _device->SetVertexBuffer(draw.vertexBuffer, draw.layout);
+        for (const ResolvedDraw& draw : draws)
+        {
+            // emit the same command order for OpenGL and Vulkan
+            _device->SetPipeline(draw.pipeline);
+            _device->SetVertexBuffer(draw.vertexBuffer, draw.layout);
 
-        if (draw.indexBuffer) 
-            _device->SetIndexBuffer(draw.indexBuffer);
+            if (draw.indexBuffer)
+                _device->SetIndexBuffer(draw.indexBuffer);
 
-        _device->SetFrameConstants(frameConstants);
-        _device->SetMaterialResources(draw.texture, draw.sampler);
-        _device->SetDrawConstants(constants);
+            _device->SetFrameConstants(frameConstants);
+            _device->SetMaterialResources(draw.texture, draw.sampler);
+            _device->SetDrawConstants(constants);
 
-        if (draw.indexCount) 
-            _device->DrawIndexed(draw.indexCount);
-        else 
-            _device->Draw(draw.vertexCount);
+            if (draw.indexCount)
+                _device->DrawIndexed(draw.indexCount);
+            else
+                _device->Draw(draw.vertexCount);
+        }
     }
 }

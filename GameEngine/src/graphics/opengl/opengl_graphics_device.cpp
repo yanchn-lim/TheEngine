@@ -61,6 +61,7 @@ namespace Graphics
             return false;
         }
 
+        glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glCreateVertexArrays(1, &_vertexArray);

@@ -1,0 +1,10 @@
+scene "Duplicate Entity"
+version: 1
+
+entities
+	same_entity
+		components
+			Transform
+	same_entity
+		components
+			Transform

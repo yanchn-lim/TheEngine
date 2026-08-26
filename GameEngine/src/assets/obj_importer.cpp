@@ -1,4 +1,5 @@
 #include "obj_importer.hpp"
+#include "debug/debug.hpp"
 
 #include <filesystem>
 #include <algorithm>
@@ -51,7 +52,7 @@ namespace Assets
 		return ext == ".obj";
 	}
 
-	bool ObjImporter::Import(const std::string& path, ModelImportData& outModel)
+	bool ObjImporter::Import(const std::string& path, MeshImportData& outMesh)
 	{
         // tinyobj stores shared attribute arrays plus per-face index triplets
         tinyobj::attrib_t attrib;
@@ -59,6 +60,8 @@ namespace Assets
         std::vector<tinyobj::material_t> materials;
         std::string warn;
         std::string err;
+        const std::string materialDirectory =
+            std::filesystem::path(path).parent_path().string();
 
         bool success = tinyobj::LoadObj(
             &attrib,
@@ -66,7 +69,8 @@ namespace Assets
             &materials,
             &warn,
             &err,
-            path.c_str()
+            path.c_str(),
+            materialDirectory.c_str()
         );
 
         if (!warn.empty())
@@ -82,9 +86,13 @@ namespace Assets
         size_t totalVertices = 0;
         size_t totalIndices = 0;
 
-        for (const tinyobj::shape_t& shape : shapes)
-        {
-            MeshImportData mesh;
+		for (size_t shapeIndex = 0; shapeIndex < shapes.size(); ++shapeIndex)
+		{
+			const tinyobj::shape_t& shape = shapes[shapeIndex];
+			MeshSurface surface;
+			surface.name = shape.name.empty()
+				? "surface_" + std::to_string(shapeIndex)
+				: shape.name;
             std::unordered_map<ObjVertexKey, uint32_t, ObjVertexKeyHasher> uniqueVertices;
 
             for (const tinyobj::index_t& index : shape.mesh.indices)
@@ -123,33 +131,33 @@ namespace Assets
                 auto it = uniqueVertices.find(key);
                 if (it != uniqueVertices.end())
                 {
-                    mesh.indices.push_back(it->second);
+					surface.indices.push_back(it->second);
                     continue;
                 }
 
-                uint32_t newIndex = static_cast<uint32_t>(mesh.vertices.size());
+				uint32_t newIndex = static_cast<uint32_t>(surface.vertices.size());
                 uniqueVertices[key] = newIndex;
 
-                mesh.vertices.push_back(vertex);
-                mesh.indices.push_back(newIndex);
+				surface.vertices.push_back(vertex);
+				surface.indices.push_back(newIndex);
             }
 
-            if (!mesh.vertices.empty() && !mesh.indices.empty())
-            {
-                totalVertices += mesh.vertices.size();
-                totalIndices += mesh.indices.size();
-                outModel.meshes.push_back(std::move(mesh));
-            }
-        }
+			if (!surface.vertices.empty() && !surface.indices.empty())
+			{
+				totalVertices += surface.vertices.size();
+				totalIndices += surface.indices.size();
+				outMesh.surfaces.push_back(std::move(surface));
+			}
+		}
 
-        if (!outModel.meshes.empty())
-        {
-            Debug::LogVerbose("ObjImporter::Import : Imported ", path,
-                " meshes=", outModel.meshes.size(),
+		if (!outMesh.surfaces.empty())
+		{
+			Debug::LogVerbose("ObjImporter::Import : Imported ", path,
+				" surfaces=", outMesh.surfaces.size(),
                 " vertices=", totalVertices,
                 " indices=", totalIndices);
         }
 
-        return !outModel.meshes.empty();
+		return !outMesh.surfaces.empty();
 	}
 }

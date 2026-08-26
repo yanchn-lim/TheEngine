@@ -11,13 +11,13 @@ namespace Assets
 		_importers.push_back(std::move(importer));
 	}
 
-	bool ModelImporterRegistry::Import(const std::string& path, ModelImportData& outModel) const
+	bool ModelImporterRegistry::Import(const std::string& path, MeshImportData& outMesh) const
 	{
 		// find the first importer that claims support for this file
 		for (const auto& importer : _importers)
 		{
 			if (importer->CanImport(path))
-				return importer->Import(path, outModel);
+				return importer->Import(path, outMesh);
 		}
 
 		return false;

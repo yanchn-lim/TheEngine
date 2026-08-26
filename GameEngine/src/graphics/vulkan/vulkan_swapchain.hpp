@@ -11,7 +11,8 @@ namespace Graphics
 	class VulkanSwapchain
 	{
 	public:
-		bool Create(const VulkanDevice& device, vk::SurfaceKHR surface, vk::Extent2D requestedExtent);
+		bool Create(const VulkanDevice& device, vk::SurfaceKHR surface,
+			vk::Extent2D requestedExtent, bool vsync);
 		void Shutdown() noexcept;
 	
 		const vk::raii::SwapchainKHR& Swapchain() const { return _swapchain; }

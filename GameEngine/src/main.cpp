@@ -2,6 +2,7 @@
 
 #include "core/engine.hpp"
 #include "tests/sandbox_application.hpp"
+#include "tests/test_runner.hpp"
 
 int main(int argc, char** argv)
 {
@@ -13,6 +14,8 @@ int main(int argc, char** argv)
             config.rendererBackend = Graphics::RendererBackend::OPENGL;
         else if (argument == "--vulkan")
             config.rendererBackend = Graphics::RendererBackend::VULKAN;
+		else if (argument == "--tests")
+			return Tests::RunAllTests();
     }
 
     Ludus::Engine engine(std::move(config));

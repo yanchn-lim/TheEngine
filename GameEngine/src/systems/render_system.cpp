@@ -25,7 +25,7 @@ namespace Systems
 
 					Rendering::MeshInstanceDesc mesh{};
 					mesh.mesh = renderable.mesh;
-					mesh.material = renderable.material;
+					mesh.materialOverride = renderable.materialOverride;
 
 					mesh.transform = glm::translate(glm::mat4(1.f), transform.position) * glm::mat4_cast(transform.rotation) * glm::scale(glm::mat4(1.f), transform.scale);
 					_renderEngine.Submit(mesh);

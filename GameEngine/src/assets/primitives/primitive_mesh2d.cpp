@@ -21,10 +21,10 @@ namespace Assets::Primitive2D
 		}
 	}
 
-	MeshImportData Triangle()
+	MeshSurface Triangle()
 	{
 		// unit triangle centered around the origin for quick renderer tests
-		MeshImportData data;
+		MeshSurface data;
 		data.vertices =
 		{
 			{ {  0.0f,  0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.5f, 1.0f } },
@@ -37,10 +37,10 @@ namespace Assets::Primitive2D
 		return data;
 	}
 
-	MeshImportData Quad()
+	MeshSurface Quad()
 	{
 		// indexed quad keeps shared corners explicit for texture and material tests
-		MeshImportData data;
+		MeshSurface data;
 		data.vertices =
 		{
 			{ { -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
@@ -54,12 +54,12 @@ namespace Assets::Primitive2D
 		return data;
 	}
 
-	MeshImportData Circle(uint32_t segments)
+	MeshSurface Circle(uint32_t segments)
 	{
 		// build a triangle fan with one center vertex and a configurable rim
 		segments = std::max(segments, 3u);
 
-		MeshImportData data;
+		MeshSurface data;
 		data.vertices.reserve(static_cast<size_t>(segments) + 1u);
 		data.indices.reserve(static_cast<size_t>(segments) * 3u);
 

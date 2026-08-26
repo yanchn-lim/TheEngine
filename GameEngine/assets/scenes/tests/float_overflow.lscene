@@ -1,0 +1,8 @@
+scene "Float Overflow"
+version: 1
+
+entities
+	test_entity
+		components
+			Transform
+				position: [1e100, 0, 0]

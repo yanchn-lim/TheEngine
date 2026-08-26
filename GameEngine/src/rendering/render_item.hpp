@@ -9,7 +9,7 @@ namespace Rendering
     struct MeshInstanceDesc
     {
         Assets::MeshHandle mesh;
-        Assets::MaterialHandle material;
+        Assets::MaterialHandle materialOverride;
         glm::mat4 transform{ 1.0f };
     };
 }

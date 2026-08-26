@@ -1,0 +1,7 @@
+scene "Unknown Component"
+version: 1
+
+entities
+	test_entity
+		components
+			MissingComponent

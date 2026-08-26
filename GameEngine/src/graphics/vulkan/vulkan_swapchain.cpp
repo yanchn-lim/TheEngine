@@ -5,7 +5,8 @@
 
 namespace Graphics
 {
-	bool VulkanSwapchain::Create(const VulkanDevice& device, vk::SurfaceKHR surface, vk::Extent2D requestedExtent)
+	bool VulkanSwapchain::Create(const VulkanDevice& device, vk::SurfaceKHR surface,
+		vk::Extent2D requestedExtent, bool vsync)
 	{
 		Shutdown();
 
@@ -41,14 +42,27 @@ namespace Graphics
 			if (!selectFormat(vk::Format::eB8G8R8A8Unorm))
 				selectFormat(vk::Format::eR8G8B8A8Unorm);
 
-			// prefer mailbox presentation and fall back to guaranteed FIFO presentation
+			// FIFO provides vsync; otherwise prefer mailbox, then immediate presentation
 			vk::PresentModeKHR selectedPresentMode = vk::PresentModeKHR::eFifo;
-			for (vk::PresentModeKHR available : presentModes)
+			if (!vsync)
 			{
-				if (available == vk::PresentModeKHR::eMailbox)
+				bool immediateAvailable = false;
+				for (vk::PresentModeKHR available : presentModes)
 				{
-					selectedPresentMode = available;
-					break;
+					if (available == vk::PresentModeKHR::eMailbox)
+					{
+						selectedPresentMode = available;
+						break;
+					}
+
+					if (available == vk::PresentModeKHR::eImmediate)
+						immediateAvailable = true;
+				}
+
+				if (selectedPresentMode != vk::PresentModeKHR::eMailbox &&
+					immediateAvailable)
+				{
+					selectedPresentMode = vk::PresentModeKHR::eImmediate;
 				}
 			}
 

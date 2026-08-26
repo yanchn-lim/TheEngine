@@ -1,0 +1,13 @@
+scene "Missing Material"
+version: 1
+
+assets
+	meshes
+		maxwell
+			source: "assets/models/maxwell.obj"
+
+entities
+	test_entity
+		components
+			Renderable
+				mesh: maxwell

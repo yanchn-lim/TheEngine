@@ -10,6 +10,15 @@ struct RingBuffer
 	size_t head{ 0 };
 	size_t count{ 0 };
 
+	void Clear()
+	{
+		for (T& value : data)
+			value = {};
+
+		head = 0;
+		count = 0;
+	}
+
 	//push into latest
 	void Push(T value)
 	{

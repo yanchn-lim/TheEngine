@@ -1,0 +1,9 @@
+scene "Zero Rotator"
+version: 1
+
+entities
+	test_entity
+		components
+			Rotator
+				axis: [0, 0, 0]
+				speed_degrees: 1

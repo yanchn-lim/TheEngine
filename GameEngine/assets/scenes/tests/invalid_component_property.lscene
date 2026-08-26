@@ -1,0 +1,8 @@
+scene "Invalid Component Property"
+version: 1
+
+entities
+	test_entity
+		components
+			Transform
+				wrong_field: 1
