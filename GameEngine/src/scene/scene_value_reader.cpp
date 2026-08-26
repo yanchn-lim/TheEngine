@@ -160,4 +160,13 @@ namespace Ludus::SceneValues
 		}
 		return true;
 	}
+
+	Serialization::LSceneValue WriteVec3(glm::vec3 value)
+	{
+		Serialization::LSceneValue::Array values;
+		values.push_back(Serialization::LSceneValue::Float(value.x, {}));
+		values.push_back(Serialization::LSceneValue::Float(value.y, {}));
+		values.push_back(Serialization::LSceneValue::Float(value.z, {}));
+		return Serialization::LSceneValue::ArrayValue(std::move(values), {});
+	}
 }

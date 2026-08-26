@@ -62,4 +62,6 @@ namespace Ludus::SceneValues
 		glm::vec3 defaultValue,
 		glm::vec3& output,
 		std::vector<SceneLoadError>& errors);
+
+	Serialization::LSceneValue WriteVec3(glm::vec3 value);
 }

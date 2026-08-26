@@ -133,6 +133,23 @@ namespace Ludus
 		const SceneComponentRegistry& components,
 		std::vector<SceneLoadError>& errors)
 	{
+		std::string source;
+		if (!FileSystem::ReadTextFile(path.c_str(), source))
+		{
+			errors.push_back({ "failed to read scene file '" + path + "'", { 1, 1 }, path });
+			return false;
+		}
+		return LoadText(source, path, scene, assets, components, errors);
+	}
+
+	bool SceneLoader::LoadText(
+		std::string_view source,
+		const std::string& path,
+		Scene& scene,
+		Assets::AssetManager& assets,
+		const SceneComponentRegistry& components,
+		std::vector<SceneLoadError>& errors)
+	{
 		const size_t firstError = errors.size();
 		const auto finish = [&](bool result)
 		{
@@ -144,13 +161,6 @@ namespace Ludus
 		if (scene.GetWorld().GetEntityCount() != 0)
 		{
 			errors.push_back({ "scene must be empty before loading", { 1, 1 } });
-			return finish(false);
-		}
-
-		std::string source;
-		if (!FileSystem::ReadTextFile(path.c_str(), source))
-		{
-			errors.push_back({ "failed to read scene file '" + path + "'", { 1, 1 } });
 			return finish(false);
 		}
 
@@ -175,6 +185,15 @@ namespace Ludus
 		Scene stagedScene;
 		if (!LoadEntities(parsed.root, stagedScene, assetContext, components, errors))
 			return finish(false);
+
+		const std::string* sceneName = parsed.root.Find("scene")->TryGetString();
+		Serialization::LSceneValue assetDeclarations = Serialization::LSceneValue::ObjectValue();
+		if (const Serialization::LSceneValue* value = parsed.root.Find("assets"))
+			assetDeclarations = *value;
+		stagedScene.SetSerializationData(
+			sceneName ? *sceneName : "Untitled",
+			std::move(assetDeclarations),
+			std::move(assetContext));
 
 		scene.Swap(stagedScene);
 		return finish(errors.size() == firstError);

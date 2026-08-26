@@ -131,7 +131,7 @@ namespace ECS::Internal
 			return _denseEntities;
 		}
 
-		bool Contains(Entity entity) const
+		bool Contains(Entity entity) const override
 		{
 			if (!_validEntity(entity))
 				return false;

@@ -47,10 +47,43 @@ namespace Ludus
 		return found->second.name;
 	}
 
+	const std::unordered_map<std::string, Scene::EntityRecord>& Scene::GetEntities() const noexcept
+	{
+		return _entities;
+	}
+
+	void Scene::SetSerializationData(
+		std::string name,
+		Serialization::LSceneValue assets,
+		SceneAssetContext assetContext)
+	{
+		_name = std::move(name);
+		_assets = std::move(assets);
+		_assetContext = std::move(assetContext);
+	}
+
+	std::string_view Scene::GetName() const noexcept
+	{
+		return _name;
+	}
+
+	const Serialization::LSceneValue& Scene::GetAssetDeclarations() const noexcept
+	{
+		return _assets;
+	}
+
+	const SceneAssetContext& Scene::GetAssetContext() const noexcept
+	{
+		return _assetContext;
+	}
+
 	void Scene::Swap(Scene& other) noexcept
 	{
 		_world.Swap(other._world);
 		_entities.swap(other._entities);
+		_name.swap(other._name);
+		std::swap(_assets, other._assets);
+		std::swap(_assetContext, other._assetContext);
 	}
 
 	ECS::World& Scene::GetWorld() noexcept

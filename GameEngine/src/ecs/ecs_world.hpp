@@ -113,6 +113,17 @@ namespace ECS
 
 		Entity CreateEntity();
 		uint32_t GetEntityCount() const;
+		std::size_t GetComponentCount(Entity entity) const
+		{
+			if (!IsEntityAlive(entity))
+				return 0;
+
+			std::size_t count = 0;
+			for (const auto& pool : _componentPools)
+				if (pool && pool->Contains(entity))
+					++count;
+			return count;
+		}
 		void RemoveEntity(Entity entity);
 		bool IsEntityAlive(Entity entity) const;
 		void Swap(World& other) noexcept;

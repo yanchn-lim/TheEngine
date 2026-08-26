@@ -297,9 +297,15 @@
     <ClCompile Include="src\scene\scene_loader.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+	<ClCompile Include="src\scene\scene_serializer.cpp">
+	  <Filter>Source Files\scene</Filter>
+	</ClCompile>
     <ClCompile Include="src\scene\scene_value_reader.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+	<ClCompile Include="src\serialization\lscene_writer.cpp">
+	  <Filter>Source Files\serialization</Filter>
+	</ClCompile>
     <ClCompile Include="src\tests\movement_system.cpp">
       <Filter>Source Files\tests\systems</Filter>
     </ClCompile>
@@ -551,9 +557,15 @@
     <ClInclude Include="src\scene\scene_load_error.hpp">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+	<ClInclude Include="src\scene\scene_serializer.hpp">
+	  <Filter>Header Files\scene</Filter>
+	</ClInclude>
     <ClInclude Include="src\scene\scene_value_reader.hpp">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+	<ClInclude Include="src\serialization\lscene_writer.hpp">
+	  <Filter>Header Files\serialization</Filter>
+	</ClInclude>
     <ClInclude Include="src\tests\position.hpp">
       <Filter>Header Files\tests\comp</Filter>
     </ClInclude>
