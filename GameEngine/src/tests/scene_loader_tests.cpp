@@ -16,7 +16,6 @@
 #include "assets/asset_manager.hpp"
 #include "components/renderable.hpp"
 #include "components/transform.hpp"
-#include "position.hpp"
 #include "rotator.hpp"
 #include "scene/scene.hpp"
 #include "scene/scene_component_registry.hpp"
@@ -29,6 +28,10 @@ namespace Tests
 {
 	namespace
 	{
+		struct UnregisteredComponent
+		{
+		};
+
 		bool LoadOrderedComponents(
 			const char* path,
 			Components::Transform& transform,
@@ -255,7 +258,7 @@ namespace Tests
 				unregisteredComponent.CreateEntity("entity", "Entity");
 			unregisteredComponent.GetWorld().AddComponent(
 				unregisteredEntity,
-				Position{ 1.0f, 2.0f });
+				UnregisteredComponent{});
 
 			Ludus::Scene missingMaterial;
 			Ludus::SceneAssetContext missingMaterialAssets;

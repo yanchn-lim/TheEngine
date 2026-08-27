@@ -4,14 +4,41 @@
 
 #include "debug/debug.hpp"
 #include "ecs/ecs_world.hpp"
-#include "movement_system.hpp"
-#include "position.hpp"
-#include "velocity.hpp"
-
 namespace Tests
 {
 	namespace
 	{
+		struct Position
+		{
+			float x = 0.0f;
+			float y = 0.0f;
+		};
+
+		struct Velocity
+		{
+			float x = 0.0f;
+			float y = 0.0f;
+		};
+
+		class MovementSystem final : public ECS::ISystem
+		{
+		public:
+			static constexpr ECS::SystemPhase Phase =
+				ECS::SystemPhase::UPDATE;
+
+			static constexpr int Order = 100;
+
+			void OnUpdate(ECS::World& world) override
+			{
+				world.ForEach<Position, Velocity>(
+					[](ECS::Entity, Position& position, Velocity& velocity)
+					{
+						position.x += velocity.x;
+						position.y += velocity.y;
+					});
+			}
+		};
+
 		bool EcsTestFailed(const char* message)
 		{
 			Debug::LogError("ECS test failed: ", message);

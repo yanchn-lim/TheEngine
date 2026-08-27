@@ -306,9 +306,6 @@
 	<ClCompile Include="src\serialization\lscene_writer.cpp">
 	  <Filter>Source Files\serialization</Filter>
 	</ClCompile>
-    <ClCompile Include="src\tests\movement_system.cpp">
-      <Filter>Source Files\tests\systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\tests\rotator_system.cpp">
       <Filter>Source Files\tests\systems</Filter>
     </ClCompile>
@@ -566,17 +563,8 @@
 	<ClInclude Include="src\serialization\lscene_writer.hpp">
 	  <Filter>Header Files\serialization</Filter>
 	</ClInclude>
-    <ClInclude Include="src\tests\position.hpp">
-      <Filter>Header Files\tests\comp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\tests\velocity.hpp">
-      <Filter>Header Files\tests\comp</Filter>
-    </ClInclude>
     <ClInclude Include="src\tests\test_runner.hpp">
       <Filter>Header Files\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="src\tests\movement_system.hpp">
-      <Filter>Header Files\tests\systems</Filter>
     </ClInclude>
     <ClInclude Include="src\tests\rotator.hpp">
       <Filter>Header Files\tests\comp</Filter>

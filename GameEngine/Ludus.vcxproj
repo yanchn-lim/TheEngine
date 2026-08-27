@@ -210,7 +210,6 @@
     <ClCompile Include="src\tests\ecs_tests.cpp" />
     <ClCompile Include="src\tests\graphics_api_tests.cpp" />
     <ClCompile Include="src\tests\lscene_parser_tests.cpp" />
-    <ClCompile Include="src\tests\movement_system.cpp" />
     <ClCompile Include="src\tests\rotator_system.cpp" />
     <ClCompile Include="src\tests\scene_asset_loader_tests.cpp" />
     <ClCompile Include="src\tests\scene_loader_tests.cpp" />
@@ -301,14 +300,11 @@
     <ClInclude Include="src\tests\ecs_tests.hpp" />
     <ClInclude Include="src\tests\graphics_api_tests.hpp" />
     <ClInclude Include="src\tests\lscene_parser_tests.hpp" />
-    <ClInclude Include="src\tests\movement_system.hpp" />
-    <ClInclude Include="src\tests\position.hpp" />
     <ClInclude Include="src\tests\rotator.hpp" />
     <ClInclude Include="src\tests\rotator_system.hpp" />
     <ClInclude Include="src\tests\sandbox_application.hpp" />
     <ClInclude Include="src\tests\scene_asset_loader_tests.hpp" />
     <ClInclude Include="src\tests\scene_loader_tests.hpp" />
-    <ClInclude Include="src\tests\velocity.hpp" />
     <ClInclude Include="src\tests\test_runner.hpp" />
   </ItemGroup>
   <ItemGroup>
