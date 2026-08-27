@@ -9,14 +9,14 @@
 #include <limits>
 #include <stdexcept>
 
-namespace ECS::Internal
+namespace Ludus::ECS::Internal
 {
 	constexpr uint32_t INVALID_COMPONENT_INDEX = UINT32_MAX;
 
 	template<typename Component>
 	class ComponentPool final : public IComponentPool
 	{
-		friend class ECS::World;
+		friend class Ludus::ECS::World;
 
 	private:
 		std::vector<Entity> _denseEntities;

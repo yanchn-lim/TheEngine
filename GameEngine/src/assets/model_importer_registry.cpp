@@ -1,6 +1,6 @@
 #include "model_importer_registry.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	void ModelImporterRegistry::RegisterImporter(std::unique_ptr<IModelImporter> importer)
 	{

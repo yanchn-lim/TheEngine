@@ -2,13 +2,13 @@
 
 #include "assets/asset_handle.hpp"
 
-namespace Components
+namespace Ludus::Components
 {
 	struct Renderable
 	{
-		Assets::MeshHandle mesh;
+		Ludus::Assets::MeshHandle mesh;
 		// when valid, this replaces every surface material
-		Assets::MaterialHandle materialOverride;
+		Ludus::Assets::MaterialHandle materialOverride;
 		bool visible = true;
 	};
 }

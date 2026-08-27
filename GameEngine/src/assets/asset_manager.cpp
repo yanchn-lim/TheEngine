@@ -2,7 +2,7 @@
 #include "debug/debug.hpp"
 #include "obj_importer.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	TextureHandle AssetManager::LoadTexture(const std::string& path)
 	{
@@ -22,18 +22,18 @@ namespace Assets
 		MeshImportData mesh;
 		if (!_modelImporters.Import(path, mesh))
 		{
-			Debug::LogError("AssetManager::LoadMesh : Failed to load mesh from ", path);
+			Ludus::Debug::LogError("AssetManager::LoadMesh : Failed to load mesh from ", path);
 			return {};
 		}
 
 		return _meshes.Create(name, mesh);
 	}
 
-	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Graphics::RenderState state)
+	MaterialHandle AssetManager::CreateMaterial(const std::string& name, ShaderHandle shader, TextureHandle texture, Ludus::Graphics::RenderState state)
 	{
 		if (!Get(shader) || !Get(texture))
 		{
-			Debug::LogError("AssetManager::CreateMaterial : Could not resolve shader or texture fallback for material ", name);
+			Ludus::Debug::LogError("AssetManager::CreateMaterial : Could not resolve shader or texture fallback for material ", name);
 			return MaterialHandle{};
 		}
 

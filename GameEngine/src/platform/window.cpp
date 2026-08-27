@@ -4,9 +4,11 @@
 
 #include <GLFW/glfw3.h>
 
-namespace Platform
+#include "core/input.hpp"
+
+namespace Ludus::Platform
 {
-    bool Window::Initialize(Graphics::RendererBackend backend, int width, int height, const char* title)
+    bool Window::Initialize(Ludus::Graphics::RendererBackend backend, int width, int height, const char* title)
     {
         if (!glfwInit())
             return false;
@@ -14,7 +16,7 @@ namespace Platform
         _glfwInitialized = true;
         glfwSetErrorCallback(ErrorCallback);
 
-        if (backend == Graphics::RendererBackend::OPENGL)
+        if (backend == Ludus::Graphics::RendererBackend::OPENGL)
         {
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -39,6 +41,10 @@ namespace Platform
         glfwSetWindowUserPointer(_handle, this);
         glfwSetFramebufferSizeCallback(_handle, FramebufferSizeCallback);
         glfwSetKeyCallback(_handle, GlfwKeyCallback);
+		glfwSetMouseButtonCallback(_handle, GlfwMouseButtonCallback);
+		glfwSetCursorPosCallback(_handle, GlfwCursorPositionCallback);
+		glfwSetScrollCallback(_handle, GlfwScrollCallback);
+		glfwSetWindowFocusCallback(_handle, GlfwFocusCallback);
         return true;
     }
 
@@ -68,11 +74,10 @@ namespace Platform
         return glfwGetTime();
     }
 
-    void Window::SetKeyCallback(KeyCallback callback, void* context) noexcept
-    {
-        _keyCallback = callback;
-        _keyContext = context;
-    }
+	void Window::SetInput(Ludus::Input* input) noexcept
+	{
+		_input = input;
+	}
 
     GLFWwindow* Window::GetNativeHandle() const noexcept
     {
@@ -115,12 +120,57 @@ namespace Platform
         instance->_resizePending = true;
     }
 
-    void Window::GlfwKeyCallback(GLFWwindow* window, int key, int, int action, int)
+    void Window::GlfwKeyCallback(GLFWwindow* window, int key, int, int action, int modifiers)
     {
         auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        if (instance && instance->_keyCallback)
-            instance->_keyCallback(instance->_keyContext, key, action);
+		if (instance && instance->_input)
+		{
+			const Ludus::InputAction inputAction = action == GLFW_RELEASE
+				? Ludus::InputAction::Release
+				: action == GLFW_REPEAT
+					? Ludus::InputAction::Repeat
+					: Ludus::InputAction::Press;
+			instance->_input->ProcessKey(
+				static_cast<Ludus::Key>(key),
+				inputAction,
+				static_cast<Ludus::Modifier>(modifiers));
+		}
     }
+
+	void Window::GlfwMouseButtonCallback(
+		GLFWwindow* window, int button, int action, int modifiers)
+	{
+		auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		if (!instance || !instance->_input)
+			return;
+		instance->_input->ProcessMouseButton(
+			static_cast<Ludus::MouseButton>(button),
+			action == GLFW_RELEASE
+				? Ludus::InputAction::Release
+				: Ludus::InputAction::Press,
+			static_cast<Ludus::Modifier>(modifiers));
+	}
+
+	void Window::GlfwCursorPositionCallback(GLFWwindow* window, double x, double y)
+	{
+		auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		if (instance && instance->_input)
+			instance->_input->ProcessMouseMove({
+				static_cast<float>(x), static_cast<float>(y) });
+	}
+
+	void Window::GlfwScrollCallback(GLFWwindow* window, double x, double y)
+	{
+		auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		if (instance && instance->_input)
+			instance->_input->ProcessScroll({
+				static_cast<float>(x), static_cast<float>(y) });
+	}
+
+	void Window::GlfwFocusCallback(GLFWwindow* window, int focused)
+	{
+		auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		if (instance && instance->_input)
+			instance->_input->ProcessFocus(focused == GLFW_TRUE);
+	}
 }

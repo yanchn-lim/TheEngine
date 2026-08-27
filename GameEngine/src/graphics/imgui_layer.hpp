@@ -7,7 +7,7 @@
 
 struct GLFWwindow;
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     class IGraphicsDevice;
 

@@ -7,7 +7,7 @@
 
 struct GLFWwindow;
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // implements IGraphicsDevice with immediate OpenGL state changes and draws
     class OpenGLGraphicsDevice final : public IGraphicsDevice

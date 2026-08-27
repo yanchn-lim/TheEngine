@@ -7,17 +7,17 @@
 #include "assets/asset_manager.hpp"
 #include "graphics/graphics_device.hpp"
 
-namespace Rendering
+namespace Ludus::Rendering
 {
     // contains the GPU handles needed for one backend-neutral draw operation
     struct ResolvedDraw
     {
-        Graphics::GpuBufferHandle vertexBuffer;
-        Graphics::GpuBufferHandle indexBuffer;
-        Graphics::GpuTextureHandle texture;
-        Graphics::GpuSamplerHandle sampler;
-        Graphics::GpuPipelineHandle pipeline;
-        Graphics::VertexLayout layout;
+        Ludus::Graphics::GpuBufferHandle vertexBuffer;
+        Ludus::Graphics::GpuBufferHandle indexBuffer;
+        Ludus::Graphics::GpuTextureHandle texture;
+        Ludus::Graphics::GpuSamplerHandle sampler;
+        Ludus::Graphics::GpuPipelineHandle pipeline;
+        Ludus::Graphics::VertexLayout layout;
         uint32_t vertexCount = 0;
         uint32_t indexCount = 0;
     };
@@ -26,10 +26,10 @@ namespace Rendering
     class RenderResourceManager
     {
     public:
-        RenderResourceManager(const Assets::AssetManager& assets, Graphics::IGraphicsDevice& device);
+        RenderResourceManager(const Ludus::Assets::AssetManager& assets, Ludus::Graphics::IGraphicsDevice& device);
         bool Resolve(
-            Assets::MeshHandle mesh,
-            Assets::MaterialHandle materialOverride,
+            Ludus::Assets::MeshHandle mesh,
+            Ludus::Assets::MaterialHandle materialOverride,
             std::vector<ResolvedDraw>& output);
         void Clear();
 
@@ -37,13 +37,13 @@ namespace Rendering
         // cache entries own only typed handles because the device owns native objects
         struct SurfaceGpu
         {
-            Graphics::GpuBufferHandle vertexBuffer;
-            Graphics::GpuBufferHandle indexBuffer;
-            Graphics::VertexLayout layout;
-            Graphics::PrimitiveTopology topology = Graphics::PrimitiveTopology::TRIANGLES;
+            Ludus::Graphics::GpuBufferHandle vertexBuffer;
+            Ludus::Graphics::GpuBufferHandle indexBuffer;
+            Ludus::Graphics::VertexLayout layout;
+            Ludus::Graphics::PrimitiveTopology topology = Ludus::Graphics::PrimitiveTopology::TRIANGLES;
             uint32_t vertexCount = 0;
             uint32_t indexCount = 0;
-            std::unordered_map<Assets::AssetId, Graphics::GpuPipelineHandle> pipelines;
+            std::unordered_map<Ludus::Assets::AssetId, Ludus::Graphics::GpuPipelineHandle> pipelines;
         };
 
         struct MeshGpu
@@ -51,16 +51,16 @@ namespace Rendering
             std::vector<SurfaceGpu> surfaces;
         };
 
-        const Assets::AssetManager& _assets;
-        Graphics::IGraphicsDevice& _device;
-        std::unordered_map<Assets::AssetId, MeshGpu> _meshes;
-        std::unordered_map<Assets::AssetId, Graphics::GpuTextureHandle> _textures;
-        std::unordered_map<Assets::AssetId, Graphics::GpuShaderHandle> _shaders;
-        Graphics::GpuSamplerHandle _sampler;
+        const Ludus::Assets::AssetManager& _assets;
+        Ludus::Graphics::IGraphicsDevice& _device;
+        std::unordered_map<Ludus::Assets::AssetId, MeshGpu> _meshes;
+        std::unordered_map<Ludus::Assets::AssetId, Ludus::Graphics::GpuTextureHandle> _textures;
+        std::unordered_map<Ludus::Assets::AssetId, Ludus::Graphics::GpuShaderHandle> _shaders;
+        Ludus::Graphics::GpuSamplerHandle _sampler;
 
         // private resolvers keep asset lookup and upload outside the renderer loop
-        MeshGpu* ResolveMesh(Assets::MeshHandle handle);
-        Graphics::GpuTextureHandle ResolveTexture(Assets::TextureHandle handle);
-        Graphics::GpuShaderHandle ResolveShader(Assets::ShaderHandle handle);
+        MeshGpu* ResolveMesh(Ludus::Assets::MeshHandle handle);
+        Ludus::Graphics::GpuTextureHandle ResolveTexture(Ludus::Assets::TextureHandle handle);
+        Ludus::Graphics::GpuShaderHandle ResolveShader(Ludus::Assets::ShaderHandle handle);
     };
 }

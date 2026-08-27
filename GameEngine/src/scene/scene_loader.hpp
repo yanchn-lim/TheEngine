@@ -5,8 +5,9 @@
 #include <vector>
 
 #include "scene_component_registry.hpp"
+#include "system_registry.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	class AssetManager;
 }
@@ -21,16 +22,18 @@ namespace Ludus
 		static bool Load(
 			const std::string& path,
 			Scene& scene,
-			Assets::AssetManager& assets,
+			Ludus::Assets::AssetManager& assets,
 			const SceneComponentRegistry& components,
+			const SystemRegistry& systems,
 			std::vector<SceneLoadError>& errors);
 
 		static bool LoadText(
 			std::string_view source,
 			const std::string& path,
 			Scene& scene,
-			Assets::AssetManager& assets,
+			Ludus::Assets::AssetManager& assets,
 			const SceneComponentRegistry& components,
+			const SystemRegistry& systems,
 			std::vector<SceneLoadError>& errors);
 	};
 }

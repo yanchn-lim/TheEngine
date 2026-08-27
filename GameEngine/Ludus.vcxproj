@@ -175,6 +175,7 @@
     <ClCompile Include="src\debug\memory_overrides.cpp" />
     <ClCompile Include="src\debug\memory_tracker.cpp" />
     <ClCompile Include="src\core\engine.cpp" />
+	<ClCompile Include="src\core\input.cpp" />
     <ClCompile Include="src\ecs\ecs_world.cpp" />
     <ClCompile Include="src\graphics\graphics_device_factory.cpp" />
     <ClCompile Include="src\graphics\imgui_backend.cpp" />
@@ -195,6 +196,10 @@
     </ClCompile>
     <ClCompile Include="src\debug\profiler.cpp" />
     <ClCompile Include="src\debug\profiler_ui.cpp" />
+	<ClCompile Include="src\editor\hierarchy_panel.cpp" />
+	<ClCompile Include="src\editor\editor_command_history.cpp" />
+	<ClCompile Include="src\editor\inspector_panel.cpp" />
+	<ClCompile Include="src\editor\value_editor.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\rendering\render_engine.cpp" />
     <ClCompile Include="src\rendering\render_resource_manager.cpp" />
@@ -204,11 +209,13 @@
     <ClCompile Include="src\scene\scene_loader.cpp" />
 	<ClCompile Include="src\scene\scene_serializer.cpp" />
     <ClCompile Include="src\scene\scene_value_reader.cpp" />
+	<ClCompile Include="src\scene\system_registry.cpp" />
     <ClCompile Include="src\serialization\lscene_parser.cpp" />
 	<ClCompile Include="src\serialization\lscene_writer.cpp" />
     <ClCompile Include="src\systems\render_system.cpp" />
     <ClCompile Include="src\tests\ecs_tests.cpp" />
     <ClCompile Include="src\tests\graphics_api_tests.cpp" />
+	<ClCompile Include="src\tests\input_tests.cpp" />
     <ClCompile Include="src\tests\lscene_parser_tests.cpp" />
     <ClCompile Include="src\tests\rotator_system.cpp" />
     <ClCompile Include="src\tests\scene_asset_loader_tests.cpp" />
@@ -248,11 +255,12 @@
     <ClInclude Include="src\debug\debug.hpp" />
     <ClInclude Include="src\debug\memory_tracker.hpp" />
     <ClInclude Include="src\core\engine.hpp" />
+	<ClInclude Include="src\core\action_map.hpp" />
+	<ClInclude Include="src\core\input.hpp" />
     <ClInclude Include="src\ecs\ecs_component_pool_interface.hpp" />
     <ClInclude Include="src\ecs\ecs_component_view.hpp" />
     <ClInclude Include="src\ecs\ecs_entity.hpp" />
     <ClInclude Include="src\ecs\ecs_system.hpp" />
-    <ClInclude Include="src\ecs\ecs_system_registry.hpp" />
     <ClInclude Include="src\ecs\ecs_world.hpp" />
     <ClInclude Include="src\ecs\ecs_component_pool.hpp" />
     <ClInclude Include="src\graphics\blend_mode.hpp" />
@@ -277,6 +285,10 @@
     <ClInclude Include="src\platform\window.hpp" />
     <ClInclude Include="src\debug\profiler.hpp" />
     <ClInclude Include="src\debug\profiler_ui.hpp" />
+	<ClInclude Include="src\editor\hierarchy_panel.hpp" />
+	<ClInclude Include="src\editor\editor_command_history.hpp" />
+	<ClInclude Include="src\editor\inspector_panel.hpp" />
+	<ClInclude Include="src\editor\value_editor.hpp" />
     <ClInclude Include="src\core\time.hpp" />
     <ClInclude Include="src\graphics\camera.hpp" />
     <ClInclude Include="src\graphics\opengl\opengl_graphics_device.hpp" />
@@ -293,12 +305,14 @@
     <ClInclude Include="src\scene\scene_load_error.hpp" />
 	<ClInclude Include="src\scene\scene_serializer.hpp" />
     <ClInclude Include="src\scene\scene_value_reader.hpp" />
+	<ClInclude Include="src\scene\system_registry.hpp" />
     <ClInclude Include="src\serialization\lscene_parser.hpp" />
     <ClInclude Include="src\serialization\lscene_value.hpp" />
 	<ClInclude Include="src\serialization\lscene_writer.hpp" />
     <ClInclude Include="src\systems\render_system.hpp" />
     <ClInclude Include="src\tests\ecs_tests.hpp" />
     <ClInclude Include="src\tests\graphics_api_tests.hpp" />
+	<ClInclude Include="src\tests\input_tests.hpp" />
     <ClInclude Include="src\tests\lscene_parser_tests.hpp" />
     <ClInclude Include="src\tests\rotator.hpp" />
     <ClInclude Include="src\tests\rotator_system.hpp" />

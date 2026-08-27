@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 
-namespace FileSystem
+namespace Ludus::FileSystem
 {
 	bool ReadTextFile(const char* path, std::string& out)
 	{

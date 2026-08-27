@@ -311,7 +311,7 @@ void ProfilerUI::DrawMemoryPanel()
 	ImGui::BeginChild("MemoryPane", ImVec2(0.f, 0.f), true);
 	ImGui::TextUnformatted("Memory");
 
-	const Memory::CpuMemoryStats cpu = Memory::GetLastFrameCpuStats();
+	const Ludus::Memory::CpuMemoryStats cpu = Ludus::Memory::GetLastFrameCpuStats();
 	_memoryHistory.Push(static_cast<float>(cpu.liveBytes) / (1024.f * 1024.f));
 
 	char liveBytes[32];
@@ -336,8 +336,8 @@ void ProfilerUI::DrawMemoryPanel()
 	ImGui::PlotLines("##CpuMemoryHistory", _memoryHistory.data.data(), static_cast<int>(_memoryHistory.count), static_cast<int>(_memoryHistory.head), nullptr, 0.f, historyMax * 1.1f, ImVec2(-1.f, 56.f));
 	ImGui::PopStyleColor();
 
-	auto resources = Memory::GetResourceMemoryStats();
-	std::sort(resources.begin(), resources.end(), [](const Memory::ResourceMemoryStats& left, const Memory::ResourceMemoryStats& right)
+	auto resources = Ludus::Memory::GetResourceMemoryStats();
+	std::sort(resources.begin(), resources.end(), [](const Ludus::Memory::ResourceMemoryStats& left, const Ludus::Memory::ResourceMemoryStats& right)
 		{
 			return left.currentBytes > right.currentBytes;
 		});
@@ -359,7 +359,7 @@ void ProfilerUI::DrawMemoryPanel()
 		ImGui::TableSetupColumn("Count", ImGuiTableColumnFlags_WidthFixed, 46.f);
 		ImGui::TableHeadersRow();
 
-		for (const Memory::ResourceMemoryStats& resource : resources)
+		for (const Ludus::Memory::ResourceMemoryStats& resource : resources)
 		{
 			char currentBytes[32];
 			char peakBytes[32];

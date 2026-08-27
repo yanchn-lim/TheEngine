@@ -6,12 +6,12 @@
 #include "scene_asset_context.hpp"
 #include "scene_load_error.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	class AssetManager;
 }
 
-namespace Serialization
+namespace Ludus::Serialization
 {
 	class LSceneValue;
 }
@@ -22,9 +22,9 @@ namespace Ludus
 	{
 	public:
 		static bool Load(
-			const Serialization::LSceneValue& root,
+			const Ludus::Serialization::LSceneValue& root,
 			std::string_view sceneNamespace,
-			Assets::AssetManager& assets,
+			Ludus::Assets::AssetManager& assets,
 			SceneAssetContext& context,
 			std::vector<SceneLoadError>& errors);
 	};

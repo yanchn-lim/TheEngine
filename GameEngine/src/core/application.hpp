@@ -13,7 +13,6 @@ namespace Ludus
         virtual void OnFixedUpdate(Engine&, double) {}
         virtual void OnUpdate(Engine&) {}
         virtual void OnImGui(Engine&) {}
-        virtual void OnKey(Engine&, int, int) {}
         virtual void OnShutdown(Engine&) {}
     };
 }

@@ -8,7 +8,7 @@
 #include "vulkan_device.hpp"
 #include "vulkan_swapchain.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // implements the shared graphics device interface with Vulkan recording
     class VulkanGraphicsDevice final : public IGraphicsDevice

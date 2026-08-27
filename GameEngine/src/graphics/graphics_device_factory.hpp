@@ -5,7 +5,7 @@
 #include "graphics_device.hpp"
 #include "renderer_backend.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // creates the backend selected before window initialization
     std::unique_ptr<IGraphicsDevice> CreateGraphicsDevice(RendererBackend backend);

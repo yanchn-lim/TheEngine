@@ -12,11 +12,11 @@ namespace
     // adapt ImGui's native callback to the engine logger
     void CheckVulkanResult(VkResult result)
     {
-        if (result < 0) Debug::LogError("ImGui Vulkan error: ", static_cast<int>(result));
+        if (result < 0) Ludus::Debug::LogError("ImGui Vulkan error: ", static_cast<int>(result));
     }
 }
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     bool VulkanImGuiBackend::Initialize(GLFWwindow* window, IGraphicsDevice& device)
     {

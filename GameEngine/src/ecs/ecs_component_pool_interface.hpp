@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <span>
 
-namespace ECS
+namespace Ludus::ECS
 {
 	class World;
 
@@ -12,7 +12,7 @@ namespace ECS
 	{
 		class IComponentPool
 		{
-			friend class ECS::World;
+			friend class Ludus::ECS::World;
 
 		public:
 			virtual ~IComponentPool() = default;

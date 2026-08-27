@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	// lists shader-visible scalar and vector formats without native API values
 	enum class ShaderDataType

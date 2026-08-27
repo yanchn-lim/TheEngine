@@ -35,12 +35,12 @@ namespace Tests
 			"\t\tmaxwell\n"
 			"\t\t\tsource: \"assets/models/maxwell.obj\"\n";
 
-		const Serialization::LSceneParseResult parsed =
-			Serialization::LSceneParser{}.Parse(validSource);
+		const Ludus::Serialization::LSceneParseResult parsed =
+			Ludus::Serialization::LSceneParser{}.Parse(validSource);
 		if (!parsed)
 			return false;
 
-		Assets::AssetManager assets;
+		Ludus::Assets::AssetManager assets;
 		Ludus::SceneAssetContext context;
 		std::vector<Ludus::SceneLoadError> errors;
 		if (!Ludus::SceneAssetLoader::Load(
@@ -61,8 +61,8 @@ namespace Tests
 			"\t\t\tshader: missing\n"
 			"\t\t\ttexture: missing\n";
 
-		const Serialization::LSceneParseResult invalidParsed =
-			Serialization::LSceneParser{}.Parse(invalidSource);
+		const Ludus::Serialization::LSceneParseResult invalidParsed =
+			Ludus::Serialization::LSceneParser{}.Parse(invalidSource);
 		if (!invalidParsed)
 			return false;
 
@@ -89,8 +89,8 @@ namespace Tests
 			"\t\t\tvertex: \"assets/shaders/standard_gl.vert\"\n"
 			"\t\t\tfragment: \"assets/shaders/standard_gl.frag\"\n"
 			"\t\t\tunknown: true\n";
-		const Serialization::LSceneParseResult invalidDefinition =
-			Serialization::LSceneParser{}.Parse(invalidDefinitionSource);
+		const Ludus::Serialization::LSceneParseResult invalidDefinition =
+			Ludus::Serialization::LSceneParser{}.Parse(invalidDefinitionSource);
 		if (!invalidDefinition)
 			return false;
 
@@ -146,8 +146,8 @@ namespace Tests
 			"\t\tshared\n"
 			"\t\t\tsource: \"assets/models/test_quad.obj\"\n";
 
-		const auto firstCollision = Serialization::LSceneParser{}.Parse(firstCollisionSource);
-		const auto secondCollision = Serialization::LSceneParser{}.Parse(secondCollisionSource);
+		const auto firstCollision = Ludus::Serialization::LSceneParser{}.Parse(firstCollisionSource);
+		const auto secondCollision = Ludus::Serialization::LSceneParser{}.Parse(secondCollisionSource);
 		if (!firstCollision || !secondCollision)
 			return false;
 
@@ -162,12 +162,12 @@ namespace Tests
 			return false;
 		}
 
-		const Assets::MeshHandle firstMesh = firstContext.meshes.at("shared");
-		const Assets::MeshHandle secondMesh = secondContext.meshes.at("shared");
-		const Assets::MaterialHandle firstMaterial = firstContext.materials.at("shared");
-		const Assets::MaterialHandle secondMaterial = secondContext.materials.at("shared");
-		const Assets::MeshAsset* firstMeshAsset = assets.Get(firstMesh);
-		const Assets::MeshAsset* secondMeshAsset = assets.Get(secondMesh);
+		const Ludus::Assets::MeshHandle firstMesh = firstContext.meshes.at("shared");
+		const Ludus::Assets::MeshHandle secondMesh = secondContext.meshes.at("shared");
+		const Ludus::Assets::MaterialHandle firstMaterial = firstContext.materials.at("shared");
+		const Ludus::Assets::MaterialHandle secondMaterial = secondContext.materials.at("shared");
+		const Ludus::Assets::MeshAsset* firstMeshAsset = assets.Get(firstMesh);
+		const Ludus::Assets::MeshAsset* secondMeshAsset = assets.Get(secondMesh);
 		if (firstMesh.id == secondMesh.id || firstMaterial.id == secondMaterial.id ||
 			!firstMeshAsset || !secondMeshAsset ||
 			firstMeshAsset->label != "tests/first.lscene::mesh::shared" ||

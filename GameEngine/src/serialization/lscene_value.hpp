@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 
-namespace Serialization
+namespace Ludus::Serialization
 {
 	struct SourceLocation
 	{
@@ -72,7 +72,12 @@ namespace Serialization
 		const int64_t* TryGetInteger() const noexcept { return std::get_if<int64_t>(&_data); }
 		const double* TryGetFloat() const noexcept { return std::get_if<double>(&_data); }
 		const bool* TryGetBoolean() const noexcept { return std::get_if<bool>(&_data); }
+		Array* TryGetArray() noexcept { return std::get_if<Array>(&_data); }
 		Object* TryGetObject() noexcept { return std::get_if<Object>(&_data); }
+		std::string* TryGetString() noexcept { return std::get_if<std::string>(&_data); }
+		int64_t* TryGetInteger() noexcept { return std::get_if<int64_t>(&_data); }
+		double* TryGetFloat() noexcept { return std::get_if<double>(&_data); }
+		bool* TryGetBoolean() noexcept { return std::get_if<bool>(&_data); }
 
 	private:
 		using Data = std::variant<std::monostate, bool, int64_t, double, std::string, Array, Object>;

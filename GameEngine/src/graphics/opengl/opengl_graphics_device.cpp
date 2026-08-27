@@ -23,28 +23,28 @@ namespace
 
         char message[2048]{};
         glGetShaderInfoLog(shader, sizeof(message), nullptr, message);
-        Debug::LogError("OpenGL shader compile failed for ", label, ": ", message);
+        Ludus::Debug::LogError("OpenGL shader compile failed for ", label, ": ", message);
         glDeleteShader(shader);
         return 0;
     }
 
-    GLenum ToTopology(Graphics::PrimitiveTopology topology)
+    GLenum ToTopology(Ludus::Graphics::PrimitiveTopology topology)
     {
         switch (topology)
         {
-        case Graphics::PrimitiveTopology::LINES: return GL_LINES;
-        case Graphics::PrimitiveTopology::POINTS: return GL_POINTS;
+        case Ludus::Graphics::PrimitiveTopology::LINES: return GL_LINES;
+        case Ludus::Graphics::PrimitiveTopology::POINTS: return GL_POINTS;
         default: return GL_TRIANGLES;
         }
     }
 
-    GLenum ToBaseType(Graphics::ShaderDataType type)
+    GLenum ToBaseType(Ludus::Graphics::ShaderDataType type)
     {
-        return Graphics::IsShaderDataTypeInteger(type) ? GL_INT : GL_FLOAT;
+        return Ludus::Graphics::IsShaderDataTypeInteger(type) ? GL_INT : GL_FLOAT;
     }
 }
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     bool OpenGLGraphicsDevice::Initialize(const GraphicsDeviceDesc& desc)
     {
@@ -57,7 +57,7 @@ namespace Graphics
         glfwSwapInterval(desc.vsync ? 1 : 0);
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
-            Debug::LogError("OpenGLGraphicsDevice: GLAD initialization failed");
+            Ludus::Debug::LogError("OpenGLGraphicsDevice: GLAD initialization failed");
             return false;
         }
 
@@ -131,7 +131,7 @@ namespace Graphics
         {
             char message[2048]{};
             glGetProgramInfoLog(program, sizeof(message), nullptr, message);
-            Debug::LogError("OpenGL program link failed for ", desc.label, ": ", message);
+            Ludus::Debug::LogError("OpenGL program link failed for ", desc.label, ": ", message);
             glDeleteProgram(program);
             return {};
         }

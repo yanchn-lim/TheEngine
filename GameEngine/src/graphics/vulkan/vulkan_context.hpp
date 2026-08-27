@@ -4,7 +4,7 @@
 
 struct GLFWwindow;
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	// owns the Vulkan instance, validation messenger, and window surface
 	class VulkanContext

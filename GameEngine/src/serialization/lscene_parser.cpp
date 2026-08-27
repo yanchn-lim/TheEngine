@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <optional>
 
-namespace Serialization
+namespace Ludus::Serialization
 {
 	namespace
 	{

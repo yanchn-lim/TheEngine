@@ -2,15 +2,15 @@
 
 #include "graphics/graphics_device_factory.hpp"
 
-namespace Rendering
+namespace Ludus::Rendering
 {
     std::unique_ptr<RenderEngine> RenderEngine::Create(
-        Graphics::RendererBackend backend,
-        const Graphics::GraphicsDeviceDesc& deviceDesc,
-        const Assets::AssetManager& assets)
+        Ludus::Graphics::RendererBackend backend,
+        const Ludus::Graphics::GraphicsDeviceDesc& deviceDesc,
+        const Ludus::Assets::AssetManager& assets)
     {
-        std::unique_ptr<Graphics::IGraphicsDevice> device =
-            Graphics::CreateGraphicsDevice(backend);
+        std::unique_ptr<Ludus::Graphics::IGraphicsDevice> device =
+            Ludus::Graphics::CreateGraphicsDevice(backend);
 
         if (!device)
             return nullptr;
@@ -39,8 +39,8 @@ namespace Rendering
     }
 
     RenderEngine::RenderEngine(
-        std::unique_ptr<Graphics::IGraphicsDevice> device,
-        const Assets::AssetManager& assets)
+        std::unique_ptr<Ludus::Graphics::IGraphicsDevice> device,
+        const Ludus::Assets::AssetManager& assets)
         : _device(std::move(device)), _resources(assets, *_device)
     {
     }
@@ -65,11 +65,11 @@ namespace Rendering
         _items.push_back(std::move(item));
     }
 
-    Graphics::FrameStatus RenderEngine::Render(const Graphics::Camera2D& camera, uint32_t width, uint32_t height)
+    Ludus::Graphics::FrameStatus RenderEngine::Render(const Ludus::Graphics::Camera2D& camera, uint32_t width, uint32_t height)
     {
         // begin the selected backend frame before collecting render data
-        const Graphics::FrameStatus status = _device->BeginFrame();
-        if (status != Graphics::FrameStatus::Success)
+        const Ludus::Graphics::FrameStatus status = _device->BeginFrame();
+        if (status != Ludus::Graphics::FrameStatus::Success)
         {
             _items.clear();
             return status;
@@ -78,17 +78,17 @@ namespace Rendering
         _device->BeginRenderPass({});
         _device->SetViewport({ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height) });
 
-        Graphics::FrameConstants frameConstants;
+        Ludus::Graphics::FrameConstants frameConstants;
         frameConstants.view = camera.GetView();
         frameConstants.projection = camera.GetProjection();
 
         for (const MeshInstanceDesc& item : _items)
             Draw(item, frameConstants);
 
-        return Graphics::FrameStatus::Success;
+        return Ludus::Graphics::FrameStatus::Success;
     }
 
-    Graphics::FrameStatus RenderEngine::EndFrame()
+    Ludus::Graphics::FrameStatus RenderEngine::EndFrame()
     {
         // UI is recorded before this call so Vulkan can share the active render pass
         _device->EndRenderPass();
@@ -111,13 +111,13 @@ namespace Rendering
         _device->Shutdown();
     }
 
-    void RenderEngine::Draw(const MeshInstanceDesc& item, const Graphics::FrameConstants& frameConstants)
+    void RenderEngine::Draw(const MeshInstanceDesc& item, const Ludus::Graphics::FrameConstants& frameConstants)
     {
         std::vector<ResolvedDraw> draws;
         if (!_resources.Resolve(item.mesh, item.materialOverride, draws))
             return;
 
-        Graphics::DrawConstants constants;
+        Ludus::Graphics::DrawConstants constants;
         constants.model = item.transform;
 
         for (const ResolvedDraw& draw : draws)

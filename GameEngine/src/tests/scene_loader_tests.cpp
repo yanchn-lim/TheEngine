@@ -16,11 +16,15 @@
 #include "assets/asset_manager.hpp"
 #include "components/renderable.hpp"
 #include "components/transform.hpp"
+#include "editor/editor_command_history.hpp"
 #include "rotator.hpp"
+#include "rotator_system.hpp"
 #include "scene/scene.hpp"
 #include "scene/scene_component_registry.hpp"
 #include "scene/scene_loader.hpp"
 #include "scene/scene_serializer.hpp"
+#include "scene/scene_value_reader.hpp"
+#include "scene/system_registry.hpp"
 #include "serialization/lscene_parser.hpp"
 #include "serialization/lscene_writer.hpp"
 
@@ -32,24 +36,73 @@ namespace Tests
 		{
 		};
 
+		class ConfiguredSystem final : public Ludus::ECS::ISystem
+		{
+		public:
+			static constexpr Ludus::ECS::SystemPhase Phase = Ludus::ECS::SystemPhase::UPDATE;
+			static constexpr int Order = 200;
+
+			explicit ConfiguredSystem(glm::vec3 gravity) : gravity(gravity) {}
+
+			glm::vec3 gravity;
+		};
+
+		const Ludus::SystemRegistry& TestSystems()
+		{
+			static const Ludus::SystemRegistry systems = []
+			{
+				Ludus::SystemRegistry registry;
+				registry.Register<RotatorSystem>();
+				registry.Register(
+					"configured",
+					[](const Ludus::Serialization::LSceneValue& config,
+						std::vector<Ludus::SceneLoadError>& errors)
+					{
+						const auto* fields = Ludus::SceneValues::RequireObject(
+							config, "configured config must be a block", errors);
+						if (!fields || !Ludus::SceneValues::ValidateFields(
+							*fields, { "gravity" }, "configured config", errors))
+							return false;
+						glm::vec3 gravity;
+						return Ludus::SceneValues::OptionalVec3(
+							*fields, "gravity", { 0.0f, -9.81f, 0.0f }, gravity, errors);
+					},
+					[](Ludus::ECS::World& world, const Ludus::Serialization::LSceneValue& config)
+					{
+						glm::vec3 gravity;
+						std::vector<Ludus::SceneLoadError> errors;
+						Ludus::SceneValues::OptionalVec3(
+							*config.TryGetObject(),
+							"gravity",
+							{ 0.0f, -9.81f, 0.0f },
+							gravity,
+							errors);
+						world.AddSystem<ConfiguredSystem>(gravity);
+					});
+				return registry;
+			}();
+			return systems;
+		}
+
 		bool LoadOrderedComponents(
 			const char* path,
-			Components::Transform& transform,
+			Ludus::Components::Transform& transform,
 			Rotator& rotator)
 		{
-			Assets::AssetManager assets;
+			Ludus::Assets::AssetManager assets;
 			Ludus::Scene scene;
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
 			RegisterRotatorSceneComponent(components);
 
 			std::vector<Ludus::SceneLoadError> errors;
-			if (!Ludus::SceneLoader::Load(path, scene, assets, components, errors))
+			if (!Ludus::SceneLoader::Load(
+				path, scene, assets, components, TestSystems(), errors))
 				return false;
 
-			const ECS::Entity entity = scene.FindEntity("test_entity");
-			const Components::Transform* loadedTransform =
-				scene.GetWorld().TryGetComponent<Components::Transform>(entity);
+			const Ludus::ECS::Entity entity = scene.FindEntity("test_entity");
+			const Ludus::Components::Transform* loadedTransform =
+				scene.GetWorld().TryGetComponent<Ludus::Components::Transform>(entity);
 			const Rotator* loadedRotator = scene.GetWorld().TryGetComponent<Rotator>(entity);
 			if (!loadedTransform || !loadedRotator)
 				return false;
@@ -61,8 +114,8 @@ namespace Tests
 
 		bool ComponentOrderIsIndependent()
 		{
-			Components::Transform firstTransform;
-			Components::Transform secondTransform;
+			Ludus::Components::Transform firstTransform;
+			Ludus::Components::Transform secondTransform;
 			Rotator firstRotator;
 			Rotator secondRotator;
 			if (!LoadOrderedComponents(
@@ -99,81 +152,81 @@ namespace Tests
 			return std::abs(left - right) <= 1.0e-4f;
 		}
 
-		Serialization::LSceneValue MakeWriterRoot()
+		Ludus::Serialization::LSceneValue MakeWriterRoot()
 		{
-			Serialization::LSceneValue::Object root;
-			root.emplace("scene", Serialization::LSceneValue::String("Test", {}));
-			root.emplace("version", Serialization::LSceneValue::Integer(1, {}));
-			root.emplace("entities", Serialization::LSceneValue::ObjectValue());
-			return Serialization::LSceneValue::ObjectValue(std::move(root));
+			Ludus::Serialization::LSceneValue::Object root;
+			root.emplace("scene", Ludus::Serialization::LSceneValue::String("Test", {}));
+			root.emplace("version", Ludus::Serialization::LSceneValue::Integer(1, {}));
+			root.emplace("entities", Ludus::Serialization::LSceneValue::ObjectValue());
+			return Ludus::Serialization::LSceneValue::ObjectValue(std::move(root));
 		}
 
-		Serialization::LSceneValue::Object& WriterEntities(
-			Serialization::LSceneValue& root)
+		Ludus::Serialization::LSceneValue::Object& WriterEntities(
+			Ludus::Serialization::LSceneValue& root)
 		{
 			return *root.TryGetObject()->find("entities")->second.TryGetObject();
 		}
 
-		bool WriterRejects(Serialization::LSceneValue root)
+		bool WriterRejects(Ludus::Serialization::LSceneValue root)
 		{
 			std::string output;
 			std::string error;
-			return !Serialization::LSceneWriter::Write(root, output, error) &&
+			return !Ludus::Serialization::LSceneWriter::Write(root, output, error) &&
 				!error.empty();
 		}
 
 		bool WriterBoundariesAreValidated()
 		{
-			Serialization::LSceneValue invalidVersion = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue invalidVersion = MakeWriterRoot();
 			invalidVersion.TryGetObject()->insert_or_assign(
-				"version", Serialization::LSceneValue::Integer(2, {}));
+				"version", Ludus::Serialization::LSceneValue::Integer(2, {}));
 
-			Serialization::LSceneValue missingEntities = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue missingEntities = MakeWriterRoot();
 			missingEntities.TryGetObject()->erase("entities");
 
-			Serialization::LSceneValue invalidIdentifier = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue invalidIdentifier = MakeWriterRoot();
 			WriterEntities(invalidIdentifier).emplace(
-				"bad id", Serialization::LSceneValue::ObjectValue());
+				"bad id", Ludus::Serialization::LSceneValue::ObjectValue());
 
-			Serialization::LSceneValue emptyArray = MakeWriterRoot();
-			Serialization::LSceneValue::Object emptyArrayEntity;
+			Ludus::Serialization::LSceneValue emptyArray = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue::Object emptyArrayEntity;
 			emptyArrayEntity.emplace("value",
-				Serialization::LSceneValue::ArrayValue({}, {}));
+				Ludus::Serialization::LSceneValue::ArrayValue({}, {}));
 			WriterEntities(emptyArray).emplace(
-				"entity", Serialization::LSceneValue::ObjectValue(std::move(emptyArrayEntity)));
+				"entity", Ludus::Serialization::LSceneValue::ObjectValue(std::move(emptyArrayEntity)));
 
-			Serialization::LSceneValue nestedArray = MakeWriterRoot();
-			Serialization::LSceneValue::Array inner;
-			inner.push_back(Serialization::LSceneValue::Float(1.0, {}));
-			Serialization::LSceneValue::Array outer;
-			outer.push_back(Serialization::LSceneValue::ArrayValue(std::move(inner), {}));
-			Serialization::LSceneValue::Object nestedArrayEntity;
+			Ludus::Serialization::LSceneValue nestedArray = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue::Array inner;
+			inner.push_back(Ludus::Serialization::LSceneValue::Float(1.0, {}));
+			Ludus::Serialization::LSceneValue::Array outer;
+			outer.push_back(Ludus::Serialization::LSceneValue::ArrayValue(std::move(inner), {}));
+			Ludus::Serialization::LSceneValue::Object nestedArrayEntity;
 			nestedArrayEntity.emplace("value",
-				Serialization::LSceneValue::ArrayValue(std::move(outer), {}));
+				Ludus::Serialization::LSceneValue::ArrayValue(std::move(outer), {}));
 			WriterEntities(nestedArray).emplace(
-				"entity", Serialization::LSceneValue::ObjectValue(std::move(nestedArrayEntity)));
+				"entity", Ludus::Serialization::LSceneValue::ObjectValue(std::move(nestedArrayEntity)));
 
-			Serialization::LSceneValue nonFinite = MakeWriterRoot();
-			Serialization::LSceneValue::Object nonFiniteEntity;
-			nonFiniteEntity.emplace("value", Serialization::LSceneValue::Float(
+			Ludus::Serialization::LSceneValue nonFinite = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue::Object nonFiniteEntity;
+			nonFiniteEntity.emplace("value", Ludus::Serialization::LSceneValue::Float(
 				std::numeric_limits<double>::infinity(), {}));
 			WriterEntities(nonFinite).emplace(
-				"entity", Serialization::LSceneValue::ObjectValue(std::move(nonFiniteEntity)));
+				"entity", Ludus::Serialization::LSceneValue::ObjectValue(std::move(nonFiniteEntity)));
 
-			Serialization::LSceneValue controlCharacter = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue controlCharacter = MakeWriterRoot();
 			controlCharacter.TryGetObject()->insert_or_assign(
-				"scene", Serialization::LSceneValue::String("Bad\rName", {}));
+				"scene", Ludus::Serialization::LSceneValue::String("Bad\rName", {}));
 
-			Serialization::LSceneValue escaped = MakeWriterRoot();
+			Ludus::Serialization::LSceneValue escaped = MakeWriterRoot();
 			const std::string escapedName = "Quote \" slash \\ line\n tab\t";
 			escaped.TryGetObject()->insert_or_assign(
-				"scene", Serialization::LSceneValue::String(escapedName, {}));
+				"scene", Ludus::Serialization::LSceneValue::String(escapedName, {}));
 			std::string text;
 			std::string error;
-			if (!Serialization::LSceneWriter::Write(escaped, text, error))
+			if (!Ludus::Serialization::LSceneWriter::Write(escaped, text, error))
 				return false;
-			const Serialization::LSceneParseResult parsed =
-				Serialization::LSceneParser{}.Parse(text);
+			const Ludus::Serialization::LSceneParseResult parsed =
+				Ludus::Serialization::LSceneParser{}.Parse(text);
 			const std::string* parsedName = parsed.root.Find("scene")
 				? parsed.root.Find("scene")->TryGetString()
 				: nullptr;
@@ -195,7 +248,7 @@ namespace Tests
 			std::string output = "stale";
 			std::vector<std::string> errors;
 			return !Ludus::SceneSerializer::Serialize(
-				scene, components, output, errors) &&
+				scene, components, TestSystems(), output, errors) &&
 				output.empty() && !errors.empty();
 		}
 
@@ -212,49 +265,49 @@ namespace Tests
 			invalidName.CreateEntity("entity", "Bad\rName");
 
 			Ludus::Scene foreignMesh;
-			const ECS::Entity foreignEntity = foreignMesh.CreateEntity("entity", "Entity");
+			const Ludus::ECS::Entity foreignEntity = foreignMesh.CreateEntity("entity", "Entity");
 			foreignMesh.GetWorld().AddComponent(
 				foreignEntity,
-				Components::Renderable{ Assets::MeshHandle{ 99 }, {}, true });
+				Ludus::Components::Renderable{ Ludus::Assets::MeshHandle{ 99 }, {}, true });
 
 			Ludus::Scene ambiguousMesh;
 			Ludus::SceneAssetContext ambiguousAssets;
-			ambiguousAssets.meshes.emplace("first", Assets::MeshHandle{ 7 });
-			ambiguousAssets.meshes.emplace("second", Assets::MeshHandle{ 7 });
+			ambiguousAssets.meshes.emplace("first", Ludus::Assets::MeshHandle{ 7 });
+			ambiguousAssets.meshes.emplace("second", Ludus::Assets::MeshHandle{ 7 });
 			ambiguousMesh.SetSerializationData(
 				"Ambiguous",
-				Serialization::LSceneValue::ObjectValue(),
+				Ludus::Serialization::LSceneValue::ObjectValue(),
 				std::move(ambiguousAssets));
-			const ECS::Entity ambiguousEntity =
+			const Ludus::ECS::Entity ambiguousEntity =
 				ambiguousMesh.CreateEntity("entity", "Entity");
 			ambiguousMesh.GetWorld().AddComponent(
 				ambiguousEntity,
-				Components::Renderable{ Assets::MeshHandle{ 7 }, {}, true });
+				Ludus::Components::Renderable{ Ludus::Assets::MeshHandle{ 7 }, {}, true });
 
 			Ludus::Scene invalidFloat;
-			const ECS::Entity invalidFloatEntity =
+			const Ludus::ECS::Entity invalidFloatEntity =
 				invalidFloat.CreateEntity("entity", "Entity");
-			Components::Transform invalidTransform;
+			Ludus::Components::Transform invalidTransform;
 			invalidTransform.position.x = std::numeric_limits<float>::infinity();
 			invalidFloat.GetWorld().AddComponent(invalidFloatEntity, invalidTransform);
 
 			Ludus::Scene invalidQuaternion;
-			const ECS::Entity invalidQuaternionEntity =
+			const Ludus::ECS::Entity invalidQuaternionEntity =
 				invalidQuaternion.CreateEntity("entity", "Entity");
-			Components::Transform zeroRotation;
+			Ludus::Components::Transform zeroRotation;
 			zeroRotation.rotation = glm::quat{ 0.0f, 0.0f, 0.0f, 0.0f };
 			invalidQuaternion.GetWorld().AddComponent(
 				invalidQuaternionEntity, zeroRotation);
 
 			Ludus::Scene invalidRotator;
-			const ECS::Entity invalidRotatorEntity =
+			const Ludus::ECS::Entity invalidRotatorEntity =
 				invalidRotator.CreateEntity("entity", "Entity");
 			invalidRotator.GetWorld().AddComponent(
 				invalidRotatorEntity,
 				Rotator{ {}, 1.0f });
 
 			Ludus::Scene unregisteredComponent;
-			const ECS::Entity unregisteredEntity =
+			const Ludus::ECS::Entity unregisteredEntity =
 				unregisteredComponent.CreateEntity("entity", "Entity");
 			unregisteredComponent.GetWorld().AddComponent(
 				unregisteredEntity,
@@ -262,17 +315,33 @@ namespace Tests
 
 			Ludus::Scene missingMaterial;
 			Ludus::SceneAssetContext missingMaterialAssets;
-			missingMaterialAssets.meshes.emplace("mesh", Assets::MeshHandle{ 8 });
+			missingMaterialAssets.meshes.emplace("mesh", Ludus::Assets::MeshHandle{ 8 });
 			missingMaterialAssets.meshHasDefaultMaterials.emplace("mesh", false);
 			missingMaterial.SetSerializationData(
 				"Missing Material",
-				Serialization::LSceneValue::ObjectValue(),
+				Ludus::Serialization::LSceneValue::ObjectValue(),
 				std::move(missingMaterialAssets));
-			const ECS::Entity missingMaterialEntity =
+			const Ludus::ECS::Entity missingMaterialEntity =
 				missingMaterial.CreateEntity("entity", "Entity");
 			missingMaterial.GetWorld().AddComponent(
 				missingMaterialEntity,
-				Components::Renderable{ Assets::MeshHandle{ 8 }, {}, true });
+				Ludus::Components::Renderable{ Ludus::Assets::MeshHandle{ 8 }, {}, true });
+
+			Ludus::Scene duplicateSystems;
+			duplicateSystems.SetSystems({
+				{ "rotator", true, Ludus::Serialization::LSceneValue::ObjectValue() },
+				{ "rotator", false, Ludus::Serialization::LSceneValue::ObjectValue() }
+			});
+
+			Ludus::Scene unknownSystem;
+			unknownSystem.SetSystems({
+				{ "missing", true, Ludus::Serialization::LSceneValue::ObjectValue() }
+			});
+
+			Ludus::Scene invalidSystemConfig;
+			invalidSystemConfig.SetSystems({
+				{ "rotator", true, Ludus::Serialization::LSceneValue::Float(1.0, {}) }
+			});
 
 			return SerializationFails(invalidId, components) &&
 				SerializationFails(invalidName, components) &&
@@ -282,7 +351,279 @@ namespace Tests
 				SerializationFails(invalidQuaternion, components) &&
 				SerializationFails(invalidRotator, components) &&
 				SerializationFails(unregisteredComponent, components) &&
-				SerializationFails(missingMaterial, components);
+				SerializationFails(missingMaterial, components) &&
+				SerializationFails(duplicateSystems, components) &&
+				SerializationFails(unknownSystem, components) &&
+				SerializationFails(invalidSystemConfig, components);
+		}
+
+		bool SystemTextFails(
+			std::string_view source,
+			std::string_view expectedMessage)
+		{
+			Ludus::Assets::AssetManager assets;
+			Ludus::Scene scene;
+			Ludus::SceneComponentRegistry components;
+			Ludus::RegisterBuiltInSceneComponents(components);
+			std::vector<Ludus::SceneLoadError> errors;
+			if (Ludus::SceneLoader::LoadText(
+				source,
+				"system_validation.lscene",
+				scene,
+				assets,
+				components,
+				TestSystems(),
+				errors))
+			{
+				return false;
+			}
+
+			return scene.GetWorld().GetEntityCount() == 0 &&
+				scene.GetWorld().GetSystemCount() == 0 &&
+				scene.GetSystems().empty() &&
+				std::ranges::any_of(
+					errors,
+					[expectedMessage](const Ludus::SceneLoadError& error)
+					{
+						return error.message == expectedMessage;
+					});
+		}
+
+		bool ComponentUpdatesAreTransactional()
+		{
+			Ludus::SceneComponentRegistry components;
+			Ludus::RegisterBuiltInSceneComponents(components);
+			Ludus::Scene scene;
+			const Ludus::ECS::Entity entity = scene.CreateEntity("entity", "Entity");
+			Ludus::Components::Transform transform;
+			transform.position = { 1.0f, 2.0f, 3.0f };
+			scene.GetWorld().AddComponent(entity, transform);
+
+			Ludus::Serialization::LSceneValue::Object values;
+			std::vector<std::string> saveErrors;
+			if (!components.SaveComponents(
+				scene.GetAssetContext(), scene.GetWorld(), entity, values, saveErrors))
+			{
+				return false;
+			}
+
+			auto transformValue = values.find("Transform");
+			auto* position = transformValue != values.end()
+				? transformValue->second.TryGetObject()->find("position")->second.TryGetArray()
+				: nullptr;
+			if (!position || position->size() != 3)
+				return false;
+			(*position)[0] = Ludus::Serialization::LSceneValue::Float(4.0, {});
+
+			std::vector<Ludus::SceneLoadError> updateErrors;
+			if (!components.Update(
+				"Transform",
+				transformValue->second,
+				scene.GetAssetContext(),
+				scene.GetWorld(),
+				entity,
+				updateErrors) ||
+				scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x != 4.0f)
+			{
+				return false;
+			}
+
+			position->pop_back();
+			updateErrors.clear();
+			return !components.Update(
+				"Transform",
+				transformValue->second,
+				scene.GetAssetContext(),
+				scene.GetWorld(),
+				entity,
+				updateErrors) &&
+				!updateErrors.empty() &&
+				scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x == 4.0f;
+		}
+
+		bool EditorCommandsUndoAndRedo()
+		{
+			Ludus::SceneComponentRegistry components;
+			Ludus::RegisterBuiltInSceneComponents(components);
+			Ludus::Scene scene;
+			const Ludus::ECS::Entity entity = scene.CreateEntity("entity", "Entity");
+			Ludus::Components::Transform transform;
+			transform.position.x = 1.0f;
+			scene.GetWorld().AddComponent(entity, transform);
+
+			Ludus::Serialization::LSceneValue before = Ludus::Serialization::LSceneValue::ObjectValue();
+			Ludus::Serialization::LSceneValue after = Ludus::Serialization::LSceneValue::ObjectValue();
+			std::vector<std::string> saveErrors;
+			Ludus::Serialization::LSceneValue::Object values;
+			if (!components.SaveComponents(
+				scene.GetAssetContext(), scene.GetWorld(), entity, values, saveErrors))
+			{
+				return false;
+			}
+			before = values.at("Transform");
+
+			scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x = 4.0f;
+			values.clear();
+			if (!components.SaveComponents(
+				scene.GetAssetContext(), scene.GetWorld(), entity, values, saveErrors))
+			{
+				return false;
+			}
+			after = values.at("Transform");
+
+			Ludus::Editor::EditorCommandHistory history;
+			history.RecordComponentEdit("entity", "Transform", before, after);
+			if (!history.CanUndo() || history.CanRedo() ||
+				!history.Undo(scene, components) ||
+				!NearlyEqual(
+					scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x,
+					1.0f) ||
+				!history.CanRedo() ||
+				!history.Redo(scene, components) ||
+				!NearlyEqual(
+					scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x,
+					4.0f))
+			{
+				return false;
+			}
+
+			Ludus::Serialization::LSceneValue::Object beforeFields;
+			beforeFields.emplace(
+				"speed", Ludus::Serialization::LSceneValue::Float(1.0, {}));
+			Ludus::Serialization::LSceneValue::Object afterFields;
+			afterFields.emplace(
+				"speed", Ludus::Serialization::LSceneValue::Float(2.0, {}));
+			Ludus::Serialization::LSceneValue beforeConfig =
+				Ludus::Serialization::LSceneValue::ObjectValue(std::move(beforeFields));
+			Ludus::Serialization::LSceneValue afterConfig =
+				Ludus::Serialization::LSceneValue::ObjectValue(std::move(afterFields));
+			scene.SetSystems({ { "rotator", false, afterConfig } });
+			history.RecordSystemEdit(
+				"rotator", false, beforeConfig, false, afterConfig);
+
+			if (!history.Undo(scene, components) || scene.GetSystems()[0].enabled)
+				return false;
+			const double* undoneSpeed = scene.GetSystems()[0].config.Find("speed")
+				? scene.GetSystems()[0].config.Find("speed")->TryGetFloat()
+				: nullptr;
+			if (!undoneSpeed || !NearlyEqual(static_cast<float>(*undoneSpeed), 1.0f) ||
+				!history.Redo(scene, components) || scene.GetSystems()[0].enabled)
+			{
+				return false;
+			}
+
+			const double* redoneSpeed = scene.GetSystems()[0].config.Find("speed")
+				? scene.GetSystems()[0].config.Find("speed")->TryGetFloat()
+				: nullptr;
+			if (!redoneSpeed || !NearlyEqual(static_cast<float>(*redoneSpeed), 2.0f) ||
+				!history.Undo(scene, components))
+			{
+				return false;
+			}
+
+			history.RecordSystemEdit(
+				"rotator", false, beforeConfig, true, beforeConfig);
+			return !history.CanRedo();
+		}
+
+		bool SystemCompositionRoundTrips()
+		{
+			constexpr std::string_view source =
+				"scene \"Systems\"\n"
+				"version: 1\n\n"
+				"systems\n"
+				"\tconfigured\n"
+				"\t\tenabled: true\n"
+				"\t\tconfig\n"
+				"\t\t\tgravity: [0.0, -9.81, 0.0]\n"
+				"\trotator\n"
+				"\t\tenabled: false\n\n"
+				"entities\n";
+
+			Ludus::SceneComponentRegistry components;
+			Ludus::RegisterBuiltInSceneComponents(components);
+			Ludus::Assets::AssetManager assets;
+			Ludus::Scene scene;
+			std::vector<Ludus::SceneLoadError> loadErrors;
+			if (!Ludus::SceneLoader::LoadText(
+				source, "systems.lscene", scene, assets, components,
+				TestSystems(), loadErrors) ||
+				scene.GetSystems().size() != 2 ||
+				scene.GetWorld().GetSystemCount() != 1)
+			{
+				return false;
+			}
+
+			std::string text;
+			std::vector<std::string> serializationErrors;
+			if (!Ludus::SceneSerializer::Serialize(
+				scene, components, TestSystems(), text, serializationErrors) ||
+				text.find("systems\r\n") == std::string::npos)
+			{
+				return false;
+			}
+
+			Ludus::Assets::AssetManager roundTripAssets;
+			Ludus::Scene roundTrip;
+			loadErrors.clear();
+			if (!Ludus::SceneLoader::LoadText(
+				text, "systems_round_trip.lscene", roundTrip, roundTripAssets,
+				components, TestSystems(), loadErrors) ||
+				roundTrip.GetSystems().size() != 2 ||
+				roundTrip.GetWorld().GetSystemCount() != 1)
+			{
+				return false;
+			}
+
+			const auto configured = std::ranges::find(
+				roundTrip.GetSystems(), "configured", &Ludus::SceneSystemDefinition::id);
+			const Ludus::Serialization::LSceneValue* gravityValue =
+				configured != roundTrip.GetSystems().end()
+				? configured->config.Find("gravity")
+				: nullptr;
+			const auto* gravity = gravityValue ? gravityValue->TryGetArray() : nullptr;
+			float gravityY = 0.0f;
+			if (!gravity || gravity->size() != 3 ||
+				!Ludus::SceneValues::FiniteFloat((*gravity)[1], gravityY) ||
+				!NearlyEqual(gravityY, -9.81f))
+			{
+				return false;
+			}
+
+			constexpr std::string_view noSystems =
+				"scene \"No Systems\"\n"
+				"version: 1\n\n"
+				"entities\n";
+			Ludus::Scene withoutSystems;
+			loadErrors.clear();
+			if (!Ludus::SceneLoader::LoadText(
+				noSystems, "no_systems.lscene", withoutSystems, roundTripAssets,
+				components, TestSystems(), loadErrors) ||
+				withoutSystems.GetWorld().GetSystemCount() != 0 ||
+				!withoutSystems.GetSystems().empty())
+			{
+				return false;
+			}
+
+			return
+				SystemTextFails(
+					"scene \"Unknown\"\nversion: 1\n\nsystems\n\tmissing\n\t\tenabled: true\nentities\n",
+					"unknown or unavailable system 'missing'") &&
+				SystemTextFails(
+					"scene \"Duplicate\"\nversion: 1\n\nsystems\n\trotator\n\t\tenabled: true\n\trotator\n\t\tenabled: false\nentities\n",
+					"duplicate key 'rotator'") &&
+				SystemTextFails(
+					"scene \"Enabled\"\nversion: 1\n\nsystems\n\trotator\n\t\tenabled: 1\nentities\n",
+					"system 'rotator' enabled must be a boolean") &&
+				SystemTextFails(
+					"scene \"Field\"\nversion: 1\n\nsystems\n\trotator\n\t\tenabled: true\n\t\torder: 5\nentities\n",
+					"unknown system field 'order'") &&
+				SystemTextFails(
+					"scene \"Config\"\nversion: 1\n\nsystems\n\trotator\n\t\tenabled: true\n\t\tconfig: 1\nentities\n",
+					"system 'rotator' config must be a block") &&
+				SystemTextFails(
+					"scene \"Disabled\"\nversion: 1\n\nsystems\n\tconfigured\n\t\tenabled: false\n\t\tconfig\n\t\t\tgravity: [0.0, 1.0]\nentities\n",
+					"field 'gravity' requires three numbers");
 		}
 
 		bool EmptyAndDeadScenesSerialize()
@@ -291,16 +632,16 @@ namespace Tests
 			Ludus::RegisterBuiltInSceneComponents(components);
 
 			Ludus::Scene source;
-			const ECS::Entity removed = source.CreateEntity("removed", "Removed");
+			const Ludus::ECS::Entity removed = source.CreateEntity("removed", "Removed");
 			source.GetWorld().RemoveEntity(removed);
 
 			std::string text;
 			std::vector<std::string> serializationErrors;
 			if (!Ludus::SceneSerializer::Serialize(
-				source, components, text, serializationErrors))
+				source, components, TestSystems(), text, serializationErrors))
 				return false;
 
-			Assets::AssetManager assets;
+			Ludus::Assets::AssetManager assets;
 			Ludus::Scene loaded;
 			std::vector<Ludus::SceneLoadError> loadErrors;
 			return Ludus::SceneLoader::LoadText(
@@ -309,6 +650,7 @@ namespace Tests
 				loaded,
 				assets,
 				components,
+				TestSystems(),
 				loadErrors) &&
 				loaded.GetWorld().GetEntityCount() == 0 &&
 				!loaded.FindEntity("removed").IsValid();
@@ -348,31 +690,32 @@ namespace Tests
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
 			Ludus::Scene source;
-			const ECS::Entity entity = source.CreateEntity("entity", "Entity");
-			Components::Transform transform;
+			const Ludus::ECS::Entity entity = source.CreateEntity("entity", "Entity");
+			Ludus::Components::Transform transform;
 			transform.position = { 1.0f, 2.0f, 3.0f };
 			source.GetWorld().AddComponent(entity, transform);
 
 			const std::filesystem::path destination = directory / "scene with spaces.lscene";
 			std::vector<std::string> saveErrors;
 			if (!Ludus::SceneSerializer::Save(
-				destination, source, components, saveErrors))
+				destination, source, components, TestSystems(), saveErrors))
 				return false;
 
 			std::string first;
 			if (!ReadBinaryFile(destination, first) || first.find("\r\n") == std::string::npos)
 				return false;
 
-			Assets::AssetManager loadedAssets;
+			Ludus::Assets::AssetManager loadedAssets;
 			Ludus::Scene loaded;
 			std::vector<Ludus::SceneLoadError> loadErrors;
 			if (!Ludus::SceneLoader::Load(
-				destination.string(), loaded, loadedAssets, components, loadErrors))
+				destination.string(), loaded, loadedAssets, components,
+				TestSystems(), loadErrors))
 				return false;
 
-			source.GetWorld().GetComponent<Components::Transform>(entity).position.x = 9.0f;
+			source.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x = 9.0f;
 			if (!Ludus::SceneSerializer::Save(
-				destination, source, components, saveErrors))
+				destination, source, components, TestSystems(), saveErrors))
 				return false;
 
 			std::string replaced;
@@ -382,7 +725,7 @@ namespace Tests
 			Ludus::Scene invalid;
 			invalid.CreateEntity("bad id", "Invalid");
 			if (Ludus::SceneSerializer::Save(
-				destination, invalid, components, saveErrors))
+				destination, invalid, components, TestSystems(), saveErrors))
 				return false;
 
 			std::string afterFailure;
@@ -401,7 +744,7 @@ namespace Tests
 			std::vector<std::string> emptyPathErrors;
 			return fileCount == 1 &&
 				!Ludus::SceneSerializer::Save(
-					{}, source, components, emptyPathErrors) &&
+					{}, source, components, TestSystems(), emptyPathErrors) &&
 				!emptyPathErrors.empty();
 		}
 
@@ -419,8 +762,8 @@ namespace Tests
 			};
 			for (const auto& [id, rotation] : rotations)
 			{
-				const ECS::Entity entity = source.CreateEntity(id, id);
-				Components::Transform transform;
+				const Ludus::ECS::Entity entity = source.CreateEntity(id, id);
+				Ludus::Components::Transform transform;
 				transform.rotation = rotation;
 				source.GetWorld().AddComponent(entity, transform);
 			}
@@ -428,19 +771,20 @@ namespace Tests
 			std::string text;
 			std::vector<std::string> serializationErrors;
 			if (!Ludus::SceneSerializer::Serialize(
-				source, components, text, serializationErrors))
+				source, components, TestSystems(), text, serializationErrors))
 				return false;
 
-			Assets::AssetManager assets;
+			Ludus::Assets::AssetManager assets;
 			Ludus::Scene loaded;
 			std::vector<Ludus::SceneLoadError> loadErrors;
 			if (!Ludus::SceneLoader::LoadText(
-				text, "rotation_round_trip.lscene", loaded, assets, components, loadErrors))
+				text, "rotation_round_trip.lscene", loaded, assets, components,
+				TestSystems(), loadErrors))
 				return false;
 
 			for (const auto& [id, rotation] : rotations)
 			{
-				const auto* result = loaded.GetWorld().TryGetComponent<Components::Transform>(
+				const auto* result = loaded.GetWorld().TryGetComponent<Ludus::Components::Transform>(
 					loaded.FindEntity(id));
 				if (!result || std::abs(glm::dot(
 					glm::normalize(rotation), glm::normalize(result->rotation))) < 0.9999f)
@@ -451,7 +795,7 @@ namespace Tests
 
 		bool SceneRoundTrips()
 		{
-			Assets::AssetManager sourceAssets;
+			Ludus::Assets::AssetManager sourceAssets;
 			Ludus::Scene source;
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
@@ -463,22 +807,23 @@ namespace Tests
 				source,
 				sourceAssets,
 				components,
+				TestSystems(),
 				loadErrors))
 				return false;
 
 			std::string serialized;
 			std::vector<std::string> serializationErrors;
 			if (!Ludus::SceneSerializer::Serialize(
-				source, components, serialized, serializationErrors) ||
+				source, components, TestSystems(), serialized, serializationErrors) ||
 				serialized.find("\r\n") == std::string::npos)
 				return false;
 			std::string repeated;
 			if (!Ludus::SceneSerializer::Serialize(
-				source, components, repeated, serializationErrors) ||
+				source, components, TestSystems(), repeated, serializationErrors) ||
 				repeated != serialized)
 				return false;
 
-			Assets::AssetManager loadedAssets;
+			Ludus::Assets::AssetManager loadedAssets;
 			Ludus::Scene loaded;
 			loadErrors.clear();
 			if (!Ludus::SceneLoader::LoadText(
@@ -487,21 +832,22 @@ namespace Tests
 				loaded,
 				loadedAssets,
 				components,
+				TestSystems(),
 				loadErrors))
 				return false;
 
 			for (const std::string_view id : { "maxwell_left", "maxwell_right" })
 			{
-				const ECS::Entity sourceEntity = source.FindEntity(id);
-				const ECS::Entity loadedEntity = loaded.FindEntity(id);
+				const Ludus::ECS::Entity sourceEntity = source.FindEntity(id);
+				const Ludus::ECS::Entity loadedEntity = loaded.FindEntity(id);
 				const auto* sourceTransform =
-					source.GetWorld().TryGetComponent<Components::Transform>(sourceEntity);
+					source.GetWorld().TryGetComponent<Ludus::Components::Transform>(sourceEntity);
 				const auto* loadedTransform =
-					loaded.GetWorld().TryGetComponent<Components::Transform>(loadedEntity);
+					loaded.GetWorld().TryGetComponent<Ludus::Components::Transform>(loadedEntity);
 				const auto* sourceRenderable =
-					source.GetWorld().TryGetComponent<Components::Renderable>(sourceEntity);
+					source.GetWorld().TryGetComponent<Ludus::Components::Renderable>(sourceEntity);
 				const auto* loadedRenderable =
-					loaded.GetWorld().TryGetComponent<Components::Renderable>(loadedEntity);
+					loaded.GetWorld().TryGetComponent<Ludus::Components::Renderable>(loadedEntity);
 				const auto* sourceRotator = source.GetWorld().TryGetComponent<Rotator>(sourceEntity);
 				const auto* loadedRotator = loaded.GetWorld().TryGetComponent<Rotator>(loadedEntity);
 
@@ -539,7 +885,7 @@ namespace Tests
 			bool makeSceneNonEmpty = false,
 			bool requireEmptyAfterFailure = false)
 		{
-			Assets::AssetManager assets;
+			Ludus::Assets::AssetManager assets;
 			Ludus::Scene scene;
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
@@ -549,7 +895,8 @@ namespace Tests
 				scene.CreateEntity("existing", "Existing");
 
 			std::vector<Ludus::SceneLoadError> errors;
-			if (Ludus::SceneLoader::Load(path, scene, assets, components, errors))
+			if (Ludus::SceneLoader::Load(
+				path, scene, assets, components, TestSystems(), errors))
 				return false;
 
 			const bool hasError = std::ranges::any_of(errors,
@@ -564,7 +911,7 @@ namespace Tests
 
 	bool RunSceneLoaderTests()
 	{
-		Assets::AssetManager assets;
+		Ludus::Assets::AssetManager assets;
 		Ludus::Scene scene;
 		Ludus::SceneComponentRegistry components;
 		Ludus::RegisterBuiltInSceneComponents(components);
@@ -576,22 +923,23 @@ namespace Tests
 			scene,
 			assets,
 			components,
+			TestSystems(),
 			errors))
 		{
 			return false;
 		}
 
-		const ECS::Entity left = scene.FindEntity("maxwell_left");
-		const ECS::Entity right = scene.FindEntity("maxwell_right");
+		const Ludus::ECS::Entity left = scene.FindEntity("maxwell_left");
+		const Ludus::ECS::Entity right = scene.FindEntity("maxwell_right");
 		const bool loadedSceneValid = errors.empty() &&
 			left.IsValid() &&
 			right.IsValid() &&
 			scene.GetEntityName("maxwell_left") == "Maxwell Left" &&
-			scene.GetWorld().HasComponent<Components::Transform>(left) &&
-			scene.GetWorld().HasComponent<Components::Renderable>(left) &&
+			scene.GetWorld().HasComponent<Ludus::Components::Transform>(left) &&
+			scene.GetWorld().HasComponent<Ludus::Components::Renderable>(left) &&
 			scene.GetWorld().HasComponent<Rotator>(left) &&
-			 scene.GetWorld().HasComponent<Components::Transform>(right) &&
-			 scene.GetWorld().HasComponent<Components::Renderable>(right) &&
+			 scene.GetWorld().HasComponent<Ludus::Components::Transform>(right) &&
+			 scene.GetWorld().HasComponent<Ludus::Components::Renderable>(right) &&
 			 scene.GetWorld().HasComponent<Rotator>(right);
 
 		if (!loadedSceneValid)
@@ -602,7 +950,7 @@ namespace Tests
 			!scene.GetEntityName("maxwell_left").empty())
 			return false;
 
-		const ECS::Entity replacement = scene.CreateEntity("maxwell_left", "Replacement");
+		const Ludus::ECS::Entity replacement = scene.CreateEntity("maxwell_left", "Replacement");
 		if (!replacement.IsValid() || !scene.RemoveEntity("maxwell_left") ||
 			scene.GetWorld().IsEntityAlive(replacement) ||
 			scene.FindEntity("maxwell_left").IsValid() ||
@@ -611,6 +959,9 @@ namespace Tests
 
 		return WriterBoundariesAreValidated() &&
 			 SerializerBoundariesAreValidated() &&
+			 ComponentUpdatesAreTransactional() &&
+			 EditorCommandsUndoAndRedo() &&
+			 SystemCompositionRoundTrips() &&
 			 EmptyAndDeadScenesSerialize() &&
 			 ScenesSaveTransactionally() &&
 			 RotationBoundariesRoundTrip() &&

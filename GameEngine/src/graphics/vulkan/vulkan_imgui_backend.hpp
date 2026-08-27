@@ -3,7 +3,7 @@
 #include "graphics/imgui_backend.hpp"
 #include "vulkan_include.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     class VulkanGraphicsDevice;
 

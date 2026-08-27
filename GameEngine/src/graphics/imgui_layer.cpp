@@ -4,7 +4,7 @@
 
 #include "graphics_device.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     ImGuiLayer::~ImGuiLayer() = default;
 

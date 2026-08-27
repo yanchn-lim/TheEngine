@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	// produces the view and projection matrices passed through FrameConstants
 	struct Camera2D

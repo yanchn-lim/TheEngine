@@ -3,6 +3,7 @@
 #include <atomic>
 #include <fstream>
 #include <system_error>
+#include <unordered_set>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -10,6 +11,7 @@
 
 #include "scene.hpp"
 #include "scene_component_registry.hpp"
+#include "system_registry.hpp"
 #include "serialization/lscene_writer.hpp"
 
 namespace Ludus
@@ -77,17 +79,18 @@ namespace Ludus
 	bool SceneSerializer::Serialize(
 		const Scene& scene,
 		const SceneComponentRegistry& components,
+		const SystemRegistry& systems,
 		std::string& output,
 		std::vector<std::string>& errors)
 	{
 		output.clear();
-		Serialization::LSceneValue::Object entities;
+		Ludus::Serialization::LSceneValue::Object entities;
 		for (const auto& [id, record] : scene.GetEntities())
 		{
 			if (!scene.GetWorld().IsEntityAlive(record.entity))
 				continue;
 
-			Serialization::LSceneValue::Object componentValues;
+			Ludus::Serialization::LSceneValue::Object componentValues;
 			if (!components.SaveComponents(
 				scene.GetAssetContext(),
 				scene.GetWorld(),
@@ -99,26 +102,64 @@ namespace Ludus
 				return false;
 			}
 
-			Serialization::LSceneValue::Object entity;
+			Ludus::Serialization::LSceneValue::Object entity;
 			entity.emplace("name",
-				Serialization::LSceneValue::String(record.name, {}));
+				Ludus::Serialization::LSceneValue::String(record.name, {}));
 			entity.emplace("components",
-				Serialization::LSceneValue::ObjectValue(std::move(componentValues)));
+				Ludus::Serialization::LSceneValue::ObjectValue(std::move(componentValues)));
 			entities.emplace(id,
-				Serialization::LSceneValue::ObjectValue(std::move(entity)));
+				Ludus::Serialization::LSceneValue::ObjectValue(std::move(entity)));
 		}
 
-		Serialization::LSceneValue::Object root;
+		Ludus::Serialization::LSceneValue::Object systemValues;
+		std::unordered_set<std::string> systemIds;
+		for (const SceneSystemDefinition& definition : scene.GetSystems())
+		{
+			if (!systemIds.emplace(definition.id).second)
+			{
+				errors.push_back("duplicate system id '" + definition.id + "'");
+				return false;
+			}
+			if (!systems.Contains(definition.id))
+			{
+				errors.push_back(
+					"unknown or unavailable system '" + definition.id + "'");
+				return false;
+			}
+
+			std::vector<SceneLoadError> configErrors;
+			if (!systems.ValidateConfig(
+				definition.id, definition.config, configErrors))
+			{
+				for (SceneLoadError& error : configErrors)
+					errors.push_back(std::move(error.message));
+				return false;
+			}
+
+			Ludus::Serialization::LSceneValue::Object fields;
+			fields.emplace("enabled",
+				Ludus::Serialization::LSceneValue::Boolean(definition.enabled, {}));
+			const auto* config = definition.config.TryGetObject();
+			if (config && !config->empty())
+				fields.emplace("config", definition.config);
+			systemValues.emplace(definition.id,
+				Ludus::Serialization::LSceneValue::ObjectValue(std::move(fields)));
+		}
+
+		Ludus::Serialization::LSceneValue::Object root;
 		root.emplace("scene",
-			Serialization::LSceneValue::String(std::string(scene.GetName()), {}));
-		root.emplace("version", Serialization::LSceneValue::Integer(1, {}));
+			Ludus::Serialization::LSceneValue::String(std::string(scene.GetName()), {}));
+		root.emplace("version", Ludus::Serialization::LSceneValue::Integer(1, {}));
 		root.emplace("assets", scene.GetAssetDeclarations());
+		if (!systemValues.empty())
+			root.emplace("systems",
+				Ludus::Serialization::LSceneValue::ObjectValue(std::move(systemValues)));
 		root.emplace("entities",
-			Serialization::LSceneValue::ObjectValue(std::move(entities)));
+			Ludus::Serialization::LSceneValue::ObjectValue(std::move(entities)));
 
 		std::string error;
-		if (!Serialization::LSceneWriter::Write(
-			Serialization::LSceneValue::ObjectValue(std::move(root)),
+		if (!Ludus::Serialization::LSceneWriter::Write(
+			Ludus::Serialization::LSceneValue::ObjectValue(std::move(root)),
 			output,
 			error))
 		{
@@ -132,6 +173,7 @@ namespace Ludus
 		const std::filesystem::path& path,
 		const Scene& scene,
 		const SceneComponentRegistry& components,
+		const SystemRegistry& systems,
 		std::vector<std::string>& errors)
 	{
 		if (path.empty())
@@ -141,7 +183,7 @@ namespace Ludus
 		}
 
 		std::string text;
-		if (!Serialize(scene, components, text, errors))
+		if (!Serialize(scene, components, systems, text, errors))
 			return false;
 
 		const std::filesystem::path temporary = TemporaryPath(path, errors);

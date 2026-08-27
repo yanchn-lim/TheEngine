@@ -3,7 +3,7 @@
 #include "asset_handle.hpp"
 #include "asset_records.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	// decodes texture files and owns their CPU pixel records
 	class TextureRegistry

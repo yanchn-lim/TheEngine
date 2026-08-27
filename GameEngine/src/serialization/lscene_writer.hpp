@@ -4,7 +4,7 @@
 
 #include "lscene_value.hpp"
 
-namespace Serialization
+namespace Ludus::Serialization
 {
 	class LSceneWriter
 	{

@@ -3,7 +3,7 @@
 #include "asset_handle.hpp"
 #include "asset_records.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	// stores source paths for the OpenGL and Vulkan variants of each shader
 	class ShaderRegistry

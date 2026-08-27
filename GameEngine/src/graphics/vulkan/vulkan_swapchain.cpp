@@ -3,7 +3,7 @@
 
 #include "debug/debug.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	bool VulkanSwapchain::Create(const VulkanDevice& device, vk::SurfaceKHR surface,
 		vk::Extent2D requestedExtent, bool vsync)
@@ -18,7 +18,7 @@ namespace Graphics
 
 			if (formats.empty() || presentModes.empty())
 			{
-				Debug::LogError("VulkanSwapchain::Create : Surface has no formats or present modes");
+				Ludus::Debug::LogError("VulkanSwapchain::Create : Surface has no formats or present modes");
 				return false;
 			}
 
@@ -87,7 +87,7 @@ namespace Graphics
 
 			if (selectedExtent.width == 0 || selectedExtent.height == 0)
 			{
-				Debug::LogWarning(
+				Ludus::Debug::LogWarning(
 					"VulkanSwapchain::Create: framebuffer extent is zero");
 				return false;
 			}
@@ -103,7 +103,7 @@ namespace Graphics
 			if (!(capabilities.supportedUsageFlags &
 				vk::ImageUsageFlagBits::eColorAttachment))
 			{
-				Debug::LogError(
+				Ludus::Debug::LogError(
 					"VulkanSwapchain::Create: color attachments aren't supported");
 				return false;
 			}
@@ -132,7 +132,7 @@ namespace Graphics
 
 			if (!foundCompositeAlpha)
 			{
-				Debug::LogError(
+				Ludus::Debug::LogError(
 					"VulkanSwapchain::Create: no composite-alpha mode available");
 				return false;
 			}
@@ -192,7 +192,7 @@ namespace Graphics
 		}
 		catch (const std::exception& error)
 		{
-			Debug::LogError("VulkanSwapchain::Create: ", error.what());
+			Ludus::Debug::LogError("VulkanSwapchain::Create: ", error.what());
 			Shutdown();
 			return false;
 		}

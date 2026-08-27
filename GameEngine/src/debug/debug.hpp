@@ -47,7 +47,7 @@ private:
 	bool _scrollToBottom{ false };
 };
 
-namespace Debug
+namespace Ludus::Debug
 {
 	template<typename... Args>
 	void CLog(Args&&... args)

@@ -13,18 +13,18 @@ namespace Ludus
 {
 	namespace
 	{
-		using Object = Serialization::LSceneValue::Object;
+		using Object = Ludus::Serialization::LSceneValue::Object;
 
 		void AddError(
 			std::vector<SceneLoadError>& errors,
-			const Serialization::LSceneValue& value,
+			const Ludus::Serialization::LSceneValue& value,
 			std::string message)
 		{
 			errors.push_back({ std::move(message), value.GetLocation() });
 		}
 
 		bool ValidateRoot(
-			const Serialization::LSceneValue& root,
+			const Ludus::Serialization::LSceneValue& root,
 			std::vector<SceneLoadError>& errors)
 		{
 			const Object* fields = root.TryGetObject();
@@ -33,7 +33,8 @@ namespace Ludus
 			bool valid = true;
 			for (const auto& [name, value] : *fields)
 			{
-				if (name != "scene" && name != "version" && name != "assets" && name != "entities")
+				if (name != "scene" && name != "version" && name != "assets" &&
+					name != "systems" && name != "entities")
 				{
 					AddError(errors, value, "unknown scene field '" + name + "'");
 					valid = false;
@@ -42,14 +43,102 @@ namespace Ludus
 			return valid;
 		}
 
+		bool LoadSystemDefinitions(
+			const Ludus::Serialization::LSceneValue& root,
+			const SystemRegistry& registry,
+			std::vector<SceneSystemDefinition>& definitions,
+			std::vector<SceneLoadError>& errors)
+		{
+			const Ludus::Serialization::LSceneValue* systemsValue = root.Find("systems");
+			if (!systemsValue)
+				return true;
+
+			const Object* systems = systemsValue->TryGetObject();
+			if (!systems)
+			{
+				AddError(errors, *systemsValue, "systems must be a block");
+				return false;
+			}
+
+			bool success = true;
+			for (const auto& [id, value] : *systems)
+			{
+				const Object* fields = value.TryGetObject();
+				if (!fields)
+				{
+					AddError(errors, value, "system '" + id + "' must be a block");
+					success = false;
+					continue;
+				}
+
+				bool fieldsValid = true;
+				for (const auto& [name, fieldValue] : *fields)
+				{
+					if (name != "enabled" && name != "config")
+					{
+						AddError(errors, fieldValue, "unknown system field '" + name + "'");
+						fieldsValid = false;
+					}
+				}
+
+				const auto enabledField = fields->find("enabled");
+				if (enabledField == fields->end())
+				{
+					AddError(errors, value, "system '" + id + "' requires enabled");
+					fieldsValid = false;
+				}
+
+				const bool* enabled = enabledField != fields->end()
+					? enabledField->second.TryGetBoolean()
+					: nullptr;
+				if (enabledField != fields->end() && !enabled)
+				{
+					AddError(errors, enabledField->second,
+						"system '" + id + "' enabled must be a boolean");
+					fieldsValid = false;
+				}
+
+				Ludus::Serialization::LSceneValue config =
+					Ludus::Serialization::LSceneValue::ObjectValue({}, value.GetLocation());
+				if (const auto configField = fields->find("config"); configField != fields->end())
+					config = configField->second;
+
+				if (!config.TryGetObject())
+				{
+					AddError(errors, config, "system '" + id + "' config must be a block");
+					fieldsValid = false;
+				}
+
+				if (!registry.Contains(id))
+				{
+					AddError(errors, value, "unknown or unavailable system '" + id + "'");
+					fieldsValid = false;
+				}
+				else if (config.TryGetObject() &&
+					!registry.ValidateConfig(id, config, errors))
+				{
+					fieldsValid = false;
+				}
+
+				if (!fieldsValid)
+				{
+					success = false;
+					continue;
+				}
+
+				definitions.push_back({ id, *enabled, std::move(config) });
+			}
+			return success;
+		}
+
 		bool LoadEntities(
-			const Serialization::LSceneValue& root,
+			const Ludus::Serialization::LSceneValue& root,
 			Scene& scene,
 			const SceneAssetContext& assets,
 			const SceneComponentRegistry& components,
 			std::vector<SceneLoadError>& errors)
 		{
-			const Serialization::LSceneValue* entitiesValue = root.Find("entities");
+			const Ludus::Serialization::LSceneValue* entitiesValue = root.Find("entities");
 			if (!entitiesValue)
 			{
 				AddError(errors, root, "scene requires an entities block");
@@ -110,7 +199,7 @@ namespace Ludus
 					continue;
 				}
 
-				const ECS::Entity entity = scene.CreateEntity(id, std::move(displayName));
+				const Ludus::ECS::Entity entity = scene.CreateEntity(id, std::move(displayName));
 				if (!entity.IsValid())
 				{
 					AddError(errors, value, "duplicate entity id '" + id + "'");
@@ -129,25 +218,27 @@ namespace Ludus
 	bool SceneLoader::Load(
 		const std::string& path,
 		Scene& scene,
-		Assets::AssetManager& assets,
+		Ludus::Assets::AssetManager& assets,
 		const SceneComponentRegistry& components,
+		const SystemRegistry& systems,
 		std::vector<SceneLoadError>& errors)
 	{
 		std::string source;
-		if (!FileSystem::ReadTextFile(path.c_str(), source))
+		if (!Ludus::FileSystem::ReadTextFile(path.c_str(), source))
 		{
 			errors.push_back({ "failed to read scene file '" + path + "'", { 1, 1 }, path });
 			return false;
 		}
-		return LoadText(source, path, scene, assets, components, errors);
+		return LoadText(source, path, scene, assets, components, systems, errors);
 	}
 
 	bool SceneLoader::LoadText(
 		std::string_view source,
 		const std::string& path,
 		Scene& scene,
-		Assets::AssetManager& assets,
+		Ludus::Assets::AssetManager& assets,
 		const SceneComponentRegistry& components,
+		const SystemRegistry& systems,
 		std::vector<SceneLoadError>& errors)
 	{
 		const size_t firstError = errors.size();
@@ -158,21 +249,27 @@ namespace Ludus
 			return result;
 		};
 
-		if (scene.GetWorld().GetEntityCount() != 0)
+		if (scene.GetWorld().GetEntityCount() != 0 ||
+			scene.GetWorld().GetSystemCount() != 0 ||
+			!scene.GetSystems().empty())
 		{
 			errors.push_back({ "scene must be empty before loading", { 1, 1 } });
 			return finish(false);
 		}
 
-		const Serialization::LSceneParseResult parsed = Serialization::LSceneParser{}.Parse(source);
+		const Ludus::Serialization::LSceneParseResult parsed = Ludus::Serialization::LSceneParser{}.Parse(source);
 		if (!parsed)
 		{
-			for (const Serialization::LSceneParseError& error : parsed.errors)
+			for (const Ludus::Serialization::LSceneParseError& error : parsed.errors)
 				errors.push_back({ error.message, error.location });
 			return finish(false);
 		}
 
 		if (!ValidateRoot(parsed.root, errors))
+			return finish(false);
+
+		std::vector<SceneSystemDefinition> systemDefinitions;
+		if (!LoadSystemDefinitions(parsed.root, systems, systemDefinitions, errors))
 			return finish(false);
 
 		SceneAssetContext assetContext;
@@ -187,15 +284,21 @@ namespace Ludus
 			return finish(false);
 
 		const std::string* sceneName = parsed.root.Find("scene")->TryGetString();
-		Serialization::LSceneValue assetDeclarations = Serialization::LSceneValue::ObjectValue();
-		if (const Serialization::LSceneValue* value = parsed.root.Find("assets"))
+		Ludus::Serialization::LSceneValue assetDeclarations = Ludus::Serialization::LSceneValue::ObjectValue();
+		if (const Ludus::Serialization::LSceneValue* value = parsed.root.Find("assets"))
 			assetDeclarations = *value;
 		stagedScene.SetSerializationData(
 			sceneName ? *sceneName : "Untitled",
 			std::move(assetDeclarations),
-			std::move(assetContext));
+			std::move(assetContext),
+			std::move(systemDefinitions));
 
 		scene.Swap(stagedScene);
+		for (const SceneSystemDefinition& definition : scene.GetSystems())
+		{
+			if (definition.enabled)
+				systems.Create(definition.id, scene.GetWorld(), definition.config);
+		}
 		return finish(errors.size() == firstError);
 	}
 }

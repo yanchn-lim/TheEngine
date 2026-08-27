@@ -6,7 +6,7 @@
 #include <vector>
 #include <optional>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     bool VulkanDevice::Init(const VulkanContext& context)
     {
@@ -20,7 +20,7 @@ namespace Graphics
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("VulkanDevice::Init: ", error.what());
+            Ludus::Debug::LogError("VulkanDevice::Init: ", error.what());
             Shutdown();
             return false;
         }
@@ -114,7 +114,7 @@ namespace Graphics
             _presentQueueFamily = *queues.present;
 
             const auto properties = candidate.getProperties();
-            Debug::CLog("Selected Vulkan device: ", properties.deviceName.data(), "\n");
+            Ludus::Debug::CLog("Selected Vulkan device: ", properties.deviceName.data(), "\n");
             return;
         }
 

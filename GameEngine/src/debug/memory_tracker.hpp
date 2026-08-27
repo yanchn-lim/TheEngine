@@ -6,7 +6,7 @@
 #include <string_view>
 #include <vector>
 
-namespace Memory
+namespace Ludus::Memory
 {
 	struct CpuMemoryStats
 	{

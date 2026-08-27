@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-namespace ECS
+namespace Ludus::ECS
 {
 	class World;
 

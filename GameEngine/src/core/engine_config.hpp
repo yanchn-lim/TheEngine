@@ -8,7 +8,7 @@ namespace Ludus
 {
     struct EngineConfig
     {
-        Graphics::RendererBackend rendererBackend = Graphics::RendererBackend::VULKAN;
+        Ludus::Graphics::RendererBackend rendererBackend = Ludus::Graphics::RendererBackend::VULKAN;
         int windowWidth = 1600;
         int windowHeight = 900;
         std::string windowTitle = "Ludus";

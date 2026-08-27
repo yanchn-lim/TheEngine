@@ -11,9 +11,9 @@ int main(int argc, char** argv)
     {
         const std::string argument = argv[index];
         if (argument == "--opengl")
-            config.rendererBackend = Graphics::RendererBackend::OPENGL;
+            config.rendererBackend = Ludus::Graphics::RendererBackend::OPENGL;
         else if (argument == "--vulkan")
-            config.rendererBackend = Graphics::RendererBackend::VULKAN;
+            config.rendererBackend = Ludus::Graphics::RendererBackend::VULKAN;
 		else if (argument == "--tests")
 			return Tests::RunAllTests();
     }

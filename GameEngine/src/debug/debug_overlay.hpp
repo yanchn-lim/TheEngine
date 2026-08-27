@@ -5,7 +5,8 @@
 class DebugOverlay
 {
 public:
-    void HandleKey(int key, int action);
+	void ToggleProfilerPause();
+	void PrintProfilerStatistics();
     void Draw();
 
 private:

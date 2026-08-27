@@ -5,7 +5,7 @@
 #include <limits>
 #include <utility>
 
-namespace Serialization
+namespace Ludus::Serialization
 {
 	namespace
 	{
@@ -233,6 +233,10 @@ namespace Serialization
 		if (!AppendRootBlock("assets", root.Find("assets"), written, error))
 			return false;
 		if (root.Find("assets"))
+			written += "\r\n";
+		if (!AppendRootBlock("systems", root.Find("systems"), written, error))
+			return false;
+		if (root.Find("systems"))
 			written += "\r\n";
 		if (!AppendRootBlock("entities", root.Find("entities"), written, error))
 			return false;

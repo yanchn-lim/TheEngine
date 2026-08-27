@@ -3,7 +3,7 @@
 #include "vulkan_include.hpp"
 #include <vector>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	class VulkanDevice;
 

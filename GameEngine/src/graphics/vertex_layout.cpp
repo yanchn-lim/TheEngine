@@ -1,6 +1,6 @@
 #include "vertex_layout.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	uint32_t GetShaderDataTypeSize(ShaderDataType type)
 	{

@@ -9,7 +9,7 @@ namespace Ludus
 	struct SceneLoadError
 	{
 		std::string message;
-		Serialization::SourceLocation location;
+		Ludus::Serialization::SourceLocation location;
 		std::string path;
 	};
 }

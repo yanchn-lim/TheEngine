@@ -11,7 +11,7 @@
 #include "graphics/primitive_topology.hpp"
 #include "graphics/vertex_layout.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	// describes the engine vertex format produced by model and primitive importers
 	struct MeshVertex
@@ -27,7 +27,7 @@ namespace Assets
 		std::string name;
 		std::vector<MeshVertex> vertices;
 		std::vector<uint32_t> indices;
-		Graphics::PrimitiveTopology topology = Graphics::PrimitiveTopology::TRIANGLES;
+		Ludus::Graphics::PrimitiveTopology topology = Ludus::Graphics::PrimitiveTopology::TRIANGLES;
 		MaterialHandle material;
 	};
 
@@ -37,5 +37,5 @@ namespace Assets
 		std::vector<MeshSurface> surfaces;
 	};
 
-	Graphics::VertexLayout CreateMeshVertexLayout();
+	Ludus::Graphics::VertexLayout CreateMeshVertexLayout();
 }

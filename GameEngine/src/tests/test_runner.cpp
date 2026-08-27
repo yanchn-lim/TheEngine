@@ -5,6 +5,7 @@
 #include "debug/debug.hpp"
 #include "ecs_tests.hpp"
 #include "graphics_api_tests.hpp"
+#include "input_tests.hpp"
 #include "lscene_parser_tests.hpp"
 #include "scene_asset_loader_tests.hpp"
 #include "scene_loader_tests.hpp"
@@ -17,9 +18,9 @@ namespace Tests
 		{
 			const bool passed = test();
 			if (passed)
-				Debug::Log("[PASS] ", name);
+				Ludus::Debug::Log("[PASS] ", name);
 			else
-				Debug::LogError("[FAIL] ", name);
+				Ludus::Debug::LogError("[FAIL] ", name);
 			return passed;
 		}
 	}
@@ -28,6 +29,7 @@ namespace Tests
 	{
 		bool passed = true;
 		passed = Run("ECS", RunEcsTests) && passed;
+		passed = Run("Input", RunInputTests) && passed;
 		passed = Run("LScene parser", RunLSceneParserTests) && passed;
 		passed = Run("Scene assets", RunSceneAssetLoaderTests) && passed;
 		passed = Run("Scene loading", RunSceneLoaderTests) && passed;

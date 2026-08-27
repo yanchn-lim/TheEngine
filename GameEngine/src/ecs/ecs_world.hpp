@@ -17,7 +17,7 @@
 #include <tuple>
 #include <functional>
 
-namespace ECS
+namespace Ludus::ECS
 {
 	namespace Internal
 	{
@@ -113,6 +113,10 @@ namespace ECS
 
 		Entity CreateEntity();
 		uint32_t GetEntityCount() const;
+		std::size_t GetSystemCount() const noexcept
+		{
+			return _systems.size();
+		}
 		std::size_t GetComponentCount(Entity entity) const
 		{
 			if (!IsEntityAlive(entity))

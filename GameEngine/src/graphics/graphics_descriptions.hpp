@@ -12,7 +12,7 @@
 #include "render_state.hpp"
 #include "vertex_layout.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // backend-neutral enums describe intent without exposing OpenGL or Vulkan values
     enum class BufferUsage { Vertex, Index };

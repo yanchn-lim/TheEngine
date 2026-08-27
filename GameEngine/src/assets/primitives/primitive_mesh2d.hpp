@@ -4,7 +4,7 @@
 
 #include "assets/mesh_import_data.hpp"
 
-namespace Assets::Primitive2D
+namespace Ludus::Assets::Primitive2D
 {
 	// generates standard CPU meshes that follow the same upload path as imported assets
 	MeshSurface Triangle();

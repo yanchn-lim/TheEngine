@@ -10,7 +10,7 @@ namespace Tests
 	{
 		bool HasError(std::string_view source)
 		{
-			return !Serialization::LSceneParser{}.Parse(source);
+			return !Ludus::Serialization::LSceneParser{}.Parse(source);
 		}
 	}
 
@@ -29,14 +29,14 @@ namespace Tests
 			"\t\t\t\tposition: [-0.85, 0, 0.25]\n"
 			"\t\t\t\tvisible: true\n";
 
-		const Serialization::LSceneParseResult parsed =
-			Serialization::LSceneParser{}.Parse(validScene);
+		const Ludus::Serialization::LSceneParseResult parsed =
+			Ludus::Serialization::LSceneParser{}.Parse(validScene);
 		if (!parsed)
 			return false;
 
-		const Serialization::LSceneValue* scene = parsed.root.Find("scene");
-		const Serialization::LSceneValue* version = parsed.root.Find("version");
-		const Serialization::LSceneValue* entities = parsed.root.Find("entities");
+		const Ludus::Serialization::LSceneValue* scene = parsed.root.Find("scene");
+		const Ludus::Serialization::LSceneValue* version = parsed.root.Find("version");
+		const Ludus::Serialization::LSceneValue* entities = parsed.root.Find("entities");
 		if (!scene || !scene->TryGetString() || *scene->TryGetString() != "Parser Test" ||
 			!version || !version->TryGetInteger() || *version->TryGetInteger() != 1 ||
 			!entities)
@@ -44,11 +44,11 @@ namespace Tests
 			return false;
 		}
 
-		const Serialization::LSceneValue* maxwell = entities->Find("maxwell");
-		const Serialization::LSceneValue* components = maxwell ? maxwell->Find("components") : nullptr;
-		const Serialization::LSceneValue* transform = components ? components->Find("Transform") : nullptr;
-		const Serialization::LSceneValue* position = transform ? transform->Find("position") : nullptr;
-		const Serialization::LSceneValue::Array* values = position ? position->TryGetArray() : nullptr;
+		const Ludus::Serialization::LSceneValue* maxwell = entities->Find("maxwell");
+		const Ludus::Serialization::LSceneValue* components = maxwell ? maxwell->Find("components") : nullptr;
+		const Ludus::Serialization::LSceneValue* transform = components ? components->Find("Transform") : nullptr;
+		const Ludus::Serialization::LSceneValue* position = transform ? transform->Find("position") : nullptr;
+		const Ludus::Serialization::LSceneValue::Array* values = position ? position->TryGetArray() : nullptr;
 		if (!values || values->size() != 3 ||
 			!(*values)[0].TryGetFloat() || !(*values)[1].TryGetInteger() || !(*values)[2].TryGetFloat())
 		{
@@ -59,9 +59,9 @@ namespace Tests
 			"scene \"Quoted Array\"\n"
 			"version: 1\n"
 			"value: [\"comma,inside\", \"hash#inside\"]\n";
-		const Serialization::LSceneParseResult quotedArray =
-			Serialization::LSceneParser{}.Parse(quotedArraySource);
-		const Serialization::LSceneValue* quotedValue = quotedArray.root.Find("value");
+		const Ludus::Serialization::LSceneParseResult quotedArray =
+			Ludus::Serialization::LSceneParser{}.Parse(quotedArraySource);
+		const Ludus::Serialization::LSceneValue* quotedValue = quotedArray.root.Find("value");
 		const auto* quotedValues = quotedValue ? quotedValue->TryGetArray() : nullptr;
 		if (!quotedArray || !quotedValues || quotedValues->size() != 2 ||
 			!(*quotedValues)[0].TryGetString() || *(*quotedValues)[0].TryGetString() != "comma,inside" ||

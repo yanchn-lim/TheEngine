@@ -20,18 +20,18 @@ namespace Tests
 			float y = 0.0f;
 		};
 
-		class MovementSystem final : public ECS::ISystem
+		class MovementSystem final : public Ludus::ECS::ISystem
 		{
 		public:
-			static constexpr ECS::SystemPhase Phase =
-				ECS::SystemPhase::UPDATE;
+			static constexpr Ludus::ECS::SystemPhase Phase =
+				Ludus::ECS::SystemPhase::UPDATE;
 
 			static constexpr int Order = 100;
 
-			void OnUpdate(ECS::World& world) override
+			void OnUpdate(Ludus::ECS::World& world) override
 			{
 				world.ForEach<Position, Velocity>(
-					[](ECS::Entity, Position& position, Velocity& velocity)
+					[](Ludus::ECS::Entity, Position& position, Velocity& velocity)
 					{
 						position.x += velocity.x;
 						position.y += velocity.y;
@@ -41,7 +41,7 @@ namespace Tests
 
 		bool EcsTestFailed(const char* message)
 		{
-			Debug::LogError("ECS test failed: ", message);
+			Ludus::Debug::LogError("ECS test failed: ", message);
 			return false;
 		}
 
@@ -53,18 +53,18 @@ namespace Tests
 			double fixedDeltaTime = 0.0;
 		};
 
-		template<ECS::SystemPhase PhaseValue, int OrderValue, int Marker>
-		class OrderedSystem final : public ECS::ISystem
+		template<Ludus::ECS::SystemPhase PhaseValue, int OrderValue, int Marker>
+		class OrderedSystem final : public Ludus::ECS::ISystem
 		{
 		public:
-			static constexpr ECS::SystemPhase Phase = PhaseValue;
+			static constexpr Ludus::ECS::SystemPhase Phase = PhaseValue;
 			static constexpr int Order = OrderValue;
 
 			explicit OrderedSystem(SystemTrace& trace) : _trace(trace) {}
 
-			void OnCreate(ECS::World&) override { ++_trace.createCount; }
-			void OnUpdate(ECS::World&) override { _trace.updateOrder.push_back(Marker); }
-			void OnFixedUpdate(ECS::World&, double fixedDeltaTime) override
+			void OnCreate(Ludus::ECS::World&) override { ++_trace.createCount; }
+			void OnUpdate(Ludus::ECS::World&) override { _trace.updateOrder.push_back(Marker); }
+			void OnFixedUpdate(Ludus::ECS::World&, double fixedDeltaTime) override
 			{
 				_trace.fixedUpdateOrder.push_back(Marker);
 				_trace.fixedDeltaTime = fixedDeltaTime;
@@ -76,9 +76,9 @@ namespace Tests
 
 		bool RunEntityAndComponentTests()
 		{
-			ECS::World world;
-			const ECS::Entity movingEntity = world.CreateEntity();
-			const ECS::Entity positionOnlyEntity = world.CreateEntity();
+			Ludus::ECS::World world;
+			const Ludus::ECS::Entity movingEntity = world.CreateEntity();
+			const Ludus::ECS::Entity positionOnlyEntity = world.CreateEntity();
 			if (world.GetEntityCount() != 2 || !world.IsEntityAlive(movingEntity) ||
 				!world.IsEntityAlive(positionOnlyEntity))
 				return EcsTestFailed("entity creation or alive count is incorrect");
@@ -104,8 +104,8 @@ namespace Tests
 				return EcsTestFailed("movement query updated the wrong component data");
 
 			std::size_t constVisitCount = 0;
-			const ECS::World& constWorld = world;
-			constWorld.ForEach<Position>([&](ECS::Entity, const Position&) { ++constVisitCount; });
+			const Ludus::ECS::World& constWorld = world;
+			constWorld.ForEach<Position>([&](Ludus::ECS::Entity, const Position&) { ++constVisitCount; });
 			if (constVisitCount != 2)
 				return EcsTestFailed("const query did not visit every matching entity");
 
@@ -122,7 +122,7 @@ namespace Tests
 			if (world.IsEntityAlive(movingEntity) || world.GetEntityCount() != 1)
 				return EcsTestFailed("entity removal is incorrect");
 
-			const ECS::Entity reusedEntity = world.CreateEntity();
+			const Ludus::ECS::Entity reusedEntity = world.CreateEntity();
 			if (reusedEntity.id != movingEntity.id ||
 				reusedEntity.generation == movingEntity.generation ||
 				world.IsEntityAlive(movingEntity))
@@ -133,12 +133,12 @@ namespace Tests
 
 		bool RunSystemOrderTests()
 		{
-			using PreUpdateSystem = OrderedSystem<ECS::SystemPhase::PREUPDATE, 500, 1>;
-			using FirstUpdateSystem = OrderedSystem<ECS::SystemPhase::UPDATE, 100, 2>;
-			using SecondUpdateSystem = OrderedSystem<ECS::SystemPhase::UPDATE, 200, 3>;
-			using TiedUpdateSystem = OrderedSystem<ECS::SystemPhase::UPDATE, 200, 4>;
+			using PreUpdateSystem = OrderedSystem<Ludus::ECS::SystemPhase::PREUPDATE, 500, 1>;
+			using FirstUpdateSystem = OrderedSystem<Ludus::ECS::SystemPhase::UPDATE, 100, 2>;
+			using SecondUpdateSystem = OrderedSystem<Ludus::ECS::SystemPhase::UPDATE, 200, 3>;
+			using TiedUpdateSystem = OrderedSystem<Ludus::ECS::SystemPhase::UPDATE, 200, 4>;
 
-			ECS::World world;
+			Ludus::ECS::World world;
 			SystemTrace trace;
 			world.AddSystem<SecondUpdateSystem>(trace);
 			world.AddSystem<TiedUpdateSystem>(trace);

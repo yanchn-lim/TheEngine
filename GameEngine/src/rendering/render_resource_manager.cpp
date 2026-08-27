@@ -2,20 +2,20 @@
 
 #include "debug/debug.hpp"
 
-namespace Rendering
+namespace Ludus::Rendering
 {
-    RenderResourceManager::RenderResourceManager(const Assets::AssetManager& assets, Graphics::IGraphicsDevice& device)
+    RenderResourceManager::RenderResourceManager(const Ludus::Assets::AssetManager& assets, Ludus::Graphics::IGraphicsDevice& device)
         : _assets(assets), _device(device)
     {
     }
 
     bool RenderResourceManager::Resolve(
-        Assets::MeshHandle meshHandle,
-        Assets::MaterialHandle materialOverride,
+        Ludus::Assets::MeshHandle meshHandle,
+        Ludus::Assets::MaterialHandle materialOverride,
         std::vector<ResolvedDraw>& output)
     {
         MeshGpu* mesh = ResolveMesh(meshHandle);
-        const Assets::MeshAsset* asset = _assets.Get(meshHandle);
+        const Ludus::Assets::MeshAsset* asset = _assets.Get(meshHandle);
 
         if (!mesh || !asset || mesh->surfaces.size() != asset->surfaces.size())
             return false;
@@ -32,10 +32,10 @@ namespace Rendering
         for (size_t index = 0; index < mesh->surfaces.size(); ++index)
         {
             SurfaceGpu& surface = mesh->surfaces[index];
-            const Assets::MeshSurface& source = asset->surfaces[index];
-            const Assets::MaterialHandle materialHandle =
+            const Ludus::Assets::MeshSurface& source = asset->surfaces[index];
+            const Ludus::Assets::MaterialHandle materialHandle =
                 materialOverride ? materialOverride : source.material;
-            const Assets::MaterialAsset* material = _assets.Get(materialHandle);
+            const Ludus::Assets::MaterialAsset* material = _assets.Get(materialHandle);
 
             if (!material)
             {
@@ -43,8 +43,8 @@ namespace Rendering
                 return false;
             }
 
-            const Graphics::GpuShaderHandle shader = ResolveShader(material->shader);
-            const Graphics::GpuTextureHandle texture = ResolveTexture(material->texture);
+            const Ludus::Graphics::GpuShaderHandle shader = ResolveShader(material->shader);
+            const Ludus::Graphics::GpuTextureHandle texture = ResolveTexture(material->texture);
 
             if (!shader || !texture)
             {
@@ -52,13 +52,13 @@ namespace Rendering
                 return false;
             }
 
-            Graphics::GpuPipelineHandle pipeline;
+            Ludus::Graphics::GpuPipelineHandle pipeline;
             const auto existing = surface.pipelines.find(materialHandle.id);
             if (existing != surface.pipelines.end())
                 pipeline = existing->second;
             else
             {
-                Graphics::GraphicsPipelineDesc desc;
+                Ludus::Graphics::GraphicsPipelineDesc desc;
                 desc.shader = shader;
                 desc.vertexLayout = surface.layout;
                 desc.topology = surface.topology;
@@ -89,13 +89,13 @@ namespace Rendering
         return true;
     }
 
-    RenderResourceManager::MeshGpu* RenderResourceManager::ResolveMesh(Assets::MeshHandle handle)
+    RenderResourceManager::MeshGpu* RenderResourceManager::ResolveMesh(Ludus::Assets::MeshHandle handle)
     {
         // upload vertex and index data only when the asset first becomes visible
         if (const auto existing = _meshes.find(handle.id); existing != _meshes.end())
             return &existing->second;
 
-        const Assets::MeshAsset* asset = _assets.Get(handle);
+        const Ludus::Assets::MeshAsset* asset = _assets.Get(handle);
 
         if (!asset || asset->surfaces.empty())
             return nullptr;
@@ -103,19 +103,19 @@ namespace Rendering
         MeshGpu mesh;
         mesh.surfaces.reserve(asset->surfaces.size());
 
-        for (const Assets::MeshSurface& source : asset->surfaces)
+        for (const Ludus::Assets::MeshSurface& source : asset->surfaces)
         {
             SurfaceGpu surface;
-            surface.layout = Assets::CreateMeshVertexLayout();
+            surface.layout = Ludus::Assets::CreateMeshVertexLayout();
             surface.topology = source.topology;
             surface.vertexCount = static_cast<uint32_t>(source.vertices.size());
             surface.indexCount = static_cast<uint32_t>(source.indices.size());
             surface.vertexBuffer = _device.CreateBuffer({ source.vertices.data(),
-                source.vertices.size() * sizeof(Assets::MeshVertex), Graphics::BufferUsage::Vertex });
+                source.vertices.size() * sizeof(Ludus::Assets::MeshVertex), Ludus::Graphics::BufferUsage::Vertex });
 
             if (!source.indices.empty())
                 surface.indexBuffer = _device.CreateBuffer({ source.indices.data(),
-                    source.indices.size() * sizeof(uint32_t), Graphics::BufferUsage::Index });
+                    source.indices.size() * sizeof(uint32_t), Ludus::Graphics::BufferUsage::Index });
 
             if (!surface.vertexBuffer || (surface.indexCount && !surface.indexBuffer))
             {
@@ -137,18 +137,18 @@ namespace Rendering
         return &_meshes.emplace(handle.id, std::move(mesh)).first->second;
     }
 
-    Graphics::GpuTextureHandle RenderResourceManager::ResolveTexture(Assets::TextureHandle handle)
+    Ludus::Graphics::GpuTextureHandle RenderResourceManager::ResolveTexture(Ludus::Assets::TextureHandle handle)
     {
         // upload texture pixels only when the asset first becomes visible
         if (const auto existing = _textures.find(handle.id); existing != _textures.end())
             return existing->second;
 
-        const Assets::TextureAsset* asset = _assets.Get(handle);
+        const Ludus::Assets::TextureAsset* asset = _assets.Get(handle);
 
         if (!asset || asset->pixels.empty())
             return {};
 
-        const Graphics::GpuTextureHandle texture =
+        const Ludus::Graphics::GpuTextureHandle texture =
             _device.CreateTexture({ asset->pixels.data(), asset->width, asset->height });
 
         if (texture)
@@ -157,24 +157,24 @@ namespace Rendering
         return texture;
     }
 
-    Graphics::GpuShaderHandle RenderResourceManager::ResolveShader(Assets::ShaderHandle handle)
+    Ludus::Graphics::GpuShaderHandle RenderResourceManager::ResolveShader(Ludus::Assets::ShaderHandle handle)
     {
         if (const auto existing = _shaders.find(handle.id); existing != _shaders.end())
             return existing->second;
 
-        const Assets::ShaderAsset* asset = _assets.Get(handle);
+        const Ludus::Assets::ShaderAsset* asset = _assets.Get(handle);
 
         if (!asset)
             return {};
 
-        Graphics::ShaderProgramDesc desc;
+        Ludus::Graphics::ShaderProgramDesc desc;
         desc.vertexSource = asset->vertexSource;
         desc.fragmentSource = asset->fragmentSource;
         desc.vertexSpirv = asset->vertexSpirv;
         desc.fragmentSpirv = asset->fragmentSpirv;
         desc.label = asset->label;
 
-        const Graphics::GpuShaderHandle shader = _device.CreateShader(desc);
+        const Ludus::Graphics::GpuShaderHandle shader = _device.CreateShader(desc);
         if (shader)
             _shaders.emplace(handle.id, shader);
 

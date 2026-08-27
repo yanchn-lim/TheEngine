@@ -27,12 +27,12 @@ namespace
 		std::atomic<std::size_t> frameFreedBytes{};
 		std::atomic<std::size_t> frameAllocationCount{};
 		std::atomic<std::size_t> frameFreeCount{};
-		Memory::CpuMemoryStats lastFrameStats{};
+		Ludus::Memory::CpuMemoryStats lastFrameStats{};
 	};
 
 	struct ResourceTrackerState
 	{
-		std::map<std::pair<Memory::ResourceMemoryDomain, std::string>, Memory::ResourceMemoryStats> resources;
+		std::map<std::pair<Ludus::Memory::ResourceMemoryDomain, std::string>, Ludus::Memory::ResourceMemoryStats> resources;
 		std::mutex resourceMutex;
 	};
 
@@ -82,20 +82,20 @@ namespace
 		state.frameFreeCount.fetch_add(1, std::memory_order_relaxed);
 	}
 
-	void AddResource(Memory::ResourceMemoryDomain domain, std::string_view label, std::size_t bytes)
+	void AddResource(Ludus::Memory::ResourceMemoryDomain domain, std::string_view label, std::size_t bytes)
 	{
 		ResourceTrackerState& state = GetResourceState();
 		std::lock_guard lock(state.resourceMutex);
 		auto [it, inserted] = state.resources.try_emplace(
 			std::make_pair(domain, std::string(label)),
-			Memory::ResourceMemoryStats{ std::string(label), domain });
-		Memory::ResourceMemoryStats& resource = it->second;
+			Ludus::Memory::ResourceMemoryStats{ std::string(label), domain });
+		Ludus::Memory::ResourceMemoryStats& resource = it->second;
 		resource.currentBytes += bytes;
 		resource.resourceCount += 1;
 		resource.peakBytes = std::max(resource.peakBytes, resource.currentBytes);
 	}
 
-	void RemoveResource(Memory::ResourceMemoryDomain domain, const std::string& label, std::size_t bytes)
+	void RemoveResource(Ludus::Memory::ResourceMemoryDomain domain, const std::string& label, std::size_t bytes)
 	{
 		ResourceTrackerState& state = GetResourceState();
 		std::lock_guard lock(state.resourceMutex);
@@ -103,7 +103,7 @@ namespace
 		if (it == state.resources.end())
 			return;
 
-		Memory::ResourceMemoryStats& resource = it->second;
+		Ludus::Memory::ResourceMemoryStats& resource = it->second;
 		resource.currentBytes -= bytes;
 		resource.resourceCount -= 1;
 		if (resource.resourceCount == 0)
@@ -111,7 +111,7 @@ namespace
 	}
 }
 
-namespace Memory
+namespace Ludus::Memory
 {
 	void BeginFrame()
 	{
@@ -236,7 +236,7 @@ namespace Memory
 
 #else
 
-namespace Memory
+namespace Ludus::Memory
 {
 	void BeginFrame() {}
 	void EndFrame() {}

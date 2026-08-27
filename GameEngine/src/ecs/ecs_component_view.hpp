@@ -3,7 +3,7 @@
 #include <span>
 #include "ecs_entity.hpp"
 
-namespace ECS
+namespace Ludus::ECS
 {
 	template<typename Component>
 	struct ComponentView

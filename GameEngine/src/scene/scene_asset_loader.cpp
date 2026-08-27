@@ -25,13 +25,13 @@ namespace Ludus
 				std::string(category) + "::" + std::string(alias);
 		}
 
-		std::optional<Graphics::BlendMode> ParseBlendMode(
+		std::optional<Ludus::Graphics::BlendMode> ParseBlendMode(
 			const Object& object,
 			std::vector<SceneLoadError>& errors)
 		{
-			const Serialization::LSceneValue* value = FindField(object, "blend");
+			const Ludus::Serialization::LSceneValue* value = FindField(object, "blend");
 			if (!value)
-				return Graphics::BlendMode::ALPHA;
+				return Ludus::Graphics::BlendMode::ALPHA;
 
 			const std::string* text = value->TryGetString();
 			if (!text)
@@ -40,19 +40,19 @@ namespace Ludus
 				return std::nullopt;
 			}
 
-			if (*text == "none") return Graphics::BlendMode::NONE;
-			if (*text == "alpha") return Graphics::BlendMode::ALPHA;
-			if (*text == "additive") return Graphics::BlendMode::ADDITIVE;
-			if (*text == "premultiplied_alpha") return Graphics::BlendMode::PREMULTIPLIED_ALPHA;
-			if (*text == "multiply") return Graphics::BlendMode::MULTIPLY;
+			if (*text == "none") return Ludus::Graphics::BlendMode::NONE;
+			if (*text == "alpha") return Ludus::Graphics::BlendMode::ALPHA;
+			if (*text == "additive") return Ludus::Graphics::BlendMode::ADDITIVE;
+			if (*text == "premultiplied_alpha") return Ludus::Graphics::BlendMode::PREMULTIPLIED_ALPHA;
+			if (*text == "multiply") return Ludus::Graphics::BlendMode::MULTIPLY;
 
 			AddError(errors, *value, "unknown blend mode '" + *text + "'");
 			return std::nullopt;
 		}
 
 		bool LoadShaders(
-			const Serialization::LSceneValue& category,
-			Assets::AssetManager& assets,
+			const Ludus::Serialization::LSceneValue& category,
+			Ludus::Assets::AssetManager& assets,
 			SceneAssetContext& context,
 			std::vector<SceneLoadError>& errors)
 		{
@@ -78,7 +78,7 @@ namespace Ludus
 					SceneValues::OptionalString(*fields, "fragment_spirv", fragmentSpirv, errors);
 				if (!vertex || !fragment || !optionalValid) { success = false; continue; }
 
-				const Assets::ShaderHandle handle = assets.LoadShader(*vertex, *fragment, vertexSpirv, fragmentSpirv);
+				const Ludus::Assets::ShaderHandle handle = assets.LoadShader(*vertex, *fragment, vertexSpirv, fragmentSpirv);
 				if (!handle)
 				{
 					AddError(errors, value, "failed to load shader '" + name + "'");
@@ -91,8 +91,8 @@ namespace Ludus
 		}
 
 		bool LoadTextures(
-			const Serialization::LSceneValue& category,
-			Assets::AssetManager& assets,
+			const Ludus::Serialization::LSceneValue& category,
+			Ludus::Assets::AssetManager& assets,
 			SceneAssetContext& context,
 			std::vector<SceneLoadError>& errors)
 		{
@@ -110,7 +110,7 @@ namespace Ludus
 				const std::string* source = SceneValues::RequiredString(*fields, "source", value, errors);
 				if (!source) { success = false; continue; }
 
-				const Assets::TextureHandle handle = assets.LoadTexture(*source);
+				const Ludus::Assets::TextureHandle handle = assets.LoadTexture(*source);
 				if (!handle)
 				{
 					AddError(errors, value, "failed to load texture '" + name + "'");
@@ -123,9 +123,9 @@ namespace Ludus
 		}
 
 		bool LoadMaterials(
-			const Serialization::LSceneValue& category,
+			const Ludus::Serialization::LSceneValue& category,
 			std::string_view sceneNamespace,
-			Assets::AssetManager& assets,
+			Ludus::Assets::AssetManager& assets,
 			SceneAssetContext& context,
 			std::vector<SceneLoadError>& errors)
 		{
@@ -162,14 +162,14 @@ namespace Ludus
 					continue;
 				}
 
-				Graphics::RenderState state;
+				Ludus::Graphics::RenderState state;
 				if (!SceneValues::OptionalBoolean(*fields, "depth_test", state.depthTest, errors) ||
 					!SceneValues::OptionalBoolean(*fields, "depth_write", state.depthWrite, errors) ||
 					!SceneValues::OptionalBoolean(*fields, "culling", state.culling, errors))
 				{ success = false; continue; }
 				state.blendMode = *blend;
 
-				const Assets::MaterialHandle handle =
+				const Ludus::Assets::MaterialHandle handle =
 					assets.CreateMaterial(
 						RegistryName(sceneNamespace, "material", name),
 						shader->second,
@@ -187,9 +187,9 @@ namespace Ludus
 		}
 
 		bool LoadMeshes(
-			const Serialization::LSceneValue& category,
+			const Ludus::Serialization::LSceneValue& category,
 			std::string_view sceneNamespace,
-			Assets::AssetManager& assets,
+			Ludus::Assets::AssetManager& assets,
 			SceneAssetContext& context,
 			std::vector<SceneLoadError>& errors)
 		{
@@ -207,7 +207,7 @@ namespace Ludus
 				const std::string* source = SceneValues::RequiredString(*fields, "source", value, errors);
 				if (!source) { success = false; continue; }
 
-				const Assets::MeshHandle handle = assets.LoadMesh(
+				const Ludus::Assets::MeshHandle handle = assets.LoadMesh(
 					RegistryName(sceneNamespace, "mesh", name), *source);
 				if (!handle)
 				{
@@ -217,7 +217,7 @@ namespace Ludus
 				}
 				context.meshes.emplace(name, handle);
 
-				const Serialization::LSceneValue* assignments = FindField(*fields, "surface_materials");
+				const Ludus::Serialization::LSceneValue* assignments = FindField(*fields, "surface_materials");
 				if (assignments)
 				{
 					const Object* assignmentFields = SceneValues::RequireObject(
@@ -247,10 +247,10 @@ namespace Ludus
 					}
 				}
 
-				const Assets::MeshAsset* mesh = assets.Get(handle);
+				const Ludus::Assets::MeshAsset* mesh = assets.Get(handle);
 				const bool hasDefaultMaterials = mesh && std::ranges::all_of(
 					mesh->surfaces,
-					[](const Assets::MeshSurface& surface)
+					[](const Ludus::Assets::MeshSurface& surface)
 					{
 						return surface.material.IsValid();
 					});
@@ -261,16 +261,16 @@ namespace Ludus
 	}
 
 	bool SceneAssetLoader::Load(
-		const Serialization::LSceneValue& root,
+		const Ludus::Serialization::LSceneValue& root,
 		std::string_view sceneNamespace,
-		Assets::AssetManager& assets,
+		Ludus::Assets::AssetManager& assets,
 		SceneAssetContext& context,
 		std::vector<SceneLoadError>& errors)
 	{
 		const size_t firstError = errors.size();
 		context = {};
 		SceneAssetContext loaded;
-		const Serialization::LSceneValue* assetsValue = root.Find("assets");
+		const Ludus::Serialization::LSceneValue* assetsValue = root.Find("assets");
 		if (!assetsValue)
 			return true;
 

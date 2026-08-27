@@ -2,7 +2,7 @@
 
 #include "model_importer_registry.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
     // converts OBJ files into the engine's backend-neutral import structures
     class ObjImporter : public IModelImporter

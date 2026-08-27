@@ -28,7 +28,7 @@ namespace
     }
 }
 
-namespace Assets
+namespace Ludus::Assets
 {
     ShaderHandle ShaderRegistry::Load(
         const std::string& vertexPath,
@@ -45,17 +45,17 @@ namespace Assets
         // retain GLSL and SPIR-V together so the selected back end uses its native form
         ShaderAsset asset;
         asset.label = key;
-        if (!FileSystem::ReadTextFile(vertexPath.c_str(), asset.vertexSource) ||
-            !FileSystem::ReadTextFile(fragmentPath.c_str(), asset.fragmentSource))
+        if (!Ludus::FileSystem::ReadTextFile(vertexPath.c_str(), asset.vertexSource) ||
+            !Ludus::FileSystem::ReadTextFile(fragmentPath.c_str(), asset.fragmentSource))
         {
-            Debug::LogError("ShaderRegistry::Load : Failed to read GLSL source for ", key);
+            Ludus::Debug::LogError("ShaderRegistry::Load : Failed to read GLSL source for ", key);
             return {};
         }
 
         if (!ReadSpirv(vertexSpirvPath, asset.vertexSpirv) ||
             !ReadSpirv(fragmentSpirvPath, asset.fragmentSpirv))
         {
-            Debug::LogError("ShaderRegistry::Load : Failed to read SPIR-V for ", key);
+            Ludus::Debug::LogError("ShaderRegistry::Load : Failed to read SPIR-V for ", key);
             return {};
         }
 

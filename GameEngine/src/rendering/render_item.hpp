@@ -4,12 +4,12 @@
 
 #include "assets/asset_handle.hpp"
 
-namespace Rendering
+namespace Ludus::Rendering
 {
     struct MeshInstanceDesc
     {
-        Assets::MeshHandle mesh;
-        Assets::MaterialHandle materialOverride;
+        Ludus::Assets::MeshHandle mesh;
+        Ludus::Assets::MaterialHandle materialOverride;
         glm::mat4 transform{ 1.0f };
     };
 }

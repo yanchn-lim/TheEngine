@@ -2,7 +2,7 @@
 
 #include "graphics/imgui_backend.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // adapts ImGui platform and renderer calls to the active OpenGL context
     class OpenGLImGuiBackend final : public IImGuiBackend

@@ -3,7 +3,7 @@
 #include "vulkan_include.hpp"
 #include <optional>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     class VulkanContext;
 

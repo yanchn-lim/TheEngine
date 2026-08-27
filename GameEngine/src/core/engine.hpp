@@ -4,10 +4,11 @@
 
 #include "assets/asset_manager.hpp"
 #include "engine_config.hpp"
+#include "input.hpp"
 #include "platform/window.hpp"
 #include "time.hpp"
 
-namespace Rendering
+namespace Ludus::Rendering
 {
     class RenderEngine;
 }
@@ -31,20 +32,21 @@ namespace Ludus
         void RequestStop() noexcept;
 
         const Time& GetTime() const noexcept;
-        Assets::AssetManager& GetAssets() noexcept;
-        Rendering::RenderEngine& GetRenderEngine() noexcept;
+        Ludus::Assets::AssetManager& GetAssets() noexcept;
+        Ludus::Rendering::RenderEngine& GetRenderEngine() noexcept;
+		const Input& GetInput() const noexcept;
 
     private:
         bool Initialize();
         void Update();
         void Shutdown();
-        void HandleKey(int key, int action);
 
         EngineConfig _config;
         Time _time{};
-        Platform::Window _window;
-        Assets::AssetManager _assets;
-        std::unique_ptr<Rendering::RenderEngine> _renderEngine;
+		Input _input;
+        Ludus::Platform::Window _window;
+        Ludus::Assets::AssetManager _assets;
+        std::unique_ptr<Ludus::Rendering::RenderEngine> _renderEngine;
         IApplication* _application = nullptr;
         bool _running = false;
     };

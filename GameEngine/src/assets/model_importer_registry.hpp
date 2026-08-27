@@ -6,7 +6,7 @@
 
 #include "mesh_import_data.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
     // isolates file-format parsing from the asset manager
     class IModelImporter

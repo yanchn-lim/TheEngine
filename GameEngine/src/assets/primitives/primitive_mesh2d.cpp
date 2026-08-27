@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Assets::Primitive2D
+namespace Ludus::Assets::Primitive2D
 {
 	namespace
 	{
@@ -32,7 +32,7 @@ namespace Assets::Primitive2D
 			{ { -0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } }
 		};
 		data.indices = { 0, 1, 2 };
-		data.topology = Graphics::PrimitiveTopology::TRIANGLES;
+		data.topology = Ludus::Graphics::PrimitiveTopology::TRIANGLES;
 
 		return data;
 	}
@@ -49,7 +49,7 @@ namespace Assets::Primitive2D
 			{ { -0.5f,  0.5f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } }
 		};
 		data.indices = { 0, 1, 2, 2, 3, 0 };
-		data.topology = Graphics::PrimitiveTopology::TRIANGLES;
+		data.topology = Ludus::Graphics::PrimitiveTopology::TRIANGLES;
 
 		return data;
 	}
@@ -81,7 +81,7 @@ namespace Assets::Primitive2D
 			data.indices.push_back(next);
 		}
 
-		data.topology = Graphics::PrimitiveTopology::TRIANGLES;
+		data.topology = Ludus::Graphics::PrimitiveTopology::TRIANGLES;
 
 		return data;
 	}

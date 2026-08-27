@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     template<typename HandleType>
     uint32_t AcquireResourceTableOwner()

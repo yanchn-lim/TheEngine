@@ -3,7 +3,7 @@
 #include <limits>
 #include <algorithm>
 
-namespace ECS
+namespace Ludus::ECS
 {
 	World::~World()
 	{

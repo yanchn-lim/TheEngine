@@ -34,6 +34,9 @@
     <Filter Include="Source Files\debug">
       <UniqueIdentifier>{81027967-9e66-4b59-9c2f-b59821b0bd1b}</UniqueIdentifier>
     </Filter>
+	<Filter Include="Source Files\editor">
+	  <UniqueIdentifier>{A73C7541-4A4D-46AA-85C7-D8A2B15F8F68}</UniqueIdentifier>
+	</Filter>
     <Filter Include="Source Files\graphics">
       <UniqueIdentifier>{9ebdb4e0-7e42-424b-bf1b-9c45f2f5a77a}</UniqueIdentifier>
     </Filter>
@@ -61,6 +64,9 @@
     <Filter Include="Header Files\debug">
       <UniqueIdentifier>{d8a758c0-9d2f-4585-8ff4-87db6d7e0716}</UniqueIdentifier>
     </Filter>
+	<Filter Include="Header Files\editor">
+	  <UniqueIdentifier>{CF573BE6-BC05-42A5-B9C2-241292265974}</UniqueIdentifier>
+	</Filter>
     <Filter Include="Header Files\graphics">
       <UniqueIdentifier>{7b4aa6a8-2957-4bfb-a94f-233cfd6703eb}</UniqueIdentifier>
     </Filter>
@@ -165,6 +171,9 @@
     <ClCompile Include="src\core\engine.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+	<ClCompile Include="src\core\input.cpp">
+	  <Filter>Source Files\core</Filter>
+	</ClCompile>
     <ClCompile Include="src\platform\window.cpp">
       <Filter>Source Files\platform</Filter>
     </ClCompile>
@@ -180,6 +189,18 @@
     <ClCompile Include="src\debug\profiler_ui.cpp">
       <Filter>Source Files\debug</Filter>
     </ClCompile>
+	<ClCompile Include="src\editor\hierarchy_panel.cpp">
+	  <Filter>Source Files\editor</Filter>
+	</ClCompile>
+	<ClCompile Include="src\editor\editor_command_history.cpp">
+	  <Filter>Source Files\editor</Filter>
+	</ClCompile>
+	<ClCompile Include="src\editor\inspector_panel.cpp">
+	  <Filter>Source Files\editor</Filter>
+	</ClCompile>
+	<ClCompile Include="src\editor\value_editor.cpp">
+	  <Filter>Source Files\editor</Filter>
+	</ClCompile>
     <ClCompile Include="src\debug\profiler.cpp">
       <Filter>Source Files\debug</Filter>
     </ClCompile>
@@ -267,6 +288,9 @@
     <ClCompile Include="src\tests\graphics_api_tests.cpp">
       <Filter>Source Files\tests</Filter>
     </ClCompile>
+	<ClCompile Include="src\tests\input_tests.cpp">
+	  <Filter>Source Files\tests</Filter>
+	</ClCompile>
     <ClCompile Include="src\tests\ecs_tests.cpp">
       <Filter>Source Files\tests</Filter>
     </ClCompile>
@@ -303,6 +327,9 @@
     <ClCompile Include="src\scene\scene_value_reader.cpp">
       <Filter>Source Files\scene</Filter>
     </ClCompile>
+	<ClCompile Include="src\scene\system_registry.cpp">
+	  <Filter>Source Files\scene</Filter>
+	</ClCompile>
 	<ClCompile Include="src\serialization\lscene_writer.cpp">
 	  <Filter>Source Files\serialization</Filter>
 	</ClCompile>
@@ -350,6 +377,12 @@
     <ClInclude Include="src\core\engine.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+	<ClInclude Include="src\core\action_map.hpp">
+	  <Filter>Header Files\core</Filter>
+	</ClInclude>
+	<ClInclude Include="src\core\input.hpp">
+	  <Filter>Header Files\core</Filter>
+	</ClInclude>
     <ClInclude Include="src\core\application.hpp">
       <Filter>Header Files\core</Filter>
     </ClInclude>
@@ -380,6 +413,18 @@
     <ClInclude Include="src\debug\profiler_ui.hpp">
       <Filter>Header Files\debug</Filter>
     </ClInclude>
+	<ClInclude Include="src\editor\hierarchy_panel.hpp">
+	  <Filter>Header Files\editor</Filter>
+	</ClInclude>
+	<ClInclude Include="src\editor\editor_command_history.hpp">
+	  <Filter>Header Files\editor</Filter>
+	</ClInclude>
+	<ClInclude Include="src\editor\inspector_panel.hpp">
+	  <Filter>Header Files\editor</Filter>
+	</ClInclude>
+	<ClInclude Include="src\editor\value_editor.hpp">
+	  <Filter>Header Files\editor</Filter>
+	</ClInclude>
     <ClInclude Include="src\debug\profiler.hpp">
       <Filter>Header Files\debug</Filter>
     </ClInclude>
@@ -503,6 +548,9 @@
     <ClInclude Include="src\tests\graphics_api_tests.hpp">
       <Filter>Header Files\tests</Filter>
     </ClInclude>
+	<ClInclude Include="src\tests\input_tests.hpp">
+	  <Filter>Header Files\tests</Filter>
+	</ClInclude>
     <ClInclude Include="src\tests\ecs_tests.hpp">
       <Filter>Header Files\tests</Filter>
     </ClInclude>
@@ -533,9 +581,6 @@
     <ClInclude Include="src\ecs\ecs_system.hpp">
       <Filter>Header Files\ecs</Filter>
     </ClInclude>
-    <ClInclude Include="src\ecs\ecs_system_registry.hpp">
-      <Filter>Header Files\ecs</Filter>
-    </ClInclude>
     <ClInclude Include="src\scene\scene.hpp">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
@@ -560,6 +605,9 @@
     <ClInclude Include="src\scene\scene_value_reader.hpp">
       <Filter>Header Files\scene</Filter>
     </ClInclude>
+	<ClInclude Include="src\scene\system_registry.hpp">
+	  <Filter>Header Files\scene</Filter>
+	</ClInclude>
 	<ClInclude Include="src\serialization\lscene_writer.hpp">
 	  <Filter>Header Files\serialization</Filter>
 	</ClInclude>

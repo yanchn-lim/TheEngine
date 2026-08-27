@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // identifies one resource slot and rejects stale or foreign device handles
     template<typename Tag>

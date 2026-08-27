@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -20,32 +21,41 @@ namespace Ludus
 	{
 	public:
 		using Loader = std::function<bool(
-			const Serialization::LSceneValue&,
+			const Ludus::Serialization::LSceneValue&,
 			const SceneAssetContext&,
-			ECS::World&,
-			ECS::Entity,
+			Ludus::ECS::World&,
+			Ludus::ECS::Entity,
 			std::vector<SceneLoadError>&)>;
 
 		using Saver = std::function<bool(
 			const SceneAssetContext&,
-			const ECS::World&,
-			ECS::Entity,
-			Serialization::LSceneValue&,
+			const Ludus::ECS::World&,
+			Ludus::ECS::Entity,
+			Ludus::Serialization::LSceneValue&,
 			std::vector<std::string>&)>;
 
-		using PresenceCheck = std::function<bool(const ECS::World&, ECS::Entity)>;
+		using PresenceCheck = std::function<bool(const Ludus::ECS::World&, Ludus::ECS::Entity)>;
+		using Updater = std::function<bool(
+			const Ludus::Serialization::LSceneValue&,
+			const SceneAssetContext&,
+			Ludus::ECS::World&,
+			Ludus::ECS::Entity,
+			std::vector<SceneLoadError>&)>;
 
 		template<typename Component>
 		bool Register()
 		{
 			using Codec = SceneComponentCodec<Component>;
+			static_assert(
+				std::is_move_assignable_v<Component>,
+				"Editable scene components must be move assignable");
 
 			return RegisterEntry(
 				std::string(Codec::Name),
-				[](const Serialization::LSceneValue& value,
+				[](const Ludus::Serialization::LSceneValue& value,
 					const SceneAssetContext& assets,
-					ECS::World& world,
-					ECS::Entity entity,
+					Ludus::ECS::World& world,
+					Ludus::ECS::Entity entity,
 					std::vector<SceneLoadError>& errors)
 				{
 					Component component;
@@ -55,34 +65,64 @@ namespace Ludus
 					return true;
 				},
 				[](const SceneAssetContext& assets,
-					const ECS::World& world,
-					ECS::Entity entity,
-					Serialization::LSceneValue& output,
+					const Ludus::ECS::World& world,
+					Ludus::ECS::Entity entity,
+					Ludus::Serialization::LSceneValue& output,
 					std::vector<std::string>& errors)
 				{
 					const Component* component = world.TryGetComponent<Component>(entity);
 					return component && Codec::Save(*component, assets, output, errors);
 				},
-				[](const ECS::World& world, ECS::Entity entity)
+				[](const Ludus::ECS::World& world, Ludus::ECS::Entity entity)
 				{
 					return world.HasComponent<Component>(entity);
+				},
+				[](const Ludus::Serialization::LSceneValue& value,
+					const SceneAssetContext& assets,
+					Ludus::ECS::World& world,
+					Ludus::ECS::Entity entity,
+					std::vector<SceneLoadError>& errors)
+				{
+					Component* existing = world.TryGetComponent<Component>(entity);
+					if (!existing)
+					{
+						errors.push_back({
+							"entity does not have component '" +
+							std::string(Codec::Name) + "'",
+							value.GetLocation() });
+						return false;
+					}
+
+					Component updated;
+					if (!Codec::Load(value, assets, updated, errors))
+						return false;
+					*existing = std::move(updated);
+					return true;
 				});
 		}
 
 		bool Load(
 			std::string_view name,
-			const Serialization::LSceneValue& value,
+			const Ludus::Serialization::LSceneValue& value,
 			const SceneAssetContext& assets,
-			ECS::World& world,
-			ECS::Entity entity,
+			Ludus::ECS::World& world,
+			Ludus::ECS::Entity entity,
 			std::vector<SceneLoadError>& errors) const;
 
 		bool SaveComponents(
 			const SceneAssetContext& assets,
-			const ECS::World& world,
-			ECS::Entity entity,
-			Serialization::LSceneValue::Object& output,
+			const Ludus::ECS::World& world,
+			Ludus::ECS::Entity entity,
+			Ludus::Serialization::LSceneValue::Object& output,
 			std::vector<std::string>& errors) const;
+
+		bool Update(
+			std::string_view name,
+			const Ludus::Serialization::LSceneValue& value,
+			const SceneAssetContext& assets,
+			Ludus::ECS::World& world,
+			Ludus::ECS::Entity entity,
+			std::vector<SceneLoadError>& errors) const;
 
 	private:
 		struct Entry
@@ -91,13 +131,15 @@ namespace Ludus
 			Loader load;
 			Saver save;
 			PresenceCheck has;
+			Updater update;
 		};
 
 		bool RegisterEntry(
 			std::string name,
 			Loader loader,
 			Saver saver,
-			PresenceCheck has);
+			PresenceCheck has,
+			Updater updater);
 
 		std::vector<Entry> _entries;
 		std::unordered_map<std::string, size_t> _indices;

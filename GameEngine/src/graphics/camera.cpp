@@ -2,7 +2,7 @@
 
 #include "camera.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	void Camera2D::SetViewport(float width, float height)
 	{

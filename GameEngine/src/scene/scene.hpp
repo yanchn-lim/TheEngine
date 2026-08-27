@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 #include "ecs/ecs_world.hpp"
 #include "scene_asset_context.hpp"
@@ -10,42 +11,54 @@
 
 namespace Ludus
 {
+	struct SceneSystemDefinition
+	{
+		std::string id;
+		bool enabled = true;
+		Ludus::Serialization::LSceneValue config = Ludus::Serialization::LSceneValue::ObjectValue();
+	};
+
 	class Scene
 	{
 	public:
 		struct EntityRecord
 		{
-			ECS::Entity entity;
+			Ludus::ECS::Entity entity;
 			std::string name;
 		};
 
-		ECS::Entity CreateEntity(std::string id, std::string name);
+		Ludus::ECS::Entity CreateEntity(std::string id, std::string name);
 		// Remove stable scene entities through Scene to keep their text IDs synchronized.
 		bool RemoveEntity(std::string_view id);
-		ECS::Entity FindEntity(std::string_view id) const;
+		Ludus::ECS::Entity FindEntity(std::string_view id) const;
 		std::string_view GetEntityName(std::string_view id) const;
 		const std::unordered_map<std::string, EntityRecord>& GetEntities() const noexcept;
 
 		void SetSerializationData(
 			std::string name,
-			Serialization::LSceneValue assets,
-			SceneAssetContext assetContext);
+			Ludus::Serialization::LSceneValue assets,
+			SceneAssetContext assetContext,
+			std::vector<SceneSystemDefinition> systems = {});
 		std::string_view GetName() const noexcept;
-		const Serialization::LSceneValue& GetAssetDeclarations() const noexcept;
+		const Ludus::Serialization::LSceneValue& GetAssetDeclarations() const noexcept;
 		const SceneAssetContext& GetAssetContext() const noexcept;
+		std::vector<SceneSystemDefinition>& GetSystems() noexcept;
+		const std::vector<SceneSystemDefinition>& GetSystems() const noexcept;
+		void SetSystems(std::vector<SceneSystemDefinition> systems);
 		void Swap(Scene& other) noexcept;
 
-		ECS::World& GetWorld() noexcept;
-		const ECS::World& GetWorld() const noexcept;
+		Ludus::ECS::World& GetWorld() noexcept;
+		const Ludus::ECS::World& GetWorld() const noexcept;
 
 		void FixedUpdate(double fixedDeltaTime);
 		void Update();
 	
 	private:
-		ECS::World _world{};
+		Ludus::ECS::World _world{};
 		std::unordered_map<std::string, EntityRecord> _entities;
 		std::string _name = "Untitled";
-		Serialization::LSceneValue _assets = Serialization::LSceneValue::ObjectValue();
+		Ludus::Serialization::LSceneValue _assets = Ludus::Serialization::LSceneValue::ObjectValue();
 		SceneAssetContext _assetContext;
+		std::vector<SceneSystemDefinition> _systems;
 	};
 }

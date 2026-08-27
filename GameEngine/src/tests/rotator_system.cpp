@@ -12,13 +12,30 @@
 
 namespace Ludus
 {
+	bool SceneSystemCodec<Tests::RotatorSystem>::Validate(
+		const Ludus::Serialization::LSceneValue& config,
+		std::vector<SceneLoadError>& errors)
+	{
+		const auto* fields = SceneValues::RequireObject(
+			config, "system 'rotator' config must be a block", errors);
+		return fields && SceneValues::ValidateFields(
+			*fields, {}, "system 'rotator' config", errors);
+	}
+
+	void SceneSystemCodec<Tests::RotatorSystem>::Create(
+		Ludus::ECS::World& world,
+		const Ludus::Serialization::LSceneValue&)
+	{
+		world.AddSystem<Tests::RotatorSystem>();
+	}
+
 	template<>
 	struct SceneComponentCodec<Tests::Rotator>
 	{
 		static constexpr std::string_view Name = "Rotator";
 
 		static bool Load(
-			const Serialization::LSceneValue& value,
+			const Ludus::Serialization::LSceneValue& value,
 			const SceneAssetContext&,
 			Tests::Rotator& rotator,
 			std::vector<SceneLoadError>& errors)
@@ -63,7 +80,7 @@ namespace Ludus
 		static bool Save(
 			const Tests::Rotator& rotator,
 			const SceneAssetContext&,
-			Serialization::LSceneValue& output,
+			Ludus::Serialization::LSceneValue& output,
 			std::vector<std::string>& errors)
 		{
 			const bool finiteAxis =
@@ -77,11 +94,11 @@ namespace Ludus
 				return false;
 			}
 
-			Serialization::LSceneValue::Object fields;
+			Ludus::Serialization::LSceneValue::Object fields;
 			fields.emplace("axis", SceneValues::WriteVec3(glm::normalize(rotator.axis)));
-			fields.emplace("speed_degrees", Serialization::LSceneValue::Float(
+			fields.emplace("speed_degrees", Ludus::Serialization::LSceneValue::Float(
 				glm::degrees(rotator.radiansPerSecond), {}));
-			output = Serialization::LSceneValue::ObjectValue(std::move(fields));
+			output = Ludus::Serialization::LSceneValue::ObjectValue(std::move(fields));
 			return true;
 		}
 	};
@@ -89,10 +106,10 @@ namespace Ludus
 
 namespace Tests
 {
-	void RotatorSystem::OnFixedUpdate(ECS::World& world, double fixedDeltaTime)
+	void RotatorSystem::OnFixedUpdate(Ludus::ECS::World& world, double fixedDeltaTime)
 	{
-		world.ForEach<Components::Transform, Rotator>(
-			[fixedDeltaTime](ECS::Entity, Components::Transform& transform, const Rotator& rotator)
+		world.ForEach<Ludus::Components::Transform, Rotator>(
+			[fixedDeltaTime](Ludus::ECS::Entity, Ludus::Components::Transform& transform, const Rotator& rotator)
 			{
 				const float angle = rotator.radiansPerSecond * static_cast<float>(fixedDeltaTime);
 				transform.rotation = glm::normalize(

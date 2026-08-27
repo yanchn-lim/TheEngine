@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace Assets
+namespace Ludus::Assets
 {
 	// asset ids identify CPU-side records and remain independent from GPU handles
 	using AssetId = uint32_t;

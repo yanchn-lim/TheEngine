@@ -1,14 +1,14 @@
 #include "debug/debug.hpp"
 #include "mesh_registry.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
 	MeshHandle MeshRegistry::Create(const std::string& name, const MeshImportData& data)
 	{
 		// mesh names act as simple deduplication keys inside the registry
 		if (data.surfaces.empty())
 		{
-			Debug::LogError("MeshRegistry::Create : Mesh has no surfaces");
+			Ludus::Debug::LogError("MeshRegistry::Create : Mesh has no surfaces");
 			return {};
 		}
 
@@ -16,7 +16,7 @@ namespace Assets
 		{
 			if (surface.vertices.empty() || surface.indices.empty())
 			{
-				Debug::LogError("MeshRegistry::Create : Mesh surface has no geometry");
+				Ludus::Debug::LogError("MeshRegistry::Create : Mesh surface has no geometry");
 				return {};
 			}
 		}
@@ -37,14 +37,14 @@ namespace Assets
 		// handles are lightweight ids while registry lookup is the ownership boundary
 		if (!handle)
 		{
-			Debug::LogError("MeshRegistry::Get : MeshHandle [", handle.id, "] is invalid");
+			Ludus::Debug::LogError("MeshRegistry::Get : MeshHandle [", handle.id, "] is invalid");
 			return nullptr;
 		}
 
 		const auto it = _meshes.find(handle.id);
 		if (it == _meshes.end())
 		{
-			Debug::LogError("MeshRegistry::Get : Could not find MeshHandle [", handle.id, "] in the registry.");
+			Ludus::Debug::LogError("MeshRegistry::Get : Could not find MeshHandle [", handle.id, "] in the registry.");
 			return nullptr;
 		}
 

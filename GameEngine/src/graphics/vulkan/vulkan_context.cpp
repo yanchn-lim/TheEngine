@@ -7,7 +7,7 @@
 
 #include "debug/debug.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     namespace
     {
@@ -27,16 +27,16 @@ namespace Graphics
 
             if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError)
             {
-                Debug::LogError("Vulkan validation: ", message);
+                Ludus::Debug::LogError("Vulkan validation: ", message);
             }
             else if (severity &
                 vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning)
             {
-                Debug::LogWarning("Vulkan validation: ", message);
+                Ludus::Debug::LogWarning("Vulkan validation: ", message);
             }
             else
             {
-                Debug::LogVerbose("Vulkan validation: ", message);
+                Ludus::Debug::LogVerbose("Vulkan validation: ", message);
             }
 
             return vk::False;
@@ -68,7 +68,7 @@ namespace Graphics
 
         if (!window || glfwVulkanSupported() != GLFW_TRUE)
         {
-            Debug::LogError("VulkanContext::Init : Vulkan or GLFW window is unavailable");
+            Ludus::Debug::LogError("VulkanContext::Init : Vulkan or GLFW window is unavailable");
             return false;
         }
 
@@ -87,11 +87,11 @@ namespace Graphics
         }
         catch (const vk::SystemError& error)
         {
-            Debug::LogError("VulkanContext::Init : ", error.what());
+            Ludus::Debug::LogError("VulkanContext::Init : ", error.what());
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("VulkanContext::Init : ", error.what());
+            Ludus::Debug::LogError("VulkanContext::Init : ", error.what());
         }
 
         Shutdown();

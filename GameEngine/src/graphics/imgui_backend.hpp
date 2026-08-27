@@ -8,7 +8,7 @@
 struct GLFWwindow;
 struct ImDrawData;
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // isolates ImGui frame operations from the engine and selected graphics API
     class IImGuiBackend

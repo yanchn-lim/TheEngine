@@ -12,7 +12,7 @@
 #include "model_importer_registry.hpp"
 
 
-namespace Assets
+namespace Ludus::Assets
 {
     // owns CPU asset registries and exposes one typed-handle entry point to callers
     class AssetManager
@@ -27,7 +27,7 @@ namespace Assets
 			const std::string& name,
 			ShaderHandle shader,
 			TextureHandle texture,
-			Graphics::RenderState state
+			Ludus::Graphics::RenderState state
 		);
 
 		MeshHandle CreateMesh(const std::string& name, const MeshSurface& surface);

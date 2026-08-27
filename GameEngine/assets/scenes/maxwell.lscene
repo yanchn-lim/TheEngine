@@ -1,6 +1,10 @@
 scene "Maxwell Test"
 version: 1
 
+systems
+	rotator
+		enabled: true
+
 assets
 	shaders
 		standard

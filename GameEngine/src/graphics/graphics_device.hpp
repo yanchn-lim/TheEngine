@@ -2,7 +2,7 @@
 
 #include "graphics_descriptions.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     // tells the renderer whether it can continue, skip, rebuild, or stop the frame
     enum class FrameStatus

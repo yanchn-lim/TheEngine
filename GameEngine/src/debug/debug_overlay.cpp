@@ -1,23 +1,19 @@
 #include "debug_overlay.hpp"
 
-#include <GLFW/glfw3.h>
 #include <imgui.h>
 
 #include "debug.hpp"
 #include "profiler.hpp"
 
-void DebugOverlay::HandleKey(int key, int action)
+void DebugOverlay::ToggleProfilerPause()
 {
-    if (action != GLFW_PRESS)
-        return;
+	Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
+}
 
-    if (key == GLFW_KEY_F5)
-        Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
-    else if (key == GLFW_KEY_F6)
-    {
-        Profiler::Get().PrintFrameStatistics(2048);
-        Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt", 2048);
-    }
+void DebugOverlay::PrintProfilerStatistics()
+{
+	Profiler::Get().PrintFrameStatistics(2048);
+	Profiler::Get().PrintFrameStatisticsToFile("FRAME_STATS.txt", 2048);
 }
 
 void DebugOverlay::Draw()

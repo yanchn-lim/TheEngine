@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	// describes blend intent so each back end can select native factors
 	enum class BlendMode

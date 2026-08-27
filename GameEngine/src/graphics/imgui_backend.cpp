@@ -3,7 +3,7 @@
 #include "opengl/opengl_imgui_backend.hpp"
 #include "vulkan/vulkan_imgui_backend.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     std::unique_ptr<IImGuiBackend> CreateImGuiBackend(RendererBackend backend)
     {

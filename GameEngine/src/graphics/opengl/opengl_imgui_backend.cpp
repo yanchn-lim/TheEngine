@@ -5,7 +5,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     bool OpenGLImGuiBackend::Initialize(GLFWwindow* window, IGraphicsDevice&)
     {

@@ -5,7 +5,7 @@
 
 #include "debug/debug.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
     TextureHandle TextureRegistry::Load(const std::string& path)
     {
@@ -20,7 +20,7 @@ namespace Assets
         unsigned char* source = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
         if (!source || width <= 0 || height <= 0)
         {
-            Debug::LogError("TextureRegistry::Load : Failed to load texture ", path);
+            Ludus::Debug::LogError("TextureRegistry::Load : Failed to load texture ", path);
             stbi_image_free(source);
             return {};
         }

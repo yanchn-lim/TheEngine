@@ -5,7 +5,7 @@
 #include "asset_handle.hpp"
 #include "asset_records.hpp"
 #include "mesh_import_data.hpp"
-namespace Assets
+namespace Ludus::Assets
 {
 	// owns CPU mesh records and deduplicates them by name
 	class MeshRegistry

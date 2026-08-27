@@ -3,7 +3,7 @@
 #include "opengl/opengl_graphics_device.hpp"
 #include "vulkan/vulkan_graphics_device.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     std::unique_ptr<IGraphicsDevice> CreateGraphicsDevice(RendererBackend backend)
     {

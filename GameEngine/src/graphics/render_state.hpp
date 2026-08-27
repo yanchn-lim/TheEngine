@@ -2,7 +2,7 @@
 
 #include "blend_mode.hpp"
 
-namespace Graphics
+namespace Ludus::Graphics
 {
 	// collects fixed pipeline state shared by materials and both back ends
 	struct RenderState

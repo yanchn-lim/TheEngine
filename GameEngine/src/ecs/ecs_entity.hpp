@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace ECS
+namespace Ludus::ECS
 {
 	struct Entity
 	{

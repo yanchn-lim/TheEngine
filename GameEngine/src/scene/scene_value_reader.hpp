@@ -12,19 +12,19 @@
 
 namespace Ludus::SceneValues
 {
-	using Object = Serialization::LSceneValue::Object;
+	using Object = Ludus::Serialization::LSceneValue::Object;
 
 	void AddError(
 		std::vector<SceneLoadError>& errors,
-		const Serialization::LSceneValue& value,
+		const Ludus::Serialization::LSceneValue& value,
 		std::string message);
 
 	const Object* RequireObject(
-		const Serialization::LSceneValue& value,
+		const Ludus::Serialization::LSceneValue& value,
 		std::string_view message,
 		std::vector<SceneLoadError>& errors);
 
-	const Serialization::LSceneValue* FindField(
+	const Ludus::Serialization::LSceneValue* FindField(
 		const Object& fields,
 		std::string_view name);
 
@@ -37,7 +37,7 @@ namespace Ludus::SceneValues
 	const std::string* RequiredString(
 		const Object& fields,
 		std::string_view name,
-		const Serialization::LSceneValue& owner,
+		const Ludus::Serialization::LSceneValue& owner,
 		std::vector<SceneLoadError>& errors);
 
 	bool OptionalString(
@@ -53,7 +53,7 @@ namespace Ludus::SceneValues
 		std::vector<SceneLoadError>& errors);
 
 	bool FiniteFloat(
-		const Serialization::LSceneValue& value,
+		const Ludus::Serialization::LSceneValue& value,
 		float& output);
 
 	bool OptionalVec3(
@@ -63,5 +63,5 @@ namespace Ludus::SceneValues
 		glm::vec3& output,
 		std::vector<SceneLoadError>& errors);
 
-	Serialization::LSceneValue WriteVec3(glm::vec3 value);
+	Ludus::Serialization::LSceneValue WriteVec3(glm::vec3 value);
 }

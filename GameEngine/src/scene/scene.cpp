@@ -2,7 +2,7 @@
 
 namespace Ludus
 {
-	ECS::Entity Scene::CreateEntity(std::string id, std::string name)
+	Ludus::ECS::Entity Scene::CreateEntity(std::string id, std::string name)
 	{
 		if (id.empty())
 			return {};
@@ -15,7 +15,7 @@ namespace Ludus
 			_entities.erase(existing);
 		}
 
-		const ECS::Entity entity = _world.CreateEntity();
+		const Ludus::ECS::Entity entity = _world.CreateEntity();
 		_entities.emplace(std::move(id), EntityRecord{ entity, std::move(name) });
 		return entity;
 	}
@@ -31,7 +31,7 @@ namespace Ludus
 		return true;
 	}
 
-	ECS::Entity Scene::FindEntity(std::string_view id) const
+	Ludus::ECS::Entity Scene::FindEntity(std::string_view id) const
 	{
 		const auto found = _entities.find(std::string(id));
 		if (found == _entities.end() || !_world.IsEntityAlive(found->second.entity))
@@ -54,12 +54,14 @@ namespace Ludus
 
 	void Scene::SetSerializationData(
 		std::string name,
-		Serialization::LSceneValue assets,
-		SceneAssetContext assetContext)
+		Ludus::Serialization::LSceneValue assets,
+		SceneAssetContext assetContext,
+		std::vector<SceneSystemDefinition> systems)
 	{
 		_name = std::move(name);
 		_assets = std::move(assets);
 		_assetContext = std::move(assetContext);
+		_systems = std::move(systems);
 	}
 
 	std::string_view Scene::GetName() const noexcept
@@ -67,7 +69,7 @@ namespace Ludus
 		return _name;
 	}
 
-	const Serialization::LSceneValue& Scene::GetAssetDeclarations() const noexcept
+	const Ludus::Serialization::LSceneValue& Scene::GetAssetDeclarations() const noexcept
 	{
 		return _assets;
 	}
@@ -77,6 +79,21 @@ namespace Ludus
 		return _assetContext;
 	}
 
+	const std::vector<SceneSystemDefinition>& Scene::GetSystems() const noexcept
+	{
+		return _systems;
+	}
+
+	std::vector<SceneSystemDefinition>& Scene::GetSystems() noexcept
+	{
+		return _systems;
+	}
+
+	void Scene::SetSystems(std::vector<SceneSystemDefinition> systems)
+	{
+		_systems = std::move(systems);
+	}
+
 	void Scene::Swap(Scene& other) noexcept
 	{
 		_world.Swap(other._world);
@@ -84,14 +101,15 @@ namespace Ludus
 		_name.swap(other._name);
 		std::swap(_assets, other._assets);
 		std::swap(_assetContext, other._assetContext);
+		_systems.swap(other._systems);
 	}
 
-	ECS::World& Scene::GetWorld() noexcept
+	Ludus::ECS::World& Scene::GetWorld() noexcept
 	{
 		return _world;
 	}
 
-	const ECS::World& Scene::GetWorld() const noexcept
+	const Ludus::ECS::World& Scene::GetWorld() const noexcept
 	{
 		return _world;
 	}

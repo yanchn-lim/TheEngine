@@ -8,22 +8,22 @@
 #include "ecs/ecs_world.hpp"
 #include "rendering/render_engine.hpp"
 
-namespace Systems
+namespace Ludus::Systems
 {
-	RenderSystem::RenderSystem(Rendering::RenderEngine& renderEngine)
+	RenderSystem::RenderSystem(Ludus::Rendering::RenderEngine& renderEngine)
 		: _renderEngine(renderEngine)
 	{
 	}
 
-	void RenderSystem::OnUpdate(ECS::World& world)
+	void RenderSystem::OnUpdate(Ludus::ECS::World& world)
 	{
-		world.ForEach<Components::Transform, Components::Renderable>
-			([this](ECS::Entity, const Components::Transform& transform, const Components::Renderable& renderable)
+		world.ForEach<Ludus::Components::Transform, Ludus::Components::Renderable>
+			([this](Ludus::ECS::Entity, const Ludus::Components::Transform& transform, const Ludus::Components::Renderable& renderable)
 				{
 					if (!renderable.visible)
 						return;
 
-					Rendering::MeshInstanceDesc mesh{};
+					Ludus::Rendering::MeshInstanceDesc mesh{};
 					mesh.mesh = renderable.mesh;
 					mesh.materialOverride = renderable.materialOverride;
 

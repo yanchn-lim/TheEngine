@@ -7,14 +7,14 @@ namespace Ludus::SceneValues
 {
 	void AddError(
 		std::vector<SceneLoadError>& errors,
-		const Serialization::LSceneValue& value,
+		const Ludus::Serialization::LSceneValue& value,
 		std::string message)
 	{
 		errors.push_back({ std::move(message), value.GetLocation() });
 	}
 
 	const Object* RequireObject(
-		const Serialization::LSceneValue& value,
+		const Ludus::Serialization::LSceneValue& value,
 		std::string_view message,
 		std::vector<SceneLoadError>& errors)
 	{
@@ -24,7 +24,7 @@ namespace Ludus::SceneValues
 		return object;
 	}
 
-	const Serialization::LSceneValue* FindField(
+	const Ludus::Serialization::LSceneValue* FindField(
 		const Object& fields,
 		std::string_view name)
 	{
@@ -59,10 +59,10 @@ namespace Ludus::SceneValues
 	const std::string* RequiredString(
 		const Object& fields,
 		std::string_view name,
-		const Serialization::LSceneValue& owner,
+		const Ludus::Serialization::LSceneValue& owner,
 		std::vector<SceneLoadError>& errors)
 	{
-		const Serialization::LSceneValue* value = FindField(fields, name);
+		const Ludus::Serialization::LSceneValue* value = FindField(fields, name);
 		if (!value)
 		{
 			AddError(errors, owner, "missing required field '" + std::string(name) + "'");
@@ -81,7 +81,7 @@ namespace Ludus::SceneValues
 		std::string& output,
 		std::vector<SceneLoadError>& errors)
 	{
-		const Serialization::LSceneValue* value = FindField(fields, name);
+		const Ludus::Serialization::LSceneValue* value = FindField(fields, name);
 		if (!value)
 		{
 			output.clear();
@@ -104,7 +104,7 @@ namespace Ludus::SceneValues
 		bool& output,
 		std::vector<SceneLoadError>& errors)
 	{
-		const Serialization::LSceneValue* value = FindField(fields, name);
+		const Ludus::Serialization::LSceneValue* value = FindField(fields, name);
 		if (!value)
 			return true;
 
@@ -118,7 +118,7 @@ namespace Ludus::SceneValues
 		return true;
 	}
 
-	bool FiniteFloat(const Serialization::LSceneValue& value, float& output)
+	bool FiniteFloat(const Ludus::Serialization::LSceneValue& value, float& output)
 	{
 		double number = 0.0;
 		if (const double* floating = value.TryGetFloat()) number = *floating;
@@ -142,7 +142,7 @@ namespace Ludus::SceneValues
 		glm::vec3& output,
 		std::vector<SceneLoadError>& errors)
 	{
-		const Serialization::LSceneValue* value = FindField(fields, name);
+		const Ludus::Serialization::LSceneValue* value = FindField(fields, name);
 		if (!value)
 		{
 			output = defaultValue;
@@ -161,12 +161,12 @@ namespace Ludus::SceneValues
 		return true;
 	}
 
-	Serialization::LSceneValue WriteVec3(glm::vec3 value)
+	Ludus::Serialization::LSceneValue WriteVec3(glm::vec3 value)
 	{
-		Serialization::LSceneValue::Array values;
-		values.push_back(Serialization::LSceneValue::Float(value.x, {}));
-		values.push_back(Serialization::LSceneValue::Float(value.y, {}));
-		values.push_back(Serialization::LSceneValue::Float(value.z, {}));
-		return Serialization::LSceneValue::ArrayValue(std::move(values), {});
+		Ludus::Serialization::LSceneValue::Array values;
+		values.push_back(Ludus::Serialization::LSceneValue::Float(value.x, {}));
+		values.push_back(Ludus::Serialization::LSceneValue::Float(value.y, {}));
+		values.push_back(Ludus::Serialization::LSceneValue::Float(value.z, {}));
+		return Ludus::Serialization::LSceneValue::ArrayValue(std::move(values), {});
 	}
 }

@@ -54,14 +54,19 @@ const Time& Engine::GetTime() const noexcept
     return _time;
 }
 
-Assets::AssetManager& Engine::GetAssets() noexcept
+Ludus::Assets::AssetManager& Engine::GetAssets() noexcept
 {
     return _assets;
 }
 
-Rendering::RenderEngine& Engine::GetRenderEngine() noexcept
+Ludus::Rendering::RenderEngine& Engine::GetRenderEngine() noexcept
 {
     return *_renderEngine;
+}
+
+const Input& Engine::GetInput() const noexcept
+{
+	return _input;
 }
 
 bool Engine::Initialize()
@@ -69,6 +74,7 @@ bool Engine::Initialize()
     if (_config.fixedTimeStep <= 0.0)
         return false;
 
+	_window.SetInput(&_input);
     if (!_window.Initialize(
         _config.rendererBackend,
         _config.windowWidth,
@@ -78,14 +84,7 @@ bool Engine::Initialize()
         return false;
     }
 
-    _window.SetKeyCallback(
-        [](void* context, int key, int action)
-        {
-            static_cast<Engine*>(context)->HandleKey(key, action);
-        },
-        this);
-
-    _renderEngine = Rendering::RenderEngine::Create(
+    _renderEngine = Ludus::Rendering::RenderEngine::Create(
         _config.rendererBackend,
         { _window.GetNativeHandle(), _config.vsync },
         _assets);
@@ -109,7 +108,7 @@ void Engine::Update()
     while (!_window.ShouldClose() && _running)
     {
         Profiler::Get().BeginFrame();
-        Memory::BeginFrame();
+        Ludus::Memory::BeginFrame();
         {
             PROFILE_SCOPE("MainLoop");
 
@@ -118,6 +117,7 @@ void Engine::Update()
                 const double current = _window.GetTime();
                 _time.deltaTime = current - _time.totalTime;
                 _time.totalTime = current;
+				_input.BeginFrame();
                 _window.PollEvents();
 
                 fixedAccumulator += _time.deltaTime;
@@ -144,10 +144,10 @@ void Engine::Update()
 
         {
             PROFILE_SCOPE("RendererLoop");
-            Graphics::FrameStatus frameStatus = Graphics::FrameStatus::Skip;
+            Ludus::Graphics::FrameStatus frameStatus = Ludus::Graphics::FrameStatus::Skip;
             {
                 PROFILE_SCOPE("World Rendering");
-                Graphics::Camera2D camera;
+                Ludus::Graphics::Camera2D camera;
                 camera.SetViewport(
                     static_cast<float>(_window.GetWidth()),
                     static_cast<float>(_window.GetHeight()));
@@ -157,7 +157,7 @@ void Engine::Update()
                     static_cast<uint32_t>(_window.GetHeight()));
             }
 
-            if (frameStatus == Graphics::FrameStatus::Success)
+            if (frameStatus == Ludus::Graphics::FrameStatus::Success)
             {
                 PROFILE_SCOPE("ImGui");
                 _renderEngine->BeginImGui();
@@ -165,20 +165,20 @@ void Engine::Update()
                 _renderEngine->EndImGui();
             }
 
-            if (frameStatus == Graphics::FrameStatus::Success)
+            if (frameStatus == Ludus::Graphics::FrameStatus::Success)
             {
                 PROFILE_SCOPE("Frame Completion");
                 frameStatus = _renderEngine->EndFrame();
             }
 
-            if (frameStatus == Graphics::FrameStatus::DeviceLost ||
-                frameStatus == Graphics::FrameStatus::Fatal)
+            if (frameStatus == Ludus::Graphics::FrameStatus::DeviceLost ||
+                frameStatus == Ludus::Graphics::FrameStatus::Fatal)
             {
-                Debug::LogError("graphics frame failed with status ", static_cast<int>(frameStatus));
+                Ludus::Debug::LogError("graphics frame failed with status ", static_cast<int>(frameStatus));
                 RequestStop();
             }
         }
-        Memory::EndFrame();
+        Ludus::Memory::EndFrame();
         Profiler::Get().EndFrame();
     }
 }
@@ -189,13 +189,9 @@ void Engine::Shutdown()
         _renderEngine->Shutdown();
     _assets.Clear();
     _renderEngine.reset();
+	_window.SetInput(nullptr);
     _window.Shutdown();
     _running = false;
 }
 
-void Engine::HandleKey(int key, int action)
-{
-    if (_application)
-        _application->OnKey(*this, key, action);
-}
 }

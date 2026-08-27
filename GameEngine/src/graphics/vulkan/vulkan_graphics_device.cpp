@@ -18,41 +18,41 @@ namespace
         glm::vec4 uvRect{ 0.0f, 0.0f, 1.0f, 1.0f };
     };
 
-    vk::PrimitiveTopology ToVulkanTopology(Graphics::PrimitiveTopology topology)
+    vk::PrimitiveTopology ToVulkanTopology(Ludus::Graphics::PrimitiveTopology topology)
     {
         switch (topology)
         {
-        case Graphics::PrimitiveTopology::LINES: return vk::PrimitiveTopology::eLineList;
-        case Graphics::PrimitiveTopology::POINTS: return vk::PrimitiveTopology::ePointList;
+        case Ludus::Graphics::PrimitiveTopology::LINES: return vk::PrimitiveTopology::eLineList;
+        case Ludus::Graphics::PrimitiveTopology::POINTS: return vk::PrimitiveTopology::ePointList;
         default: return vk::PrimitiveTopology::eTriangleList;
         }
     }
 
-    vk::Format ToVulkanFormat(Graphics::ShaderDataType type)
+    vk::Format ToVulkanFormat(Ludus::Graphics::ShaderDataType type)
     {
         switch (type)
         {
-        case Graphics::ShaderDataType::FLOAT: return vk::Format::eR32Sfloat;
-        case Graphics::ShaderDataType::FLOAT2: return vk::Format::eR32G32Sfloat;
-        case Graphics::ShaderDataType::FLOAT3: return vk::Format::eR32G32B32Sfloat;
-        case Graphics::ShaderDataType::FLOAT4: return vk::Format::eR32G32B32A32Sfloat;
-        case Graphics::ShaderDataType::INT: return vk::Format::eR32Sint;
-        case Graphics::ShaderDataType::INT2: return vk::Format::eR32G32Sint;
-        case Graphics::ShaderDataType::INT3: return vk::Format::eR32G32B32Sint;
-        case Graphics::ShaderDataType::INT4: return vk::Format::eR32G32B32A32Sint;
+        case Ludus::Graphics::ShaderDataType::FLOAT: return vk::Format::eR32Sfloat;
+        case Ludus::Graphics::ShaderDataType::FLOAT2: return vk::Format::eR32G32Sfloat;
+        case Ludus::Graphics::ShaderDataType::FLOAT3: return vk::Format::eR32G32B32Sfloat;
+        case Ludus::Graphics::ShaderDataType::FLOAT4: return vk::Format::eR32G32B32A32Sfloat;
+        case Ludus::Graphics::ShaderDataType::INT: return vk::Format::eR32Sint;
+        case Ludus::Graphics::ShaderDataType::INT2: return vk::Format::eR32G32Sint;
+        case Ludus::Graphics::ShaderDataType::INT3: return vk::Format::eR32G32B32Sint;
+        case Ludus::Graphics::ShaderDataType::INT4: return vk::Format::eR32G32B32A32Sint;
         default: return vk::Format::eUndefined;
         }
     }
 
-    Graphics::FrameStatus FromVulkanError(const vk::SystemError& error)
+    Ludus::Graphics::FrameStatus FromVulkanError(const vk::SystemError& error)
     {
         return error.code().value() == VK_ERROR_DEVICE_LOST
-            ? Graphics::FrameStatus::DeviceLost
-            : Graphics::FrameStatus::Fatal;
+            ? Ludus::Graphics::FrameStatus::DeviceLost
+            : Ludus::Graphics::FrameStatus::Fatal;
     }
 }
 
-namespace Graphics
+namespace Ludus::Graphics
 {
     size_t VulkanGraphicsDevice::TextureSetKeyHash::operator()(const TextureSetKey& key) const
     {
@@ -92,7 +92,7 @@ namespace Graphics
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("VulkanGraphicsDevice::Initialize: ", error.what());
+            Ludus::Debug::LogError("VulkanGraphicsDevice::Initialize: ", error.what());
             Shutdown();
             return false;
         }
@@ -110,7 +110,7 @@ namespace Graphics
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("Vulkan buffer creation failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan buffer creation failed: ", error.what());
             return {};
         }
     }
@@ -189,7 +189,7 @@ namespace Graphics
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("Vulkan texture creation failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan texture creation failed: ", error.what());
             return {};
         }
     }
@@ -215,7 +215,7 @@ namespace Graphics
     {
         if (desc.vertexSpirv.empty() || desc.fragmentSpirv.empty())
         {
-            Debug::LogError("Vulkan shader requires SPIR-V: ", desc.label);
+            Ludus::Debug::LogError("Vulkan shader requires SPIR-V: ", desc.label);
             return {};
         }
         try
@@ -352,7 +352,7 @@ namespace Graphics
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("Vulkan pipeline creation failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan pipeline creation failed: ", error.what());
             return {};
         }
     }
@@ -404,12 +404,12 @@ namespace Graphics
         }
         catch (const vk::SystemError& error)
         {
-            Debug::LogError("Vulkan BeginFrame failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan BeginFrame failed: ", error.what());
             return FromVulkanError(error);
         }
         catch (const std::exception& error)
         {
-            Debug::LogError("Vulkan BeginFrame failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan BeginFrame failed: ", error.what());
             return FrameStatus::Fatal;
         }
     }
@@ -443,7 +443,7 @@ namespace Graphics
         catch (const vk::SystemError& error)
         {
             _frameReady = false;
-            Debug::LogError("Vulkan EndFrame failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan EndFrame failed: ", error.what());
             return FromVulkanError(error);
         }
         catch (...)
@@ -477,7 +477,7 @@ namespace Graphics
         catch (const vk::SystemError& error)
         {
             _frameReady = false;
-            Debug::LogError("Vulkan Present failed: ", error.what());
+            Ludus::Debug::LogError("Vulkan Present failed: ", error.what());
             return FromVulkanError(error);
         }
         catch (...)

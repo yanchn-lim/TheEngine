@@ -46,14 +46,14 @@ namespace Ludus
 	}
 
 	template<>
-	struct SceneComponentCodec<Components::Transform>
+	struct SceneComponentCodec<Ludus::Components::Transform>
 	{
 		static constexpr std::string_view Name = "Transform";
 
 		static bool Load(
-			const Serialization::LSceneValue& value,
+			const Ludus::Serialization::LSceneValue& value,
 			const SceneAssetContext&,
-			Components::Transform& transform,
+			Ludus::Components::Transform& transform,
 			std::vector<SceneLoadError>& errors)
 		{
 			const SceneValues::Object* fields = SceneValues::RequireObject(
@@ -76,9 +76,9 @@ namespace Ludus
 		}
 
 		static bool Save(
-			const Components::Transform& transform,
+			const Ludus::Components::Transform& transform,
 			const SceneAssetContext&,
-			Serialization::LSceneValue& output,
+			Ludus::Serialization::LSceneValue& output,
 			std::vector<std::string>& errors)
 		{
 			if (!IsFinite(transform.position) || !IsFinite(transform.scale) ||
@@ -97,24 +97,24 @@ namespace Ludus
 				return false;
 			}
 
-			Serialization::LSceneValue::Object fields;
+			Ludus::Serialization::LSceneValue::Object fields;
 			fields.emplace("position", SceneValues::WriteVec3(transform.position));
 			fields.emplace("rotation_degrees", SceneValues::WriteVec3(rotationDegrees));
 			fields.emplace("scale", SceneValues::WriteVec3(transform.scale));
-			output = Serialization::LSceneValue::ObjectValue(std::move(fields));
+			output = Ludus::Serialization::LSceneValue::ObjectValue(std::move(fields));
 			return true;
 		}
 	};
 
 	template<>
-	struct SceneComponentCodec<Components::Renderable>
+	struct SceneComponentCodec<Ludus::Components::Renderable>
 	{
 		static constexpr std::string_view Name = "Renderable";
 
 		static bool Load(
-			const Serialization::LSceneValue& value,
+			const Ludus::Serialization::LSceneValue& value,
 			const SceneAssetContext& assets,
-			Components::Renderable& renderable,
+			Ludus::Components::Renderable& renderable,
 			std::vector<SceneLoadError>& errors)
 		{
 			const SceneValues::Object* fields = SceneValues::RequireObject(
@@ -177,9 +177,9 @@ namespace Ludus
 		}
 
 		static bool Save(
-			const Components::Renderable& renderable,
+			const Ludus::Components::Renderable& renderable,
 			const SceneAssetContext& assets,
-			Serialization::LSceneValue& output,
+			Ludus::Serialization::LSceneValue& output,
 			std::vector<std::string>& errors)
 		{
 			const std::string* mesh = nullptr;
@@ -193,8 +193,8 @@ namespace Ludus
 				return false;
 			}
 
-			Serialization::LSceneValue::Object fields;
-			fields.emplace("mesh", Serialization::LSceneValue::String(*mesh, {}));
+			Ludus::Serialization::LSceneValue::Object fields;
+			fields.emplace("mesh", Ludus::Serialization::LSceneValue::String(*mesh, {}));
 			const auto defaults = assets.meshHasDefaultMaterials.find(*mesh);
 			const bool hasDefaultMaterials =
 				defaults != assets.meshHasDefaultMaterials.end() && defaults->second;
@@ -218,11 +218,11 @@ namespace Ludus
 					return false;
 				}
 				fields.emplace("material_override",
-					Serialization::LSceneValue::String(*material, {}));
+					Ludus::Serialization::LSceneValue::String(*material, {}));
 			}
 			fields.emplace("visible",
-				Serialization::LSceneValue::Boolean(renderable.visible, {}));
-			output = Serialization::LSceneValue::ObjectValue(std::move(fields));
+				Ludus::Serialization::LSceneValue::Boolean(renderable.visible, {}));
+			output = Ludus::Serialization::LSceneValue::ObjectValue(std::move(fields));
 			return true;
 		}
 	};
@@ -231,23 +231,30 @@ namespace Ludus
 		std::string name,
 		Loader loader,
 		Saver saver,
-		PresenceCheck has)
+		PresenceCheck has,
+		Updater updater)
 	{
-		if (name.empty() || !loader || !saver || !has || _indices.contains(name))
+		if (name.empty() || !loader || !saver || !has || !updater ||
+			_indices.contains(name))
 			return false;
 
 		const size_t index = _entries.size();
 		_indices.emplace(name, index);
-		_entries.push_back({ std::move(name), std::move(loader), std::move(saver), std::move(has) });
+		_entries.push_back({
+			std::move(name),
+			std::move(loader),
+			std::move(saver),
+			std::move(has),
+			std::move(updater) });
 		return true;
 	}
 
 	bool SceneComponentRegistry::Load(
 		std::string_view name,
-		const Serialization::LSceneValue& value,
+		const Ludus::Serialization::LSceneValue& value,
 		const SceneAssetContext& assets,
-		ECS::World& world,
-		ECS::Entity entity,
+		Ludus::ECS::World& world,
+		Ludus::ECS::Entity entity,
 		std::vector<SceneLoadError>& errors) const
 	{
 		const auto found = _indices.find(std::string(name));
@@ -261,9 +268,9 @@ namespace Ludus
 
 	bool SceneComponentRegistry::SaveComponents(
 		const SceneAssetContext& assets,
-		const ECS::World& world,
-		ECS::Entity entity,
-		Serialization::LSceneValue::Object& output,
+		const Ludus::ECS::World& world,
+		Ludus::ECS::Entity entity,
+		Ludus::Serialization::LSceneValue::Object& output,
 		std::vector<std::string>& errors) const
 	{
 		size_t matchedComponents = 0;
@@ -273,7 +280,7 @@ namespace Ludus
 				continue;
 			++matchedComponents;
 
-			Serialization::LSceneValue value = Serialization::LSceneValue::ObjectValue();
+			Ludus::Serialization::LSceneValue value = Ludus::Serialization::LSceneValue::ObjectValue();
 			if (!entry.save(assets, world, entity, value, errors))
 				return false;
 			output.emplace(entry.name, std::move(value));
@@ -288,9 +295,28 @@ namespace Ludus
 		return true;
 	}
 
+	bool SceneComponentRegistry::Update(
+		std::string_view name,
+		const Ludus::Serialization::LSceneValue& value,
+		const SceneAssetContext& assets,
+		Ludus::ECS::World& world,
+		Ludus::ECS::Entity entity,
+		std::vector<SceneLoadError>& errors) const
+	{
+		const auto found = _indices.find(std::string(name));
+		if (found == _indices.end())
+		{
+			SceneValues::AddError(
+				errors, value, "unknown component '" + std::string(name) + "'");
+			return false;
+		}
+		return _entries[found->second].update(
+			value, assets, world, entity, errors);
+	}
+
 	void RegisterBuiltInSceneComponents(SceneComponentRegistry& registry)
 	{
-		registry.Register<Components::Transform>();
-		registry.Register<Components::Renderable>();
+		registry.Register<Ludus::Components::Transform>();
+		registry.Register<Ludus::Components::Renderable>();
 	}
 }

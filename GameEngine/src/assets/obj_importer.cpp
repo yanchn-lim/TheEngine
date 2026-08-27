@@ -10,7 +10,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-namespace Assets
+namespace Ludus::Assets
 {
     namespace
     {
@@ -74,10 +74,10 @@ namespace Assets
         );
 
         if (!warn.empty())
-            Debug::LogWarning(warn);
+            Ludus::Debug::LogWarning(warn);
 
         if (!err.empty())
-            Debug::LogError(err);
+            Ludus::Debug::LogError(err);
 
         if (!success)
             return false;
@@ -152,7 +152,7 @@ namespace Assets
 
 		if (!outMesh.surfaces.empty())
 		{
-			Debug::LogVerbose("ObjImporter::Import : Imported ", path,
+			Ludus::Debug::LogVerbose("ObjImporter::Import : Imported ", path,
 				" surfaces=", outMesh.surfaces.size(),
                 " vertices=", totalVertices,
                 " indices=", totalIndices);

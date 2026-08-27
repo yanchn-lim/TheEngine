@@ -8,7 +8,7 @@
 #include "mesh_import_data.hpp"
 #include "graphics/render_state.hpp"
 
-namespace Assets
+namespace Ludus::Assets
 {
     // asset records keep CPU data independent from the selected graphics backend
     struct MeshAsset
@@ -42,7 +42,7 @@ namespace Assets
     {
         ShaderHandle shader;
         TextureHandle texture;
-        Graphics::RenderState state{};
+        Ludus::Graphics::RenderState state{};
         std::string label;
         uint64_t version = 1;
     };
