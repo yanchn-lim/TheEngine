@@ -20,11 +20,14 @@ namespace Ludus::Graphics
         GpuSamplerHandle CreateSampler(const SamplerDesc& desc) override;
         GpuShaderHandle CreateShader(const ShaderProgramDesc& desc) override;
         GpuPipelineHandle CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) override;
+		GpuRenderTargetHandle CreateRenderTarget(const RenderTargetDesc& desc) override;
+		GpuTextureHandle GetRenderTargetTexture(GpuRenderTargetHandle handle) const override;
         void DestroyBuffer(GpuBufferHandle handle) override;
         void DestroyTexture(GpuTextureHandle handle) override;
         void DestroySampler(GpuSamplerHandle handle) override;
         void DestroyShader(GpuShaderHandle handle) override;
         void DestroyPipeline(GpuPipelineHandle handle) override;
+		void DestroyRenderTarget(GpuRenderTargetHandle handle) override;
         FrameStatus BeginFrame() override;
         FrameStatus EndFrame() override;
         void OnResize(uint32_t width, uint32_t height) override;
@@ -52,6 +55,8 @@ namespace Ludus::Graphics
         vk::Format DepthFormat() const { return _depthFormat; }
         uint32_t SwapchainImageCount() const { return _swapchain.ImageCount(); }
         vk::CommandBuffer ActiveCommandBuffer() const { return *_frames[_frameIndex].commandBuffer; }
+		vk::ImageView NativeTextureView(GpuTextureHandle handle) const;
+		vk::Sampler NativeSampler(GpuSamplerHandle handle) const;
 
     private:
         FrameStatus Present();
@@ -87,6 +92,13 @@ namespace Ludus::Graphics
             vk::raii::PipelineLayout layout{ nullptr };
             vk::raii::Pipeline pipeline{ nullptr };
         };
+		struct RenderTargetResource
+		{
+			GpuTextureHandle color;
+			ImageResource depth;
+			vk::Extent2D extent;
+			bool rendered = false;
+		};
         struct TextureSetKey
         {
             GpuTextureHandle texture;
@@ -117,6 +129,7 @@ namespace Ludus::Graphics
         ResourceTable<GpuSamplerHandle, vk::raii::Sampler> _samplers;
         ResourceTable<GpuShaderHandle, ShaderResource> _shaders;
         ResourceTable<GpuPipelineHandle, PipelineResource> _pipelines;
+		ResourceTable<GpuRenderTargetHandle, RenderTargetResource> _renderTargets;
         GpuPipelineHandle _activePipeline;
         FrameConstants _frameConstants;
         uint32_t _frameIndex = 0;
@@ -124,6 +137,7 @@ namespace Ludus::Graphics
         vk::Format _depthFormat = vk::Format::eUndefined;
         bool _frameReady = false;
         bool _renderPassActive = false;
+		GpuRenderTargetHandle _activeRenderTarget;
         bool _resizePending = false;
         bool _vsync = false;
 

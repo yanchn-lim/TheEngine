@@ -45,6 +45,19 @@ namespace Ludus::Graphics
         _backend->Render(ImGui::GetDrawData());
     }
 
+	ImTextureID ImGuiLayer::AddTexture(
+		GpuTextureHandle texture,
+		GpuSamplerHandle sampler)
+	{
+		return _backend->AddTexture(texture, sampler);
+	}
+
+	void ImGuiLayer::RemoveTexture(ImTextureID texture)
+	{
+		if (texture != ImTextureID_Invalid)
+			_backend->RemoveTexture(texture);
+	}
+
     void ImGuiLayer::Shutdown()
     {
         if (_initialized)

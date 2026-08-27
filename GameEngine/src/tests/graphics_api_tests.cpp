@@ -23,11 +23,16 @@ namespace
         Ludus::Graphics::GpuSamplerHandle CreateSampler(const Ludus::Graphics::SamplerDesc&) override { return {}; }
         Ludus::Graphics::GpuShaderHandle CreateShader(const Ludus::Graphics::ShaderProgramDesc&) override { return {}; }
         Ludus::Graphics::GpuPipelineHandle CreateGraphicsPipeline(const Ludus::Graphics::GraphicsPipelineDesc&) override { return {}; }
+		Ludus::Graphics::GpuRenderTargetHandle CreateRenderTarget(
+			const Ludus::Graphics::RenderTargetDesc&) override { return {}; }
+		Ludus::Graphics::GpuTextureHandle GetRenderTargetTexture(
+			Ludus::Graphics::GpuRenderTargetHandle) const override { return {}; }
         void DestroyBuffer(Ludus::Graphics::GpuBufferHandle) override {}
         void DestroyTexture(Ludus::Graphics::GpuTextureHandle) override {}
         void DestroySampler(Ludus::Graphics::GpuSamplerHandle) override {}
         void DestroyShader(Ludus::Graphics::GpuShaderHandle) override {}
         void DestroyPipeline(Ludus::Graphics::GpuPipelineHandle) override {}
+		void DestroyRenderTarget(Ludus::Graphics::GpuRenderTargetHandle) override {}
         Ludus::Graphics::FrameStatus BeginFrame() override { return beginStatus; }
         Ludus::Graphics::FrameStatus EndFrame() override { return endStatus; }
         void OnResize(uint32_t, uint32_t) override {}

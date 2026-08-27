@@ -1,5 +1,6 @@
 #include "system_registry.hpp"
 
+#include <algorithm>
 #include <utility>
 
 #include "scene_value_reader.hpp"
@@ -59,6 +60,25 @@ namespace Ludus
 	bool SystemRegistry::Contains(std::string_view id) const
 	{
 		return _entries.contains(std::string(id));
+	}
+
+	std::vector<std::string> SystemRegistry::GetIds() const
+	{
+		std::vector<std::string> ids;
+		ids.reserve(_entries.size());
+		for (const auto& [id, entry] : _entries)
+			ids.push_back(id);
+		std::ranges::sort(ids);
+		return ids;
+	}
+
+	bool SystemRegistry::CreateDefaultConfig(
+		std::string_view id,
+		Ludus::Serialization::LSceneValue& output,
+		std::vector<SceneLoadError>& errors) const
+	{
+		output = Ludus::Serialization::LSceneValue::ObjectValue();
+		return ValidateConfig(id, output, errors);
 	}
 
 	bool SystemRegistry::ValidateConfig(

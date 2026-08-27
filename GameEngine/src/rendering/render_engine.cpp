@@ -25,6 +25,7 @@ namespace Ludus::Rendering
             std::make_unique<RenderEngine>(
                 std::move(device),
                 assets);
+		renderEngine->_backend = backend;
 
         if (!renderEngine->_imgui.Initialize(
             static_cast<GLFWwindow*>(deviceDesc.window),
@@ -65,8 +66,25 @@ namespace Ludus::Rendering
         _items.push_back(std::move(item));
     }
 
+	void RenderEngine::RequestEditorViewportSize(uint32_t width, uint32_t height)
+	{
+		_requestedEditorWidth = width;
+		_requestedEditorHeight = height;
+	}
+
+	ImTextureID RenderEngine::GetEditorViewportTexture() const noexcept
+	{
+		return _editorTexture;
+	}
+
+	bool RenderEngine::EditorViewportNeedsVerticalFlip() const noexcept
+	{
+		return _backend == Ludus::Graphics::RendererBackend::OPENGL;
+	}
+
     Ludus::Graphics::FrameStatus RenderEngine::Render(const Ludus::Graphics::Camera2D& camera, uint32_t width, uint32_t height)
     {
+		ApplyEditorViewportSize();
         // begin the selected backend frame before collecting render data
         const Ludus::Graphics::FrameStatus status = _device->BeginFrame();
         if (status != Ludus::Graphics::FrameStatus::Success)
@@ -75,15 +93,43 @@ namespace Ludus::Rendering
             return status;
         }
 
-        _device->BeginRenderPass({});
-        _device->SetViewport({ 0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height) });
+		Ludus::Graphics::Camera2D renderCamera = camera;
+		if (_editorTarget)
+		{
+			renderCamera.SetViewport(
+				static_cast<float>(_editorWidth),
+				static_cast<float>(_editorHeight));
+			_device->BeginRenderPass({ {}, true, true, _editorTarget });
+			_device->SetViewport({
+				0.0f, 0.0f,
+				static_cast<float>(_editorWidth),
+				static_cast<float>(_editorHeight) });
+		}
+		else
+		{
+			_device->BeginRenderPass({});
+			_device->SetViewport({
+				0.0f, 0.0f,
+				static_cast<float>(width),
+				static_cast<float>(height) });
+		}
 
         Ludus::Graphics::FrameConstants frameConstants;
-        frameConstants.view = camera.GetView();
-        frameConstants.projection = camera.GetProjection();
+		frameConstants.view = renderCamera.GetView();
+		frameConstants.projection = renderCamera.GetProjection();
 
         for (const MeshInstanceDesc& item : _items)
             Draw(item, frameConstants);
+
+		if (_editorTarget)
+		{
+			_device->EndRenderPass();
+			_device->BeginRenderPass({ { 0.06f, 0.06f, 0.06f, 1.0f }, true, true, {} });
+			_device->SetViewport({
+				0.0f, 0.0f,
+				static_cast<float>(width),
+				static_cast<float>(height) });
+		}
 
         return Ludus::Graphics::FrameStatus::Success;
     }
@@ -105,11 +151,46 @@ namespace Ludus::Rendering
             return;
 
         _shutdown = true;
+		_device->WaitIdle();
+		if (_editorTexture != ImTextureID_Invalid)
+			_imgui.RemoveTexture(_editorTexture);
+		if (_editorTarget)
+			_device->DestroyRenderTarget(_editorTarget);
+		if (_editorSampler)
+			_device->DestroySampler(_editorSampler);
+		_editorTexture = ImTextureID_Invalid;
+		_editorTarget = {};
+		_editorSampler = {};
         _imgui.Shutdown();
         _resources.Clear();
         _items.clear();
         _device->Shutdown();
     }
+
+	void RenderEngine::ApplyEditorViewportSize()
+	{
+		if (!_requestedEditorWidth || !_requestedEditorHeight ||
+			(_editorTarget && _requestedEditorWidth == _editorWidth &&
+				_requestedEditorHeight == _editorHeight))
+			return;
+
+		_device->WaitIdle();
+		if (_editorTexture != ImTextureID_Invalid)
+			_imgui.RemoveTexture(_editorTexture);
+		if (_editorTarget)
+			_device->DestroyRenderTarget(_editorTarget);
+		if (!_editorSampler)
+			_editorSampler = _device->CreateSampler({ true, false });
+
+		_editorTarget = _device->CreateRenderTarget({
+			_requestedEditorWidth, _requestedEditorHeight });
+		_editorWidth = _requestedEditorWidth;
+		_editorHeight = _requestedEditorHeight;
+		_editorTexture = _editorTarget
+			? _imgui.AddTexture(
+				_device->GetRenderTargetTexture(_editorTarget), _editorSampler)
+			: ImTextureID_Invalid;
+	}
 
     void RenderEngine::Draw(const MeshInstanceDesc& item, const Ludus::Graphics::FrameConstants& frameConstants)
     {

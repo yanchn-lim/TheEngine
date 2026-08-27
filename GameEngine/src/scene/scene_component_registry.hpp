@@ -41,6 +41,11 @@ namespace Ludus
 			Ludus::ECS::World&,
 			Ludus::ECS::Entity,
 			std::vector<SceneLoadError>&)>;
+		using DefaultCreator = std::function<bool(
+			const SceneAssetContext&,
+			Ludus::Serialization::LSceneValue&,
+			std::vector<std::string>&)>;
+		using Remover = std::function<bool(Ludus::ECS::World&, Ludus::ECS::Entity)>;
 
 		template<typename Component>
 		bool Register()
@@ -98,8 +103,34 @@ namespace Ludus
 						return false;
 					*existing = std::move(updated);
 					return true;
+				},
+				[](const SceneAssetContext& assets,
+					Ludus::Serialization::LSceneValue& output,
+					std::vector<std::string>& errors)
+				{
+					const Component component{};
+					return Codec::Save(component, assets, output, errors);
+				},
+				[](Ludus::ECS::World& world, Ludus::ECS::Entity entity)
+				{
+					return world.RemoveComponent<Component>(entity);
 				});
 		}
+
+		std::vector<std::string_view> GetNames() const;
+		bool Has(
+			std::string_view name,
+			const Ludus::ECS::World& world,
+			Ludus::ECS::Entity entity) const;
+		bool CreateDefault(
+			std::string_view name,
+			const SceneAssetContext& assets,
+			Ludus::Serialization::LSceneValue& output,
+			std::vector<std::string>& errors) const;
+		bool Remove(
+			std::string_view name,
+			Ludus::ECS::World& world,
+			Ludus::ECS::Entity entity) const;
 
 		bool Load(
 			std::string_view name,
@@ -132,6 +163,8 @@ namespace Ludus
 			Saver save;
 			PresenceCheck has;
 			Updater update;
+			DefaultCreator createDefault;
+			Remover remove;
 		};
 
 		bool RegisterEntry(
@@ -139,7 +172,9 @@ namespace Ludus
 			Loader loader,
 			Saver saver,
 			PresenceCheck has,
-			Updater updater);
+			Updater updater,
+			DefaultCreator defaultCreator,
+			Remover remover);
 
 		std::vector<Entry> _entries;
 		std::unordered_map<std::string, size_t> _indices;

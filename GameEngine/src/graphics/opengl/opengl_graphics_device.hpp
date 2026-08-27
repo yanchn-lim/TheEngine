@@ -20,12 +20,15 @@ namespace Ludus::Graphics
         GpuSamplerHandle CreateSampler(const SamplerDesc& desc) override;
         GpuShaderHandle CreateShader(const ShaderProgramDesc& desc) override;
         GpuPipelineHandle CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) override;
+		GpuRenderTargetHandle CreateRenderTarget(const RenderTargetDesc& desc) override;
+		GpuTextureHandle GetRenderTargetTexture(GpuRenderTargetHandle handle) const override;
 
         void DestroyBuffer(GpuBufferHandle handle) override;
         void DestroyTexture(GpuTextureHandle handle) override;
         void DestroySampler(GpuSamplerHandle handle) override;
         void DestroyShader(GpuShaderHandle handle) override;
         void DestroyPipeline(GpuPipelineHandle handle) override;
+		void DestroyRenderTarget(GpuRenderTargetHandle handle) override;
 
         FrameStatus BeginFrame() override;
         FrameStatus EndFrame() override;
@@ -45,6 +48,8 @@ namespace Ludus::Graphics
         void Draw(uint32_t vertexCount) override;
         void DrawIndexed(uint32_t indexCount) override;
 
+		uint32_t NativeTexture(GpuTextureHandle handle) const;
+
     private:
         // native OpenGL names stay behind typed resource tables
         struct BufferResource { uint32_t id = 0; };
@@ -52,6 +57,12 @@ namespace Ludus::Graphics
         struct SamplerResource { uint32_t id = 0; };
         struct ShaderResource { uint32_t program = 0; };
         struct PipelineResource { GraphicsPipelineDesc desc; };
+		struct RenderTargetResource
+		{
+			uint32_t framebuffer = 0;
+			uint32_t depth = 0;
+			GpuTextureHandle color;
+		};
 
         GLFWwindow* _window = nullptr;
         ResourceTable<GpuBufferHandle, BufferResource> _buffers;
@@ -59,6 +70,7 @@ namespace Ludus::Graphics
         ResourceTable<GpuSamplerHandle, SamplerResource> _samplers;
         ResourceTable<GpuShaderHandle, ShaderResource> _shaders;
         ResourceTable<GpuPipelineHandle, PipelineResource> _pipelines;
+		ResourceTable<GpuRenderTargetHandle, RenderTargetResource> _renderTargets;
         GpuPipelineHandle _activePipeline;
         uint32_t _vertexArray = 0;
 

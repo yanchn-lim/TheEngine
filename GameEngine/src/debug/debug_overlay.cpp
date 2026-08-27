@@ -28,8 +28,6 @@ void DebugOverlay::Draw()
         }
         ImGui::EndMainMenuBar();
     }
-
-    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
     _profilerUI.Draw();
     DebugConsole::Get().Draw();
 }

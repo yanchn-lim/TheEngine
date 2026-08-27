@@ -53,6 +53,11 @@ namespace Ludus::Editor
 		ImGui::TextDisabled("ID: %s", _selectedEntityId.c_str());
 		ImGui::Separator();
 
+		for (const std::string& error : _errors)
+			ImGui::TextColored(
+				ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "%s", error.c_str());
+		ImGui::Separator();
+
 		Ludus::Serialization::LSceneValue::Object values;
 		std::vector<std::string> saveErrors;
 		if (!components.SaveComponents(
@@ -81,12 +86,39 @@ namespace Ludus::Editor
 		if (values.empty())
 			ImGui::TextDisabled("Entity has no components");
 
+		bool componentRemoved = false;
 		for (auto& [componentName, currentValue] : values)
 		{
 			ImGui::PushID(componentName.c_str());
-			if (ImGui::CollapsingHeader(
-				componentName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+			const bool open = ImGui::CollapsingHeader(
+				componentName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+			if (ImGui::BeginPopupContextItem())
 			{
+				if (ImGui::MenuItem("Remove Component"))
+				{
+					FinishActiveEdits(history);
+					_errors.clear();
+					if (history.RemoveComponent(
+						scene,
+						components,
+						_selectedEntityId,
+						componentName,
+						_errors))
+					{
+						_pendingEdits.erase(componentName);
+						componentRemoved = true;
+					}
+				}
+				ImGui::EndPopup();
+			}
+			if (open)
+			{
+				if (componentRemoved)
+				{
+					ImGui::PopID();
+					break;
+				}
+
 				auto pending = _pendingEdits.find(componentName);
 				Ludus::Serialization::LSceneValue editable = pending == _pendingEdits.end()
 					? currentValue
@@ -151,6 +183,49 @@ namespace Ludus::Editor
 				}
 			}
 			ImGui::PopID();
+		}
+
+		if (ImGui::BeginPopupContextWindow(
+			"InspectorContext",
+			ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+		{
+			if (ImGui::BeginMenu("Add Component"))
+			{
+				for (const std::string_view componentName : components.GetNames())
+				{
+					const bool exists = components.Has(
+						componentName, scene.GetWorld(), entity);
+					ImGui::BeginDisabled(exists);
+					if (ImGui::MenuItem(std::string(componentName).c_str()))
+					{
+						_errors.clear();
+						Ludus::Serialization::LSceneValue value =
+							Ludus::Serialization::LSceneValue::ObjectValue();
+						if (components.CreateDefault(
+							componentName,
+							scene.GetAssetContext(),
+							value,
+							_errors))
+						{
+							std::vector<Ludus::SceneLoadError> loadErrors;
+							if (!history.AddComponent(
+								scene,
+								components,
+								_selectedEntityId,
+								std::string(componentName),
+								std::move(value),
+								loadErrors))
+							{
+								for (Ludus::SceneLoadError& error : loadErrors)
+									_errors.push_back(std::move(error.message));
+							}
+						}
+					}
+					ImGui::EndDisabled();
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
 		}
 
 		ImGui::End();

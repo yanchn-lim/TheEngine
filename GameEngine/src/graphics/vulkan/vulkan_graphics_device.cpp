@@ -357,6 +357,77 @@ namespace Ludus::Graphics
         }
     }
 
+	GpuRenderTargetHandle VulkanGraphicsDevice::CreateRenderTarget(
+		const RenderTargetDesc& desc)
+	{
+		if (!desc.width || !desc.height)
+			return {};
+		try
+		{
+			const auto createImage = [this, &desc](
+				vk::Format format,
+				vk::ImageUsageFlags usage,
+				vk::ImageAspectFlags aspect)
+			{
+				vk::ImageCreateInfo info{};
+				info.imageType = vk::ImageType::e2D;
+				info.format = format;
+				info.extent = { desc.width, desc.height, 1 };
+				info.mipLevels = 1;
+				info.arrayLayers = 1;
+				info.samples = vk::SampleCountFlagBits::e1;
+				info.tiling = vk::ImageTiling::eOptimal;
+				info.usage = usage;
+				info.initialLayout = vk::ImageLayout::eUndefined;
+				ImageResource image;
+				image.image = vk::raii::Image(_device.Device(), info);
+				const vk::MemoryRequirements requirements = image.image.getMemoryRequirements();
+				vk::MemoryAllocateInfo allocation{};
+				allocation.allocationSize = requirements.size;
+				allocation.memoryTypeIndex = FindMemoryType(
+					requirements.memoryTypeBits,
+					vk::MemoryPropertyFlagBits::eDeviceLocal);
+				image.memory = vk::raii::DeviceMemory(_device.Device(), allocation);
+				image.image.bindMemory(*image.memory, 0);
+				vk::ImageViewCreateInfo viewInfo{};
+				viewInfo.image = *image.image;
+				viewInfo.viewType = vk::ImageViewType::e2D;
+				viewInfo.format = format;
+				viewInfo.subresourceRange = { aspect, 0, 1, 0, 1 };
+				image.view = vk::raii::ImageView(_device.Device(), viewInfo);
+				return image;
+			};
+
+			ImageResource color = createImage(
+				_swapchain.Format(),
+				vk::ImageUsageFlagBits::eColorAttachment |
+					vk::ImageUsageFlagBits::eSampled,
+				vk::ImageAspectFlagBits::eColor);
+			ImageResource depth = createImage(
+				_depthFormat,
+				vk::ImageUsageFlagBits::eDepthStencilAttachment,
+				vk::ImageAspectFlagBits::eDepth);
+			const GpuTextureHandle colorHandle = _textures.Create(std::move(color));
+			return _renderTargets.Create(RenderTargetResource{
+				colorHandle,
+				std::move(depth),
+				{ desc.width, desc.height },
+				false });
+		}
+		catch (const std::exception& error)
+		{
+			Ludus::Debug::LogError("Vulkan render target creation failed: ", error.what());
+			return {};
+		}
+	}
+
+	GpuTextureHandle VulkanGraphicsDevice::GetRenderTargetTexture(
+		GpuRenderTargetHandle handle) const
+	{
+		const RenderTargetResource* target = _renderTargets.Get(handle);
+		return target ? target->color : GpuTextureHandle{};
+	}
+
     void VulkanGraphicsDevice::DestroyBuffer(GpuBufferHandle handle) { _buffers.Destroy(handle); }
     void VulkanGraphicsDevice::DestroyTexture(GpuTextureHandle handle)
     {
@@ -379,6 +450,14 @@ namespace Ludus::Graphics
     }
     void VulkanGraphicsDevice::DestroyShader(GpuShaderHandle handle) { _shaders.Destroy(handle); }
     void VulkanGraphicsDevice::DestroyPipeline(GpuPipelineHandle handle) { _pipelines.Destroy(handle); }
+	void VulkanGraphicsDevice::DestroyRenderTarget(GpuRenderTargetHandle handle)
+	{
+		RenderTargetResource* target = _renderTargets.Get(handle);
+		if (!target)
+			return;
+		DestroyTexture(target->color);
+		_renderTargets.Destroy(handle);
+	}
 
     FrameStatus VulkanGraphicsDevice::BeginFrame()
     {
@@ -498,6 +577,7 @@ namespace Ludus::Graphics
     {
         try { WaitIdle(); } catch (...) {}
         _textureSets.clear();
+		_renderTargets.Clear();
         _pipelines.Clear();
         _shaders.Clear();
         _samplers.Clear();
@@ -524,13 +604,48 @@ namespace Ludus::Graphics
 
     void VulkanGraphicsDevice::BeginRenderPass(const RenderPassDesc& desc)
     {
-        // dynamic rendering uses the current swapchain view without a render-pass object
         vk::raii::CommandBuffer& commands = CurrentCommands();
-        TransitionForRender(commands);
+		RenderTargetResource* target = _renderTargets.Get(desc.target);
+		_activeRenderTarget = target ? desc.target : GpuRenderTargetHandle{};
+		if (target)
+		{
+			ImageResource* color = _textures.Get(target->color);
+			vk::ImageMemoryBarrier2 barriers[2]{};
+			barriers[0].srcStageMask = target->rendered
+				? vk::PipelineStageFlagBits2::eFragmentShader
+				: vk::PipelineStageFlags2{};
+			barriers[0].srcAccessMask = target->rendered
+				? vk::AccessFlagBits2::eShaderSampledRead
+				: vk::AccessFlags2{};
+			barriers[0].dstStageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
+			barriers[0].dstAccessMask = vk::AccessFlagBits2::eColorAttachmentWrite;
+			barriers[0].oldLayout = target->rendered
+				? vk::ImageLayout::eShaderReadOnlyOptimal
+				: vk::ImageLayout::eUndefined;
+			barriers[0].newLayout = vk::ImageLayout::eColorAttachmentOptimal;
+			barriers[0].image = *color->image;
+			barriers[0].subresourceRange = {
+				vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 };
+			barriers[1].dstStageMask = vk::PipelineStageFlagBits2::eEarlyFragmentTests;
+			barriers[1].dstAccessMask = vk::AccessFlagBits2::eDepthStencilAttachmentWrite;
+			barriers[1].oldLayout = vk::ImageLayout::eUndefined;
+			barriers[1].newLayout = vk::ImageLayout::eDepthAttachmentOptimal;
+			barriers[1].image = *target->depth.image;
+			barriers[1].subresourceRange = {
+				vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1 };
+			vk::DependencyInfo dependency{};
+			dependency.imageMemoryBarrierCount = 2;
+			dependency.pImageMemoryBarriers = barriers;
+			commands.pipelineBarrier2(dependency);
+		}
+		else
+			TransitionForRender(commands);
         vk::ClearValue clear{};
         clear.color.float32 = std::array{ desc.clearColor.r, desc.clearColor.g, desc.clearColor.b, desc.clearColor.a };
         vk::RenderingAttachmentInfo attachment{};
-        attachment.imageView = _swapchain.ImageView(_imageIndex);
+		attachment.imageView = target
+			? *_textures.Get(target->color)->view
+			: _swapchain.ImageView(_imageIndex);
         attachment.imageLayout = vk::ImageLayout::eColorAttachmentOptimal;
         attachment.loadOp = desc.clearColorTarget ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
         attachment.storeOp = vk::AttachmentStoreOp::eStore;
@@ -538,13 +653,15 @@ namespace Ludus::Graphics
         vk::ClearValue depthClear{};
         depthClear.depthStencil = { 1.0f, 0 };
         vk::RenderingAttachmentInfo depthAttachment{};
-        depthAttachment.imageView = *_depthResources.at(_imageIndex).view;
+		depthAttachment.imageView = target
+			? *target->depth.view
+			: *_depthResources.at(_imageIndex).view;
         depthAttachment.imageLayout = vk::ImageLayout::eDepthAttachmentOptimal;
         depthAttachment.loadOp = desc.clearDepthTarget ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
         depthAttachment.storeOp = vk::AttachmentStoreOp::eStore;
         depthAttachment.clearValue = depthClear;
         vk::RenderingInfo info{};
-        info.renderArea = { {0, 0}, _swapchain.Extent() };
+		info.renderArea = { {0, 0}, target ? target->extent : _swapchain.Extent() };
         info.layerCount = 1;
         info.colorAttachmentCount = 1;
         info.pColorAttachments = &attachment;
@@ -557,9 +674,43 @@ namespace Ludus::Graphics
     {
         if (!_renderPassActive) return;
         CurrentCommands().endRendering();
-        TransitionForPresent(CurrentCommands());
+		if (RenderTargetResource* target = _renderTargets.Get(_activeRenderTarget))
+		{
+			ImageResource* color = _textures.Get(target->color);
+			vk::ImageMemoryBarrier2 barrier{};
+			barrier.srcStageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput;
+			barrier.srcAccessMask = vk::AccessFlagBits2::eColorAttachmentWrite;
+			barrier.dstStageMask = vk::PipelineStageFlagBits2::eFragmentShader;
+			barrier.dstAccessMask = vk::AccessFlagBits2::eShaderSampledRead;
+			barrier.oldLayout = vk::ImageLayout::eColorAttachmentOptimal;
+			barrier.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			barrier.image = *color->image;
+			barrier.subresourceRange = {
+				vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 };
+			vk::DependencyInfo dependency{};
+			dependency.imageMemoryBarrierCount = 1;
+			dependency.pImageMemoryBarriers = &barrier;
+			CurrentCommands().pipelineBarrier2(dependency);
+			target->rendered = true;
+		}
+		else
+			TransitionForPresent(CurrentCommands());
+		_activeRenderTarget = {};
         _renderPassActive = false;
     }
+
+	vk::ImageView VulkanGraphicsDevice::NativeTextureView(
+		GpuTextureHandle handle) const
+	{
+		const ImageResource* image = _textures.Get(handle);
+		return image ? *image->view : vk::ImageView{};
+	}
+
+	vk::Sampler VulkanGraphicsDevice::NativeSampler(GpuSamplerHandle handle) const
+	{
+		const vk::raii::Sampler* sampler = _samplers.Get(handle);
+		return sampler ? **sampler : vk::Sampler{};
+	}
 
     void VulkanGraphicsDevice::SetViewport(const ViewportDesc& viewport)
     {

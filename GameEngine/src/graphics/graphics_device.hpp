@@ -28,12 +28,15 @@ namespace Ludus::Graphics
         virtual GpuSamplerHandle CreateSampler(const SamplerDesc& desc) = 0;
         virtual GpuShaderHandle CreateShader(const ShaderProgramDesc& desc) = 0;
         virtual GpuPipelineHandle CreateGraphicsPipeline(const GraphicsPipelineDesc& desc) = 0;
+		virtual GpuRenderTargetHandle CreateRenderTarget(const RenderTargetDesc& desc) = 0;
+		virtual GpuTextureHandle GetRenderTargetTexture(GpuRenderTargetHandle handle) const = 0;
 
         virtual void DestroyBuffer(GpuBufferHandle handle) = 0;
         virtual void DestroyTexture(GpuTextureHandle handle) = 0;
         virtual void DestroySampler(GpuSamplerHandle handle) = 0;
         virtual void DestroyShader(GpuShaderHandle handle) = 0;
         virtual void DestroyPipeline(GpuPipelineHandle handle) = 0;
+		virtual void DestroyRenderTarget(GpuRenderTargetHandle handle) = 0;
 
         // frame methods keep acquire, recording, submission, and presentation ordered
         virtual FrameStatus BeginFrame() = 0;

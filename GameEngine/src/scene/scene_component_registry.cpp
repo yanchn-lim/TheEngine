@@ -232,9 +232,12 @@ namespace Ludus
 		Loader loader,
 		Saver saver,
 		PresenceCheck has,
-		Updater updater)
+		Updater updater,
+		DefaultCreator defaultCreator,
+		Remover remover)
 	{
 		if (name.empty() || !loader || !saver || !has || !updater ||
+			!defaultCreator || !remover ||
 			_indices.contains(name))
 			return false;
 
@@ -245,8 +248,53 @@ namespace Ludus
 			std::move(loader),
 			std::move(saver),
 			std::move(has),
-			std::move(updater) });
+			std::move(updater),
+			std::move(defaultCreator),
+			std::move(remover) });
 		return true;
+	}
+
+	std::vector<std::string_view> SceneComponentRegistry::GetNames() const
+	{
+		std::vector<std::string_view> names;
+		names.reserve(_entries.size());
+		for (const Entry& entry : _entries)
+			names.push_back(entry.name);
+		return names;
+	}
+
+	bool SceneComponentRegistry::Has(
+		std::string_view name,
+		const Ludus::ECS::World& world,
+		Ludus::ECS::Entity entity) const
+	{
+		const auto found = _indices.find(std::string(name));
+		return found != _indices.end() && _entries[found->second].has(world, entity);
+	}
+
+	bool SceneComponentRegistry::CreateDefault(
+		std::string_view name,
+		const SceneAssetContext& assets,
+		Ludus::Serialization::LSceneValue& output,
+		std::vector<std::string>& errors) const
+	{
+		const auto found = _indices.find(std::string(name));
+		if (found == _indices.end())
+		{
+			errors.push_back("unknown component '" + std::string(name) + "'");
+			return false;
+		}
+		return _entries[found->second].createDefault(assets, output, errors);
+	}
+
+	bool SceneComponentRegistry::Remove(
+		std::string_view name,
+		Ludus::ECS::World& world,
+		Ludus::ECS::Entity entity) const
+	{
+		const auto found = _indices.find(std::string(name));
+		return found != _indices.end() &&
+			_entries[found->second].remove(world, entity);
 	}
 
 	bool SceneComponentRegistry::Load(

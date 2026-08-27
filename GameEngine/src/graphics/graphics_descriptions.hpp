@@ -38,6 +38,12 @@ namespace Ludus::Graphics
         uint32_t height = 0;
     };
 
+	struct RenderTargetDesc
+	{
+		uint32_t width = 0;
+		uint32_t height = 0;
+	};
+
     struct SamplerDesc
     {
         bool linear = true;
@@ -82,6 +88,7 @@ namespace Ludus::Graphics
         glm::vec4 clearColor{ 0.1f, 0.1f, 0.1f, 1.0f };
         bool clearColorTarget = true;
         bool clearDepthTarget = true;
+		GpuRenderTargetHandle target;
     };
 
     struct ViewportDesc

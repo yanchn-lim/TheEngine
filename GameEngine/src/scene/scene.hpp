@@ -27,7 +27,8 @@ namespace Ludus
 			std::string name;
 		};
 
-		Ludus::ECS::Entity CreateEntity(std::string id, std::string name);
+		std::string CreateEntity(std::string name);
+		Ludus::ECS::Entity RestoreEntity(std::string id, std::string name);
 		// Remove stable scene entities through Scene to keep their text IDs synchronized.
 		bool RemoveEntity(std::string_view id);
 		Ludus::ECS::Entity FindEntity(std::string_view id) const;

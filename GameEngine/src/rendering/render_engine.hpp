@@ -25,6 +25,9 @@ namespace Ludus::Rendering
         void BeginImGui();
         void EndImGui();
         void Submit(MeshInstanceDesc item);
+		void RequestEditorViewportSize(uint32_t width, uint32_t height);
+		ImTextureID GetEditorViewportTexture() const noexcept;
+		bool EditorViewportNeedsVerticalFlip() const noexcept;
         // Render records world and scene draws while EndFrame waits for UI recording
         Ludus::Graphics::FrameStatus Render(const Ludus::Graphics::Camera2D& camera, uint32_t width, uint32_t height);
         Ludus::Graphics::FrameStatus EndFrame();
@@ -38,7 +41,16 @@ namespace Ludus::Rendering
         Ludus::Graphics::ImGuiLayer _imgui;
         std::vector<MeshInstanceDesc> _items;
         bool _shutdown = false;
+		Ludus::Graphics::RendererBackend _backend;
+		Ludus::Graphics::GpuRenderTargetHandle _editorTarget;
+		Ludus::Graphics::GpuSamplerHandle _editorSampler;
+		ImTextureID _editorTexture = ImTextureID_Invalid;
+		uint32_t _editorWidth = 0;
+		uint32_t _editorHeight = 0;
+		uint32_t _requestedEditorWidth = 0;
+		uint32_t _requestedEditorHeight = 0;
 
         void Draw(const MeshInstanceDesc& item, const Ludus::Graphics::FrameConstants& frameConstants);
+		void ApplyEditorViewportSize();
     };
 }

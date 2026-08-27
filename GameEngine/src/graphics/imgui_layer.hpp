@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <imgui.h>
+
 #include "imgui_backend.hpp"
 #include "renderer_backend.hpp"
 
@@ -23,6 +25,8 @@ namespace Ludus::Graphics
         bool Initialize(GLFWwindow* window, RendererBackend backend, IGraphicsDevice& device);
         void Begin();
         void End();
+		ImTextureID AddTexture(GpuTextureHandle texture, GpuSamplerHandle sampler);
+		void RemoveTexture(ImTextureID texture);
         void Shutdown();
 
     private:

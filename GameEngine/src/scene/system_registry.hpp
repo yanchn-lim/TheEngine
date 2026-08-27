@@ -81,6 +81,11 @@ namespace Ludus
 		}
 
 		bool Contains(std::string_view id) const;
+		std::vector<std::string> GetIds() const;
+		bool CreateDefaultConfig(
+			std::string_view id,
+			Ludus::Serialization::LSceneValue& output,
+			std::vector<SceneLoadError>& errors) const;
 		bool ValidateConfig(
 			std::string_view id,
 			const Ludus::Serialization::LSceneValue& config,

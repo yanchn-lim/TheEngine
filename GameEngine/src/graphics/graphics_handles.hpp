@@ -28,4 +28,5 @@ namespace Ludus::Graphics
     using GpuSamplerHandle = Handle<struct GpuSamplerTag>;
     using GpuShaderHandle = Handle<struct GpuShaderTag>;
     using GpuPipelineHandle = Handle<struct GpuPipelineTag>;
+	using GpuRenderTargetHandle = Handle<struct GpuRenderTargetTag>;
 }

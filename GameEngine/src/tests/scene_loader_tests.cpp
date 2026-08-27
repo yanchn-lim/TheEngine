@@ -39,6 +39,7 @@ namespace Tests
 		class ConfiguredSystem final : public Ludus::ECS::ISystem
 		{
 		public:
+			static constexpr const char* ProfileName = "ConfiguredSystem";
 			static constexpr Ludus::ECS::SystemPhase Phase = Ludus::ECS::SystemPhase::UPDATE;
 			static constexpr int Order = 200;
 
@@ -259,13 +260,13 @@ namespace Tests
 			RegisterRotatorSceneComponent(components);
 
 			Ludus::Scene invalidId;
-			invalidId.CreateEntity("bad id", "Bad ID");
+			invalidId.RestoreEntity("bad id", "Bad ID");
 
 			Ludus::Scene invalidName;
-			invalidName.CreateEntity("entity", "Bad\rName");
+			invalidName.RestoreEntity("entity", "Bad\rName");
 
 			Ludus::Scene foreignMesh;
-			const Ludus::ECS::Entity foreignEntity = foreignMesh.CreateEntity("entity", "Entity");
+			const Ludus::ECS::Entity foreignEntity = foreignMesh.RestoreEntity("entity", "Entity");
 			foreignMesh.GetWorld().AddComponent(
 				foreignEntity,
 				Ludus::Components::Renderable{ Ludus::Assets::MeshHandle{ 99 }, {}, true });
@@ -279,21 +280,21 @@ namespace Tests
 				Ludus::Serialization::LSceneValue::ObjectValue(),
 				std::move(ambiguousAssets));
 			const Ludus::ECS::Entity ambiguousEntity =
-				ambiguousMesh.CreateEntity("entity", "Entity");
+				ambiguousMesh.RestoreEntity("entity", "Entity");
 			ambiguousMesh.GetWorld().AddComponent(
 				ambiguousEntity,
 				Ludus::Components::Renderable{ Ludus::Assets::MeshHandle{ 7 }, {}, true });
 
 			Ludus::Scene invalidFloat;
 			const Ludus::ECS::Entity invalidFloatEntity =
-				invalidFloat.CreateEntity("entity", "Entity");
+				invalidFloat.RestoreEntity("entity", "Entity");
 			Ludus::Components::Transform invalidTransform;
 			invalidTransform.position.x = std::numeric_limits<float>::infinity();
 			invalidFloat.GetWorld().AddComponent(invalidFloatEntity, invalidTransform);
 
 			Ludus::Scene invalidQuaternion;
 			const Ludus::ECS::Entity invalidQuaternionEntity =
-				invalidQuaternion.CreateEntity("entity", "Entity");
+				invalidQuaternion.RestoreEntity("entity", "Entity");
 			Ludus::Components::Transform zeroRotation;
 			zeroRotation.rotation = glm::quat{ 0.0f, 0.0f, 0.0f, 0.0f };
 			invalidQuaternion.GetWorld().AddComponent(
@@ -301,14 +302,14 @@ namespace Tests
 
 			Ludus::Scene invalidRotator;
 			const Ludus::ECS::Entity invalidRotatorEntity =
-				invalidRotator.CreateEntity("entity", "Entity");
+				invalidRotator.RestoreEntity("entity", "Entity");
 			invalidRotator.GetWorld().AddComponent(
 				invalidRotatorEntity,
 				Rotator{ {}, 1.0f });
 
 			Ludus::Scene unregisteredComponent;
 			const Ludus::ECS::Entity unregisteredEntity =
-				unregisteredComponent.CreateEntity("entity", "Entity");
+				unregisteredComponent.RestoreEntity("entity", "Entity");
 			unregisteredComponent.GetWorld().AddComponent(
 				unregisteredEntity,
 				UnregisteredComponent{});
@@ -322,7 +323,7 @@ namespace Tests
 				Ludus::Serialization::LSceneValue::ObjectValue(),
 				std::move(missingMaterialAssets));
 			const Ludus::ECS::Entity missingMaterialEntity =
-				missingMaterial.CreateEntity("entity", "Entity");
+				missingMaterial.RestoreEntity("entity", "Entity");
 			missingMaterial.GetWorld().AddComponent(
 				missingMaterialEntity,
 				Ludus::Components::Renderable{ Ludus::Assets::MeshHandle{ 8 }, {}, true });
@@ -394,7 +395,7 @@ namespace Tests
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
 			Ludus::Scene scene;
-			const Ludus::ECS::Entity entity = scene.CreateEntity("entity", "Entity");
+			const Ludus::ECS::Entity entity = scene.RestoreEntity("entity", "Entity");
 			Ludus::Components::Transform transform;
 			transform.position = { 1.0f, 2.0f, 3.0f };
 			scene.GetWorld().AddComponent(entity, transform);
@@ -446,7 +447,7 @@ namespace Tests
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
 			Ludus::Scene scene;
-			const Ludus::ECS::Entity entity = scene.CreateEntity("entity", "Entity");
+			const Ludus::ECS::Entity entity = scene.RestoreEntity("entity", "Entity");
 			Ludus::Components::Transform transform;
 			transform.position.x = 1.0f;
 			scene.GetWorld().AddComponent(entity, transform);
@@ -473,13 +474,18 @@ namespace Tests
 
 			Ludus::Editor::EditorCommandHistory history;
 			history.RecordComponentEdit("entity", "Transform", before, after);
-			if (!history.CanUndo() || history.CanRedo() ||
+			if (!history.CanUndo() || history.CanRedo() || !history.IsDirty())
+				return false;
+			history.MarkSaved();
+			if (history.IsDirty() ||
 				!history.Undo(scene, components) ||
+				!history.IsDirty() ||
 				!NearlyEqual(
 					scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x,
 					1.0f) ||
 				!history.CanRedo() ||
 				!history.Redo(scene, components) ||
+				history.IsDirty() ||
 				!NearlyEqual(
 					scene.GetWorld().GetComponent<Ludus::Components::Transform>(entity).position.x,
 					4.0f))
@@ -501,13 +507,16 @@ namespace Tests
 			history.RecordSystemEdit(
 				"rotator", false, beforeConfig, false, afterConfig);
 
-			if (!history.Undo(scene, components) || scene.GetSystems()[0].enabled)
+			if (!history.IsDirty() ||
+				!history.Undo(scene, components) || history.IsDirty() ||
+				scene.GetSystems()[0].enabled)
 				return false;
 			const double* undoneSpeed = scene.GetSystems()[0].config.Find("speed")
 				? scene.GetSystems()[0].config.Find("speed")->TryGetFloat()
 				: nullptr;
 			if (!undoneSpeed || !NearlyEqual(static_cast<float>(*undoneSpeed), 1.0f) ||
-				!history.Redo(scene, components) || scene.GetSystems()[0].enabled)
+				!history.Redo(scene, components) || !history.IsDirty() ||
+				scene.GetSystems()[0].enabled)
 			{
 				return false;
 			}
@@ -516,14 +525,125 @@ namespace Tests
 				? scene.GetSystems()[0].config.Find("speed")->TryGetFloat()
 				: nullptr;
 			if (!redoneSpeed || !NearlyEqual(static_cast<float>(*redoneSpeed), 2.0f) ||
-				!history.Undo(scene, components))
+				!history.Undo(scene, components) || history.IsDirty())
 			{
 				return false;
 			}
 
 			history.RecordSystemEdit(
 				"rotator", false, beforeConfig, true, beforeConfig);
-			return !history.CanRedo();
+			return !history.CanRedo() && history.IsDirty();
+		}
+
+		bool StructuralEditorCommandsUndoAndRedo()
+		{
+			Ludus::SceneComponentRegistry components;
+			Ludus::RegisterBuiltInSceneComponents(components);
+			RegisterRotatorSceneComponent(components);
+			const std::vector<std::string_view> componentNames = components.GetNames();
+			if (componentNames.size() != 3)
+				return false;
+
+			Ludus::Serialization::LSceneValue transformValue =
+				Ludus::Serialization::LSceneValue::ObjectValue();
+			std::vector<std::string> errors;
+			if (!components.CreateDefault(
+				"Transform", {}, transformValue, errors))
+				return false;
+
+			Ludus::Scene scene;
+			Ludus::Editor::EditorCommandHistory history;
+			const std::string createdId = history.CreateEntity(scene, "Created");
+			const std::string otherId = scene.CreateEntity("Other");
+			const bool validGeneratedId =
+				createdId.starts_with("entity_") &&
+				createdId.size() == 39 &&
+				std::ranges::all_of(
+					createdId.substr(7),
+					[](char value)
+					{
+						return (value >= '0' && value <= '9') ||
+							(value >= 'a' && value <= 'f');
+					});
+			if (!validGeneratedId || otherId.empty() || otherId == createdId ||
+				!scene.RemoveEntity(otherId) ||
+				!scene.FindEntity(createdId).IsValid() ||
+				!history.Undo(scene, components) ||
+				scene.FindEntity(createdId).IsValid() ||
+				!history.Redo(scene, components))
+				return false;
+
+			std::vector<Ludus::SceneLoadError> loadErrors;
+			if (!history.AddComponent(
+				scene,
+				components,
+				createdId,
+				"Transform",
+				transformValue,
+				loadErrors))
+				return false;
+			Ludus::ECS::Entity entity = scene.FindEntity(createdId);
+			if (!scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity) ||
+				!history.Undo(scene, components) ||
+				scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity) ||
+				!history.Redo(scene, components) ||
+				!scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity))
+				return false;
+
+			errors.clear();
+			if (!history.RemoveComponent(
+				scene, components, createdId, "Transform", errors) ||
+				scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity) ||
+				!history.Undo(scene, components) ||
+				!scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity) ||
+				!history.Redo(scene, components) ||
+				scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity))
+				return false;
+
+			loadErrors.clear();
+			if (!history.AddComponent(
+				scene,
+				components,
+				createdId,
+				"Transform",
+				transformValue,
+				loadErrors))
+				return false;
+			errors.clear();
+			if (!history.DeleteEntity(scene, components, createdId, errors) ||
+				scene.FindEntity(createdId).IsValid() ||
+				!history.Undo(scene, components))
+				return false;
+			entity = scene.FindEntity(createdId);
+			if (!entity.IsValid() || scene.GetEntityName(createdId) != "Created" ||
+				!scene.GetWorld().HasComponent<Ludus::Components::Transform>(entity) ||
+				!history.Redo(scene, components) ||
+				scene.FindEntity(createdId).IsValid())
+				return false;
+
+			const std::vector<std::string> systemIds = TestSystems().GetIds();
+			if (systemIds != std::vector<std::string>{ "configured", "rotator" })
+				return false;
+			Ludus::Serialization::LSceneValue config =
+				Ludus::Serialization::LSceneValue::ObjectValue();
+			loadErrors.clear();
+			if (!TestSystems().CreateDefaultConfig("rotator", config, loadErrors) ||
+				!history.AddSystem(scene, { "rotator", true, config }) ||
+				scene.GetSystems().size() != 1 ||
+				!history.Undo(scene, components) ||
+				!scene.GetSystems().empty() ||
+				!history.Redo(scene, components) ||
+				scene.GetSystems().size() != 1 ||
+				!history.RemoveSystem(scene, "rotator") ||
+				!scene.GetSystems().empty() ||
+				!history.Undo(scene, components) ||
+				scene.GetSystems().size() != 1 ||
+				scene.GetSystems()[0].id != "rotator" ||
+				!history.Redo(scene, components) ||
+				!scene.GetSystems().empty())
+				return false;
+
+			return true;
 		}
 
 		bool SystemCompositionRoundTrips()
@@ -632,7 +752,7 @@ namespace Tests
 			Ludus::RegisterBuiltInSceneComponents(components);
 
 			Ludus::Scene source;
-			const Ludus::ECS::Entity removed = source.CreateEntity("removed", "Removed");
+			const Ludus::ECS::Entity removed = source.RestoreEntity("removed", "Removed");
 			source.GetWorld().RemoveEntity(removed);
 
 			std::string text;
@@ -690,7 +810,7 @@ namespace Tests
 			Ludus::SceneComponentRegistry components;
 			Ludus::RegisterBuiltInSceneComponents(components);
 			Ludus::Scene source;
-			const Ludus::ECS::Entity entity = source.CreateEntity("entity", "Entity");
+			const Ludus::ECS::Entity entity = source.RestoreEntity("entity", "Entity");
 			Ludus::Components::Transform transform;
 			transform.position = { 1.0f, 2.0f, 3.0f };
 			source.GetWorld().AddComponent(entity, transform);
@@ -723,7 +843,7 @@ namespace Tests
 				return false;
 
 			Ludus::Scene invalid;
-			invalid.CreateEntity("bad id", "Invalid");
+			invalid.RestoreEntity("bad id", "Invalid");
 			if (Ludus::SceneSerializer::Save(
 				destination, invalid, components, TestSystems(), saveErrors))
 				return false;
@@ -762,7 +882,7 @@ namespace Tests
 			};
 			for (const auto& [id, rotation] : rotations)
 			{
-				const Ludus::ECS::Entity entity = source.CreateEntity(id, id);
+				const Ludus::ECS::Entity entity = source.RestoreEntity(id, id);
 				Ludus::Components::Transform transform;
 				transform.rotation = rotation;
 				source.GetWorld().AddComponent(entity, transform);
@@ -892,7 +1012,7 @@ namespace Tests
 			RegisterRotatorSceneComponent(components);
 
 			if (makeSceneNonEmpty)
-				scene.CreateEntity("existing", "Existing");
+				scene.RestoreEntity("existing", "Existing");
 
 			std::vector<Ludus::SceneLoadError> errors;
 			if (Ludus::SceneLoader::Load(
@@ -950,7 +1070,8 @@ namespace Tests
 			!scene.GetEntityName("maxwell_left").empty())
 			return false;
 
-		const Ludus::ECS::Entity replacement = scene.CreateEntity("maxwell_left", "Replacement");
+		const Ludus::ECS::Entity replacement = scene.RestoreEntity(
+			"maxwell_left", "Replacement");
 		if (!replacement.IsValid() || !scene.RemoveEntity("maxwell_left") ||
 			scene.GetWorld().IsEntityAlive(replacement) ||
 			scene.FindEntity("maxwell_left").IsValid() ||
@@ -961,6 +1082,7 @@ namespace Tests
 			 SerializerBoundariesAreValidated() &&
 			 ComponentUpdatesAreTransactional() &&
 			 EditorCommandsUndoAndRedo() &&
+			 StructuralEditorCommandsUndoAndRedo() &&
 			 SystemCompositionRoundTrips() &&
 			 EmptyAndDeadScenesSerialize() &&
 			 ScenesSaveTransactionally() &&

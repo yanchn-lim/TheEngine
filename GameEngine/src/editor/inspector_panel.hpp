@@ -43,5 +43,6 @@ namespace Ludus::Editor
 		std::string _selectedEntityId;
 		std::unordered_map<std::string, PendingEdit> _pendingEdits;
 		std::unordered_map<std::string, ActiveEdit> _activeEdits;
+		std::vector<std::string> _errors;
 	};
 }

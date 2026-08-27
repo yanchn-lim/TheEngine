@@ -1,8 +1,38 @@
 #include "scene.hpp"
 
+#include <cstdio>
+#include <random>
+
 namespace Ludus
 {
-	Ludus::ECS::Entity Scene::CreateEntity(std::string id, std::string name)
+	namespace
+	{
+		std::string GenerateEntityId()
+		{
+			thread_local std::mt19937_64 generator(std::random_device{}());
+			char suffix[33]{};
+			std::snprintf(
+				suffix,
+				sizeof(suffix),
+				"%016llx%016llx",
+				static_cast<unsigned long long>(generator()),
+				static_cast<unsigned long long>(generator()));
+			return "entity_" + std::string(suffix);
+		}
+	}
+
+	std::string Scene::CreateEntity(std::string name)
+	{
+		for (size_t attempt = 0; attempt < 100; ++attempt)
+		{
+			std::string id = GenerateEntityId();
+			if (RestoreEntity(id, name).IsValid())
+				return id;
+		}
+		return {};
+	}
+
+	Ludus::ECS::Entity Scene::RestoreEntity(std::string id, std::string name)
 	{
 		if (id.empty())
 			return {};

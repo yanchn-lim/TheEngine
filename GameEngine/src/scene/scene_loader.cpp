@@ -199,7 +199,8 @@ namespace Ludus
 					continue;
 				}
 
-				const Ludus::ECS::Entity entity = scene.CreateEntity(id, std::move(displayName));
+				const Ludus::ECS::Entity entity = scene.RestoreEntity(
+					id, std::move(displayName));
 				if (!entity.IsValid())
 				{
 					AddError(errors, value, "duplicate entity id '" + id + "'");

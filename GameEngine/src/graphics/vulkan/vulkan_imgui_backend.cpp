@@ -65,6 +65,24 @@ namespace Ludus::Graphics
         ImGui_ImplGlfw_NewFrame();
     }
 
+	ImTextureID VulkanImGuiBackend::AddTexture(
+		GpuTextureHandle texture,
+		GpuSamplerHandle sampler)
+	{
+		const VkDescriptorSet set = ImGui_ImplVulkan_AddTexture(
+			static_cast<VkSampler>(_device->NativeSampler(sampler)),
+			static_cast<VkImageView>(_device->NativeTextureView(texture)),
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		return static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(set));
+	}
+
+	void VulkanImGuiBackend::RemoveTexture(ImTextureID texture)
+	{
+		if (texture != ImTextureID_Invalid)
+			ImGui_ImplVulkan_RemoveTexture(
+				reinterpret_cast<VkDescriptorSet>(static_cast<uintptr_t>(texture)));
+	}
+
     void VulkanImGuiBackend::Render(ImDrawData* drawData)
     {
         // append ImGui commands to the render pass already opened by RenderEngine

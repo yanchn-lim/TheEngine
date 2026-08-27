@@ -15,6 +15,8 @@ namespace Ludus::Graphics
         bool Initialize(GLFWwindow* window, IGraphicsDevice& device) override;
         void BeginFrame() override;
         void Render(ImDrawData* drawData) override;
+		ImTextureID AddTexture(GpuTextureHandle texture, GpuSamplerHandle sampler) override;
+		void RemoveTexture(ImTextureID texture) override;
         void Shutdown() override;
 
     private:

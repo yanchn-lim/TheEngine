@@ -144,6 +144,47 @@ namespace Ludus::Graphics
         return _shaders.Get(desc.shader) ? _pipelines.Create(PipelineResource{ desc }) : GpuPipelineHandle{};
     }
 
+	GpuRenderTargetHandle OpenGLGraphicsDevice::CreateRenderTarget(
+		const RenderTargetDesc& desc)
+	{
+		if (!desc.width || !desc.height)
+			return {};
+
+		GLuint texture = 0;
+		GLuint framebuffer = 0;
+		GLuint depth = 0;
+		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+		glTextureStorage2D(texture, 1, GL_RGBA8, desc.width, desc.height);
+		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		const GpuTextureHandle color = _textures.Create(TextureResource{ texture });
+		glCreateRenderbuffers(1, &depth);
+		glNamedRenderbufferStorage(depth, GL_DEPTH_COMPONENT24, desc.width, desc.height);
+		glCreateFramebuffers(1, &framebuffer);
+		glNamedFramebufferTexture(framebuffer, GL_COLOR_ATTACHMENT0, texture, 0);
+		glNamedFramebufferRenderbuffer(
+			framebuffer, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+		if (glCheckNamedFramebufferStatus(framebuffer, GL_FRAMEBUFFER) !=
+			GL_FRAMEBUFFER_COMPLETE)
+		{
+			glDeleteFramebuffers(1, &framebuffer);
+			glDeleteRenderbuffers(1, &depth);
+			DestroyTexture(color);
+			return {};
+		}
+		return _renderTargets.Create(
+			RenderTargetResource{ framebuffer, depth, color });
+	}
+
+	GpuTextureHandle OpenGLGraphicsDevice::GetRenderTargetTexture(
+		GpuRenderTargetHandle handle) const
+	{
+		const RenderTargetResource* target = _renderTargets.Get(handle);
+		return target ? target->color : GpuTextureHandle{};
+	}
+
     void OpenGLGraphicsDevice::DestroyBuffer(GpuBufferHandle handle)
     {
         if (BufferResource* resource = _buffers.Get(handle)) glDeleteBuffers(1, &resource->id);
@@ -173,6 +214,17 @@ namespace Ludus::Graphics
         _pipelines.Destroy(handle);
     }
 
+	void OpenGLGraphicsDevice::DestroyRenderTarget(GpuRenderTargetHandle handle)
+	{
+		RenderTargetResource* target = _renderTargets.Get(handle);
+		if (!target)
+			return;
+		glDeleteFramebuffers(1, &target->framebuffer);
+		glDeleteRenderbuffers(1, &target->depth);
+		DestroyTexture(target->color);
+		_renderTargets.Destroy(handle);
+	}
+
     FrameStatus OpenGLGraphicsDevice::BeginFrame()
     {
         _activePipeline = {};
@@ -197,6 +249,13 @@ namespace Ludus::Graphics
         // release escaped resources before the GLFW context is destroyed
         if (!_window) return;
         WaitIdle();
+		_renderTargets.ForEach(
+			[this](RenderTargetResource& target)
+			{
+				glDeleteFramebuffers(1, &target.framebuffer);
+				glDeleteRenderbuffers(1, &target.depth);
+				DestroyTexture(target.color);
+			});
         _buffers.ForEach([](BufferResource& resource) { glDeleteBuffers(1, &resource.id); });
         _textures.ForEach([](TextureResource& resource) { glDeleteTextures(1, &resource.id); });
         _samplers.ForEach([](SamplerResource& resource) { glDeleteSamplers(1, &resource.id); });
@@ -204,6 +263,7 @@ namespace Ludus::Graphics
         if (_vertexArray) glDeleteVertexArrays(1, &_vertexArray);
         _vertexArray = 0;
         _pipelines.Clear();
+		_renderTargets.Clear();
         _shaders.Clear();
         _samplers.Clear();
         _textures.Clear();
@@ -214,6 +274,8 @@ namespace Ludus::Graphics
     void OpenGLGraphicsDevice::BeginRenderPass(const RenderPassDesc& desc)
     {
         // OpenGL starts a pass by clearing the currently bound framebuffer
+		const RenderTargetResource* target = _renderTargets.Get(desc.target);
+		glBindFramebuffer(GL_FRAMEBUFFER, target ? target->framebuffer : 0);
         GLbitfield flags = 0;
         if (desc.clearColorTarget)
         {
@@ -226,6 +288,12 @@ namespace Ludus::Graphics
     }
 
     void OpenGLGraphicsDevice::EndRenderPass() {}
+
+	uint32_t OpenGLGraphicsDevice::NativeTexture(GpuTextureHandle handle) const
+	{
+		const TextureResource* texture = _textures.Get(handle);
+		return texture ? texture->id : 0;
+	}
 
     void OpenGLGraphicsDevice::SetViewport(const ViewportDesc& viewport)
     {
