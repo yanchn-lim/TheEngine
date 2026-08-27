@@ -20,14 +20,6 @@ struct ProfileSampleNode
 	std::vector<ProfileSampleNode> children{};
 };
 
-struct ProfileSample
-{
-	const char* name{ nullptr };
-	float startMs{ 0.f };
-	float durationMs{ 0.f };
-	size_t depth{ 0 }; //stack depth for hierarchy view
-};
-
 struct FrameData
 {
 	std::vector<ProfileSampleNode> roots;
@@ -37,18 +29,21 @@ struct FrameData
 class Profiler
 {
 	using Frames = RingBuffer<FrameData, PROFILER_CAP>;
-	using Clock = std::chrono::high_resolution_clock;
+	using Clock = std::chrono::steady_clock;
 	using TimePoint = std::chrono::time_point<Clock>;
 
 private:
-	FrameData _displayFrame{};
+	FrameData _emptyFrame{};
 	FrameData _currentFrame{};
 	Frames _frames{};
 
 	std::array<ProfileSampleNode*, MAX_SCOPE_DEPTH> _scopeStack{};
 	size_t _scopeDepth;
+	size_t _ignoredScopeDepth;
 
 	bool _paused;
+	bool _pauseRequested;
+	bool _capturing;
 	TimePoint _frameStart;
 
 	double ToMs(std::chrono::duration<double> d)
@@ -70,15 +65,24 @@ public:
 	void PrintFrameStatistics(size_t numFrames = 100) const;
 	void PrintFrameStatisticsToFile(const std::string& filename, size_t numFrames = 100) const;
 
-	const FrameData& GetDisplayFrame() const { return _displayFrame; }
-	const Frames& GetFrames() const	{ return _frames; }
-	void SetPaused(bool pause)
+	const FrameData& GetDisplayFrame() const
 	{
-		_paused = pause;
+		return _frames.count > 0
+			? _frames.data[(_frames.head + PROFILER_CAP - 1) % PROFILER_CAP]
+			: _emptyFrame;
 	}
+	const Frames& GetFrames() const	{ return _frames; }
+	void RequestPaused(bool pause) { _pauseRequested = pause; }
 
-	const bool IsPaused() { return _paused; }
-	Profiler() : _scopeDepth(0), _paused(false) {};
+	bool IsPaused() const { return _pauseRequested; }
+	Profiler()
+		: _scopeDepth(0),
+		_ignoredScopeDepth(0),
+		_paused(false),
+		_pauseRequested(false),
+		_capturing(false)
+	{
+	}
 
 	//singleton?
 	Profiler(const Profiler&) = delete;

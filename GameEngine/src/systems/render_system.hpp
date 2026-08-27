@@ -17,6 +17,7 @@ namespace Ludus::Systems
 	class RenderSystem final : public Ludus::ECS::ISystem
 	{
 	public:
+		static constexpr const char* ProfileName = "RenderSystem";
 		static constexpr Ludus::ECS::SystemPhase Phase = Ludus::ECS::SystemPhase::RENDER;
 		static constexpr int Order = 100;
 

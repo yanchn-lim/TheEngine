@@ -8,6 +8,7 @@ namespace Tests
 	class RotatorSystem final : public Ludus::ECS::ISystem
 	{
 	public:
+		static constexpr const char* ProfileName = "RotatorSystem";
 		static constexpr Ludus::ECS::SystemPhase Phase = Ludus::ECS::SystemPhase::UPDATE;
 		static constexpr int Order = 100;
 

@@ -7,7 +7,7 @@
 
 void DebugOverlay::ToggleProfilerPause()
 {
-	Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
+	Profiler::Get().RequestPaused(!Profiler::Get().IsPaused());
 }
 
 void DebugOverlay::PrintProfilerStatistics()

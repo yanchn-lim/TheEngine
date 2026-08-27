@@ -378,10 +378,19 @@ namespace Ludus::ECS
 		SystemType& AddSystem(Arguments&&... args)
 		{
 			static_assert(std::derived_from<SystemType, ISystem>);
+			static_assert(
+				std::is_convertible_v<decltype(SystemType::ProfileName), const char*>,
+				"ECS systems must define a static constexpr const char* ProfileName");
 
 			auto system = std::make_unique<SystemType>(std::forward<Arguments>(args)...);
 			SystemType& result = *system;
-			SystemEntry entry{ SystemType::Phase, SystemType::Order, _nextSystemInsertionIndex++, std::move(system) };
+			SystemEntry entry{
+				SystemType::Phase,
+				SystemType::Order,
+				_nextSystemInsertionIndex++,
+				SystemType::ProfileName,
+				std::move(system)
+			};
 
 			_systems.push_back(std::move(entry));
 			_systemsNeedSorting = true;

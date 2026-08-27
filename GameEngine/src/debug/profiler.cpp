@@ -1,34 +1,46 @@
 #include "profiler.hpp"
 
+#include <cassert>
+#include <utility>
+
 void Profiler::BeginFrame()
 {
-	// Start a new frame capture unless profiling is paused.
-	if (_paused) return;
-	_frameStart = Clock::now();
-	_scopeDepth = 0; //reset depth
+	_paused = _pauseRequested;
+	_capturing = !_paused;
+	if (!_capturing) return;
 
-	_currentFrame = {}; //reset frame
-	_currentFrame.roots.reserve(16); //reserve some roots
+	_frameStart = Clock::now();
+	_scopeDepth = 0;
+	_ignoredScopeDepth = 0;
+
+	_currentFrame = {};
+	_currentFrame.roots.reserve(16);
 }
 
 void Profiler::EndFrame()
 {
-	// Finalize frame timing and store a copy for UI/history consumers.
-	if (_paused) return;
+	if (!_capturing) return;
+	assert(_scopeDepth == 0 && "Profiler frame ended with open scopes");
+	assert(_ignoredScopeDepth == 0 && "Profiler frame ended with ignored scopes");
 
 	auto frameMs = ToMs(Clock::now() - _frameStart);
 
 	_currentFrame.frameTimeMs = static_cast<float>(frameMs);
-	_displayFrame = _currentFrame;
-	_frames.Push(_currentFrame);
+	_frames.Push(std::move(_currentFrame));
+	_capturing = false;
 }
 
 void Profiler::PushScope(const char* name)
 {
 	// Push a timed scope into the current frame's hierarchy.
-	if (_paused) return;
+	if (!_capturing) return;
 
-	if (_scopeDepth >= MAX_SCOPE_DEPTH) return;
+	if (_scopeDepth >= MAX_SCOPE_DEPTH)
+	{
+		++_ignoredScopeDepth;
+		assert(false && "Profiler scope depth exceeded MAX_SCOPE_DEPTH");
+		return;
+	}
 
 	ProfileSampleNode node;
 	node.name = name;
@@ -56,8 +68,17 @@ void Profiler::PushScope(const char* name)
 void Profiler::PopScope()
 {
 	// Close the most recent open scope and record elapsed time.
-	if (_paused) return;
-	if (_scopeDepth == 0) return;
+	if (!_capturing) return;
+	if (_ignoredScopeDepth > 0)
+	{
+		--_ignoredScopeDepth;
+		return;
+	}
+	if (_scopeDepth == 0)
+	{
+		assert(false && "Profiler scope stack underflow");
+		return;
+	}
 
 	--_scopeDepth;
 	ProfileSampleNode* node = _scopeStack[_scopeDepth];

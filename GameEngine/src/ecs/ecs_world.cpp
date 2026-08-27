@@ -3,6 +3,8 @@
 #include <limits>
 #include <algorithm>
 
+#include "debug/profiler.hpp"
+
 namespace Ludus::ECS
 {
 	World::~World()
@@ -124,22 +126,28 @@ namespace Ludus::ECS
 
 	void World::UpdateSystems()
 	{
+		PROFILE_SCOPE("ECS Update");
+
 		if (_systemsNeedSorting)
 			SortSystems();
 
 		for (SystemEntry& entry : _systems)
 		{
+			ProfileScope systemScope(entry.profileName);
 			entry.instance->OnUpdate(*this);
 		}
 	}
 
 	void World::FixedUpdateSystems(double fixedDeltaTime)
 	{
+		PROFILE_SCOPE("ECS Fixed Update");
+
 		if (_systemsNeedSorting)
 			SortSystems();
 
 		for (SystemEntry& entry : _systems)
 		{
+			ProfileScope systemScope(entry.profileName);
 			entry.instance->OnFixedUpdate(*this, fixedDeltaTime);
 		}
 	}

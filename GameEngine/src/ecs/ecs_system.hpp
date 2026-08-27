@@ -41,6 +41,7 @@ namespace Ludus::ECS
 		SystemPhase phase;
 		int order;
 		std::size_t insertionIndex;
+		const char* profileName;
 		std::unique_ptr<ISystem> instance;
 	};
 }

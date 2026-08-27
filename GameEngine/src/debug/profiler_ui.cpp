@@ -15,6 +15,7 @@ namespace
 {
 	constexpr size_t ANALYSIS_FRAME_COUNT = 120;
 	constexpr float FRAME_BUDGET_MS = 16.66f;
+	constexpr float WARNING_FRAME_MS = 14.f;
 
 	struct FrameSummary
 	{
@@ -91,6 +92,33 @@ namespace
 			AccumulateScope(child, aggregates);
 	}
 
+	ImVec4 GetFrameColor(float frameTimeMs)
+	{
+		if (frameTimeMs > FRAME_BUDGET_MS)
+			return ImVec4(0.95f, 0.35f, 0.31f, 1.f);
+		if (frameTimeMs >= WARNING_FRAME_MS)
+			return ImVec4(0.95f, 0.70f, 0.25f, 1.f);
+		return ImVec4(0.31f, 0.78f, 0.58f, 1.f);
+	}
+
+	void DrawSectionTitle(const char* title, const char* detail = nullptr)
+	{
+		ImGui::TextUnformatted(title);
+		if (detail)
+		{
+			ImGui::SameLine();
+			ImGui::TextDisabled("%s", detail);
+		}
+		ImGui::Separator();
+	}
+
+	void DrawCompactMetric(const char* label, const char* value, const ImVec4& valueColor)
+	{
+		ImGui::TextDisabled("%s", label);
+		ImGui::SameLine(0.f, 5.f);
+		ImGui::TextColored(valueColor, "%s", value);
+	}
+
 }
 
 void ProfilerUI::Draw()
@@ -99,32 +127,39 @@ void ProfilerUI::Draw()
 		return;
 
 	ImGui::SetNextWindowSize(ImVec2(1000.f, 760.f), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSizeConstraints(ImVec2(820.f, 560.f), ImVec2(FLT_MAX, FLT_MAX));
+	ImGui::SetNextWindowSizeConstraints(ImVec2(480.f, 420.f), ImVec2(FLT_MAX, FLT_MAX));
 	ImGui::Begin("Profiler", &_open);
 
 	const FrameData& displayFrame = Profiler::Get().GetDisplayFrame();
 	DrawHeader(displayFrame);
 	DrawFrameHistory();
-	ImGui::Separator();
 
-	const float upperHeight = std::max(260.f, ImGui::GetContentRegionAvail().y * 0.54f);
-	if (ImGui::BeginTable("ProfilerUpper", 2, ImGuiTableFlags_SizingStretchProp, ImVec2(0.f, upperHeight)))
+	const bool wideLayout = ImGui::GetContentRegionAvail().x >= 760.f;
+	if (wideLayout)
 	{
-		ImGui::TableSetupColumn("Timeline", ImGuiTableColumnFlags_WidthStretch, 1.45f);
-		ImGui::TableSetupColumn("Memory", ImGuiTableColumnFlags_WidthStretch, 1.f);
-		ImGui::TableNextRow();
+		const float upperHeight = std::max(260.f, ImGui::GetContentRegionAvail().y * 0.54f);
+		if (ImGui::BeginTable("ProfilerUpper", 2, ImGuiTableFlags_SizingStretchProp, ImVec2(0.f, upperHeight)))
+		{
+			ImGui::TableSetupColumn("Timeline", ImGuiTableColumnFlags_WidthStretch, 1.45f);
+			ImGui::TableSetupColumn("Memory", ImGuiTableColumnFlags_WidthStretch, 1.f);
+			ImGui::TableNextRow();
 
-		ImGui::TableSetColumnIndex(0);
+			ImGui::TableSetColumnIndex(0);
+			const FrameData& selectedFrame = _followLatest ? displayFrame : _pinnedFrame;
+			DrawScopeTimeline(selectedFrame);
+
+			ImGui::TableSetColumnIndex(1);
+			DrawMemoryPanel();
+			ImGui::EndTable();
+		}
+	}
+	else
+	{
 		const FrameData& selectedFrame = _followLatest ? displayFrame : _pinnedFrame;
-		DrawScopeTimeline(selectedFrame);
-
-		ImGui::TableSetColumnIndex(1);
-		DrawMemoryPanel();
-
-		ImGui::EndTable();
+		DrawScopeTimeline(selectedFrame, 280.f);
+		DrawMemoryPanel(280.f);
 	}
 
-	ImGui::Separator();
 	DrawRecentScopeCost();
 	ImGui::End();
 }
@@ -138,12 +173,13 @@ void ProfilerUI::DrawHeader(const FrameData& displayFrame)
 {
 	const FrameSummary summary = CalculateFrameSummary(Profiler::Get().GetFrames());
 	const float fps = displayFrame.frameTimeMs > 0.f ? 1000.f / displayFrame.frameTimeMs : 0.f;
-	ImGui::Text("Frame %.2f ms | %.1f FPS | Avg %.2f ms | P95 %.2f ms | Max %.2f ms (%zu frames)",
-		displayFrame.frameTimeMs, fps, summary.averageMs, summary.p95Ms, summary.maxMs, summary.count);
-
-	ImGui::SameLine();
+	if (Profiler::Get().IsPaused())
+		ImGui::TextColored(ImVec4(0.95f, 0.70f, 0.25f, 1.f), "PAUSED");
+	else
+		ImGui::TextColored(ImVec4(0.31f, 0.78f, 0.58f, 1.f), "CAPTURING");
+	ImGui::SameLine(0.f, 12.f);
 	if (ImGui::Button(Profiler::Get().IsPaused() ? "Resume" : "Pause"))
-		Profiler::Get().SetPaused(!Profiler::Get().IsPaused());
+		Profiler::Get().RequestPaused(!Profiler::Get().IsPaused());
 
 	if (!_followLatest)
 	{
@@ -154,10 +190,36 @@ void ProfilerUI::DrawHeader(const FrameData& displayFrame)
 			_selectedScope = {};
 		}
 	}
+
+	char frameValue[32];
+	char fpsValue[32];
+	char averageValue[32];
+	char p95Value[32];
+	snprintf(frameValue, sizeof(frameValue), "%.2f ms", displayFrame.frameTimeMs);
+	snprintf(fpsValue, sizeof(fpsValue), "%.1f", fps);
+	snprintf(averageValue, sizeof(averageValue), "%.2f ms", summary.averageMs);
+	snprintf(p95Value, sizeof(p95Value), "%.2f ms", summary.p95Ms);
+
+	const int columnCount = ImGui::GetContentRegionAvail().x >= 620.f ? 4 : 2;
+	if (ImGui::BeginTable("ProfilerMetrics", columnCount, ImGuiTableFlags_SizingStretchSame))
+	{
+		const ImVec4 frameColor = GetFrameColor(displayFrame.frameTimeMs);
+		const ImVec4 textColor = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+		ImGui::TableNextColumn();
+		DrawCompactMetric("Frame", frameValue, frameColor);
+		ImGui::TableNextColumn();
+		DrawCompactMetric("FPS", fpsValue, textColor);
+		ImGui::TableNextColumn();
+		DrawCompactMetric("Average", averageValue, textColor);
+		ImGui::TableNextColumn();
+		DrawCompactMetric("P95", p95Value, GetFrameColor(summary.p95Ms));
+		ImGui::EndTable();
+	}
 }
 
 void ProfilerUI::DrawFrameHistory()
 {
+	DrawSectionTitle("FRAME HISTORY", "Click a frame to inspect it");
 	const auto& frames = Profiler::Get().GetFrames();
 	if (frames.count == 0)
 	{
@@ -182,10 +244,13 @@ void ProfilerUI::DrawFrameHistory()
 	for (size_t i = 0; i < frames.count; ++i)
 		history[i] = frames.data[(historyStart + i) % PROFILER_CAP].frameTimeMs;
 
-	constexpr float plotHeight = 88.f;
+	constexpr float plotHeight = 120.f;
 	const ImVec2 plotPosition = ImGui::GetCursorScreenPos();
 	const ImVec2 plotSize = ImVec2(ImGui::GetContentRegionAvail().x, plotHeight);
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.07f, 0.08f, 0.09f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.31f, 0.78f, 0.58f, 1.f));
 	ImGui::PlotLines("##FrameHistory", history.data(), static_cast<int>(frames.count), 0, nullptr, 0.f, 50.f, plotSize);
+	ImGui::PopStyleColor(2);
 
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	const float budgetY = plotPosition.y + plotSize.y * (1.f - FRAME_BUDGET_MS / 50.f);
@@ -200,6 +265,12 @@ void ProfilerUI::DrawFrameHistory()
 		_pinnedFrameAge = frames.count - 1 - sampleIndex;
 		_followLatest = false;
 		_selectedScope = {};
+	}
+	if (ImGui::IsItemHovered())
+	{
+		const float normalizedX = std::clamp((ImGui::GetIO().MousePos.x - plotPosition.x) / plotSize.x, 0.f, 0.9999f);
+		const size_t sampleIndex = std::min(static_cast<size_t>(normalizedX * frames.count), frames.count - 1);
+		ImGui::SetTooltip("Frame %zu\n%.3f ms", sampleIndex + 1, history[sampleIndex]);
 	}
 
 	size_t markerIndex = frames.count - 1;
@@ -218,12 +289,12 @@ void ProfilerUI::DrawFrameHistory()
 	ImGui::TextDisabled(_followLatest ? "Following latest frame. Click history to inspect a captured frame." : "Pinned frame. Follow Latest resumes live inspection.");
 }
 
-void ProfilerUI::DrawScopeTimeline(const FrameData& frame)
+void ProfilerUI::DrawScopeTimeline(const FrameData& frame, float height)
 {
-	ImGui::BeginChild("ScopeTimelinePane", ImVec2(0.f, 0.f), true);
-	ImGui::TextUnformatted("Selected Frame Breakdown");
-	ImGui::SameLine();
-	ImGui::TextDisabled("%.2f ms", frame.frameTimeMs);
+	ImGui::BeginChild("ScopeTimelinePane", ImVec2(0.f, height), true);
+	char frameDetail[32];
+	snprintf(frameDetail, sizeof(frameDetail), "%.2f ms", frame.frameTimeMs);
+	DrawSectionTitle("SCOPE BREAKDOWN", frameDetail);
 
 	if (frame.roots.empty() || frame.frameTimeMs <= 0.f)
 	{
@@ -283,7 +354,10 @@ void ProfilerUI::DrawScopeNode(const ProfileSampleNode& node, float parentDurati
 	ImGui::TableSetColumnIndex(1);
 	ImGui::Text("%.3f ms", node.durationMs);
 	ImGui::TableSetColumnIndex(2);
-	ImGui::Text("%.1f%%", (node.durationMs / frameDurationMs) * 100.f);
+	const float frameShare = frameDurationMs > 0.f ? node.durationMs / frameDurationMs : 0.f;
+	char frameShareLabel[16];
+	snprintf(frameShareLabel, sizeof(frameShareLabel), "%.1f%%", frameShare * 100.f);
+	ImGui::ProgressBar(std::clamp(frameShare, 0.f, 1.f), ImVec2(-FLT_MIN, 0.f), frameShareLabel);
 	ImGui::TableSetColumnIndex(3);
 	const float parentShare = parentDurationMs > 0.f ? (node.durationMs / parentDurationMs) * 100.f : 0.f;
 	ImGui::Text("%.1f%%", parentShare);
@@ -306,10 +380,10 @@ void ProfilerUI::DrawScopeNode(const ProfileSampleNode& node, float parentDurati
 	}
 }
 
-void ProfilerUI::DrawMemoryPanel()
+void ProfilerUI::DrawMemoryPanel(float height)
 {
-	ImGui::BeginChild("MemoryPane", ImVec2(0.f, 0.f), true);
-	ImGui::TextUnformatted("Memory");
+	ImGui::BeginChild("MemoryPane", ImVec2(0.f, height), true);
+	DrawSectionTitle("MEMORY");
 
 	const Ludus::Memory::CpuMemoryStats cpu = Ludus::Memory::GetLastFrameCpuStats();
 	_memoryHistory.Push(static_cast<float>(cpu.liveBytes) / (1024.f * 1024.f));
@@ -384,9 +458,9 @@ void ProfilerUI::DrawMemoryPanel()
 
 void ProfilerUI::DrawRecentScopeCost()
 {
-	ImGui::TextUnformatted("Recent Scope Cost");
-	ImGui::SameLine();
-	ImGui::TextDisabled("Last %zu frames", ANALYSIS_FRAME_COUNT);
+	char detail[32];
+	snprintf(detail, sizeof(detail), "Last %zu frames", ANALYSIS_FRAME_COUNT);
+	DrawSectionTitle("RECENT SCOPE COST", detail);
 
 	const auto& frames = Profiler::Get().GetFrames();
 	const size_t frameCount = std::min(frames.count, ANALYSIS_FRAME_COUNT);

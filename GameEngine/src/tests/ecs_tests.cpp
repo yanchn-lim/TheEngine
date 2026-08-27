@@ -23,6 +23,7 @@ namespace Tests
 		class MovementSystem final : public Ludus::ECS::ISystem
 		{
 		public:
+			static constexpr const char* ProfileName = "MovementSystem";
 			static constexpr Ludus::ECS::SystemPhase Phase =
 				Ludus::ECS::SystemPhase::UPDATE;
 
@@ -57,6 +58,7 @@ namespace Tests
 		class OrderedSystem final : public Ludus::ECS::ISystem
 		{
 		public:
+			static constexpr const char* ProfileName = "OrderedSystem";
 			static constexpr Ludus::ECS::SystemPhase Phase = PhaseValue;
 			static constexpr int Order = OrderValue;
 

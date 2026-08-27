@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <utility>
 
 template<typename T,size_t N>
 struct RingBuffer
@@ -23,7 +24,7 @@ struct RingBuffer
 	void Push(T value)
 	{
 		//assign a value to the head
-		data[head] = value;
+		data[head] = std::move(value);
 		//updt head and clamp to N
 		head = (head + 1) % N;
 		//keep count

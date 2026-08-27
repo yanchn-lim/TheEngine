@@ -21,10 +21,10 @@ private:
 
 	void DrawHeader(const FrameData& displayFrame);
 	void DrawFrameHistory();
-	void DrawScopeTimeline(const FrameData& frame);
+	void DrawScopeTimeline(const FrameData& frame, float height = 0.f);
 	void DrawScopeNode(const ProfileSampleNode& node, float parentDurationMs, float frameDurationMs);
 	void DrawRecentScopeCost();
-	void DrawMemoryPanel();
+	void DrawMemoryPanel(float height = 0.f);
 
 	bool _open = true;
 	bool _followLatest = true;
