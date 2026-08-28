@@ -54,6 +54,8 @@ namespace Ludus::Editor
 		static const char* FilterName(Filter filter) noexcept;
 		static const char* TypeName(AssetType type) noexcept;
 
+		// _entries caches only the current directory.
+		// navigation or an explicit refresh replaces this cache.
 		std::filesystem::path _assetsRoot;
 		std::filesystem::path _currentDirectory;
 		std::vector<Entry> _entries;

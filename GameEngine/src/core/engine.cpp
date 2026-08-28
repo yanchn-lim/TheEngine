@@ -20,6 +20,7 @@ Engine::~Engine() = default;
 
 int Engine::Run(IApplication& application)
 {
+    // keep one callback target for initialization, frame work, and shutdown
     _application = &application;
 
     if (!Initialize())
@@ -117,10 +118,14 @@ void Engine::Update()
                 const double current = _window.GetTime();
                 _time.deltaTime = current - _time.totalTime;
                 _time.totalTime = current;
+
+				// clear prior transitions before polling this frame's events
 				_input.BeginFrame();
                 _window.PollEvents();
 
                 fixedAccumulator += _time.deltaTime;
+
+                // preserve simulation cadence when one rendered frame is late
                 while (fixedAccumulator >= _config.fixedTimeStep)
                 {
                     _application->OnFixedUpdate(*this, _config.fixedTimeStep);
@@ -138,6 +143,8 @@ void Engine::Update()
 
             {
                 PROFILE_SCOPE("Simulation");
+
+                // application updates submit work before RenderEngine records it
                 _application->OnUpdate(*this);
             }
         }
@@ -188,6 +195,7 @@ void Engine::Shutdown()
     if (_renderEngine)
         _renderEngine->Shutdown();
     _assets.Clear();
+    // release asset-backed GPU resources before clearing their CPU records
     _renderEngine.reset();
 	_window.SetInput(nullptr);
     _window.Shutdown();

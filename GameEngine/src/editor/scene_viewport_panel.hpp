@@ -24,3 +24,5 @@ namespace Ludus::Editor
 		double _saveMessageUntil = 0.0;
 	};
 }
+	// owns the editor camera and translates viewport input into orbit state.
+	// scene and asset data are borrowed only while Draw runs.

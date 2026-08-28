@@ -16,7 +16,9 @@
 
 namespace Ludus::Assets
 {
-    // owns CPU asset registries and exposes one typed-handle entry point to callers
+    // owns cpu asset registries and exposes one typed-handle entry point.
+	// returned pointers and handles borrow records from these registries.
+	// AssetManager must outlive each RenderEngine that uses it.
     class AssetManager
 	{
 	public:

@@ -11,6 +11,7 @@ namespace Ludus::Serialization
 	struct LSceneParseError
 	{
 		std::string message;
+		// locations are one-based positions in the source text.
 		SourceLocation location;
 	};
 

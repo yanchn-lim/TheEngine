@@ -118,6 +118,8 @@ namespace Ludus
 					}
 				}
 
+				// component validation uses this result when no material
+				// override is present.
 				const Ludus::Assets::MeshAsset* mesh = assets.Get(handle);
 				const bool hasDefaultMaterials = mesh && std::ranges::all_of(
 					mesh->surfaces,
@@ -140,6 +142,8 @@ namespace Ludus
 	{
 		const size_t firstError = errors.size();
 		context = {};
+		// publish aliases only after all declarations succeed. AssetManager
+		// changes made during this load are not rolled back.
 		SceneAssetContext loaded;
 		const Ludus::Serialization::LSceneValue* assetsValue = root.Find("assets");
 		if (!assetsValue)
@@ -151,8 +155,10 @@ namespace Ludus
 			return false;
 
 		bool success = true;
+		// materials load first so mesh surfaces can resolve their aliases.
 		for (const auto& [name, value] : *categories)
 			if (name == "materials") success = LoadMaterials(value, assets, loaded, errors) && success;
+		// mesh registry names include the scene namespace to avoid collisions.
 		for (const auto& [name, value] : *categories)
 			if (name == "meshes") success = LoadMeshes(
 				value, sceneNamespace, assets, loaded, errors) && success;

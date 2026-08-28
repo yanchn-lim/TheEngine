@@ -19,9 +19,11 @@ namespace Ludus::ECS::Internal
 		friend class Ludus::ECS::World;
 
 	private:
+		// matching indices keep entity handles and components in dense storage.
 		std::vector<Entity> _denseEntities;
 		std::vector<Component> _denseComponents;
-		std::vector<uint32_t> _sparseIndices; //same size as the maximum entity id, maps entity id to dense index
+		// an entity id maps to its dense index or INVALID_COMPONENT_INDEX.
+		std::vector<uint32_t> _sparseIndices;
 
 		bool _validEntity(Entity entity) const
 		{
@@ -108,7 +110,8 @@ namespace Ludus::ECS::Internal
 
 			if (removedIndex != lastIndex)
 			{
-				//swap
+				// swap-and-pop keeps storage dense but does not preserve order.
+				// update the sparse entry for the component that moves.
 				std::swap(_denseComponents[removedIndex], _denseComponents[lastIndex]);
 				std::swap(_denseEntities[removedIndex], _denseEntities[lastIndex]);
 				const Entity& movedEntity = _denseEntities[removedIndex];

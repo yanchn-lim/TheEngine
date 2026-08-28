@@ -243,6 +243,7 @@ namespace Ludus
 		std::vector<SceneLoadError>& errors)
 	{
 		const size_t firstError = errors.size();
+		// attach the caller's path only to errors produced by this operation.
 		const auto finish = [&](bool result)
 		{
 			for (size_t index = firstError; index < errors.size(); ++index)
@@ -279,12 +280,15 @@ namespace Ludus
 			return finish(false);
 
 		SceneAssetContext assetContext;
+		// the normalized path namespaces asset-manager registry names for this
+		// scene.
 		const std::string sceneNamespace =
 			std::filesystem::path(path).lexically_normal().generic_string();
 		if (!SceneAssetLoader::Load(
 			parsed.root, sceneNamespace, assets, assetContext, errors))
 			return finish(false);
 
+		// entity and component failures cannot change the destination Scene.
 		Scene stagedScene;
 		if (!LoadEntities(parsed.root, stagedScene, assetContext, components, errors))
 			return finish(false);
@@ -298,6 +302,7 @@ namespace Ludus
 			std::move(assetContext),
 			std::move(systemDefinitions));
 
+		// publish the complete staged state before factories receive its World.
 		scene.Swap(stagedScene);
 		for (const SceneSystemDefinition& definition : scene.GetSystems())
 		{

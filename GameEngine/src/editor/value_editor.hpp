@@ -9,6 +9,8 @@ namespace Ludus::Serialization
 
 namespace Ludus::Editor
 {
+	// changed reports a value change in this frame.
+	// finished reports that an edited scalar widget became inactive.
 	struct ValueEditResult
 	{
 		bool changed = false;

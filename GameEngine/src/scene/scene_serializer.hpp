@@ -10,6 +10,8 @@ namespace Ludus
 	class SceneComponentRegistry;
 	class SystemRegistry;
 
+	// serialization validates the live scene before Save replaces its file
+	// through a sibling temporary file.
 	class SceneSerializer
 	{
 	public:

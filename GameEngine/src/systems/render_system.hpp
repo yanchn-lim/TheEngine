@@ -14,6 +14,8 @@ namespace Ludus::Rendering
 
 namespace Ludus::Systems
 {
+	// translates visible ecs renderables into frame-local renderer submissions.
+	// the borrowed RenderEngine must outlive this World-owned system.
 	class RenderSystem final : public Ludus::ECS::ISystem
 	{
 	public:

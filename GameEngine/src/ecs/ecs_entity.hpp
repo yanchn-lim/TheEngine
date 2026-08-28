@@ -4,6 +4,8 @@
 
 namespace Ludus::ECS
 {
+	// a generation makes an Entity handle invalid after its slot is reused.
+	// id 0 and generation 0 are reserved for invalid handles.
 	struct Entity
 	{
 		uint32_t id = 0;

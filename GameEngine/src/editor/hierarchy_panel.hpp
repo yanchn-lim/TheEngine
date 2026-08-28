@@ -48,8 +48,10 @@ namespace Ludus::Editor
 		};
 
 		std::string _selectedEntityId;
+		// selection uses stable scene ids because undo can replace ECS handles.
 		std::string _selectedSystemId;
 		std::optional<ActiveSystemEdit> _activeSystemEdit;
+		// repeated widget changes remain one command until editing finishes.
 		char _newEntityName[128]{};
 		std::vector<std::string> _errors;
 	};

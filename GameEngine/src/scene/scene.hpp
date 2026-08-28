@@ -27,9 +27,11 @@ namespace Ludus
 			std::string name;
 		};
 
+		// text ids remain stable when the ECS reuses entity slots.
 		std::string CreateEntity(std::string name);
 		Ludus::ECS::Entity RestoreEntity(std::string id, std::string name);
-		// Remove stable scene entities through Scene to keep their text IDs synchronized.
+		// remove stable scene entities through Scene to keep their text IDs
+		// synchronized with the World.
 		bool RemoveEntity(std::string_view id);
 		Ludus::ECS::Entity FindEntity(std::string_view id) const;
 		std::string_view GetEntityName(std::string_view id) const;
@@ -55,11 +57,14 @@ namespace Ludus
 		void Update();
 	
 	private:
+		// Scene owns the World and maps serialized ids to its Entity handles.
 		Ludus::ECS::World _world{};
 		std::unordered_map<std::string, EntityRecord> _entities;
 		std::string _name = "Untitled";
+		// declarations preserve source data; the context stores resolved handles.
 		Ludus::Serialization::LSceneValue _assets = Ludus::Serialization::LSceneValue::ObjectValue();
 		SceneAssetContext _assetContext;
+		// definitions preserve serialized state for save and editor operations.
 		std::vector<SceneSystemDefinition> _systems;
 	};
 }

@@ -23,7 +23,8 @@ namespace Ludus::Graphics
         bool vsync = true;
     };
 
-    // resource descriptions carry CPU source data and a diagnostic label into the device
+    // source pointers are borrowed for the duration of a creation call.
+    // the device owns the resulting gpu resource.
     struct BufferDesc
     {
         const void* data = nullptr;

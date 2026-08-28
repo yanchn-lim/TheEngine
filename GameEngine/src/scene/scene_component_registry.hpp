@@ -17,6 +17,8 @@ namespace Ludus
 	template<typename Component>
 	struct SceneComponentCodec;
 
+	// this registry maps stable scene names to type-erased ECS component
+	// operations.
 	class SceneComponentRegistry
 	{
 	public:
@@ -55,6 +57,8 @@ namespace Ludus
 				std::is_move_assignable_v<Component>,
 				"Editable scene components must be move assignable");
 
+			// decode into a temporary component so a failed codec does not
+			// change the entity.
 			return RegisterEntry(
 				std::string(Codec::Name),
 				[](const Ludus::Serialization::LSceneValue& value,
@@ -98,6 +102,7 @@ namespace Ludus
 						return false;
 					}
 
+					// publish the new value only after complete validation.
 					Component updated;
 					if (!Codec::Load(value, assets, updated, errors))
 						return false;

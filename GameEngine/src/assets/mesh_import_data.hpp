@@ -13,7 +13,7 @@
 
 namespace Ludus::Assets
 {
-	// describes the engine vertex format produced by model and primitive importers
+	// this vertex format is shared by importers, shaders, and gpu upload.
 	struct MeshVertex
 	{
 		glm::vec3 position{};
@@ -21,7 +21,7 @@ namespace Ludus::Assets
 		glm::vec2 texCoord0{};
 	};
 
-	// one independently drawable section of a mesh
+	// one surface is one draw and can select its own material.
 	struct MeshSurface
 	{
 		std::string name;

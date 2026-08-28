@@ -17,6 +17,8 @@ namespace Ludus
 
 namespace Ludus::Editor
 {
+	// owns reversible scene edits as serialized values and stable string ids.
+	// the Scene remains externally owned and must outlive each operation.
 	class EditorCommandHistory
 	{
 	public:
@@ -131,6 +133,8 @@ namespace Ludus::Editor
 
 		std::vector<RecordedCommand> _undo;
 		std::vector<RecordedCommand> _redo;
+		// revisions track the current history branch without using stack size.
+		// _savedRevision identifies the state accepted by the last save.
 		uint64_t _currentRevision = 0;
 		uint64_t _savedRevision = 0;
 		uint64_t _nextRevision = 1;

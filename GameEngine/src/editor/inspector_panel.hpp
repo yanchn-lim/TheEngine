@@ -29,11 +29,13 @@ namespace Ludus::Editor
 	private:
 		struct PendingEdit
 		{
+			// keep rejected input separate from the unchanged live component.
 			Ludus::Serialization::LSceneValue value;
 			std::vector<std::string> errors;
 		};
 		struct ActiveEdit
 		{
+			// group repeated widget changes into one history command.
 			Ludus::Serialization::LSceneValue before;
 			Ludus::Serialization::LSceneValue after;
 		};

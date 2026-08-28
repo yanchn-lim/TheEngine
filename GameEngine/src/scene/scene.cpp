@@ -25,6 +25,7 @@ namespace Ludus
 	{
 		for (size_t attempt = 0; attempt < 100; ++attempt)
 		{
+			// RestoreEntity provides the collision check and creates the ECS entity.
 			std::string id = GenerateEntityId();
 			if (RestoreEntity(id, name).IsValid())
 				return id;
@@ -40,6 +41,7 @@ namespace Ludus
 		const auto existing = _entities.find(id);
 		if (existing != _entities.end())
 		{
+			// a direct World removal can leave a dead scene record.
 			if (_world.IsEntityAlive(existing->second.entity))
 				return {};
 			_entities.erase(existing);

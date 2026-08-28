@@ -85,6 +85,8 @@ namespace Ludus
 	{
 		output.clear();
 		Ludus::Serialization::LSceneValue::Object entities;
+		// stale records can remain after direct World removal. they do not
+		// represent serializable scene entities.
 		for (const auto& [id, record] : scene.GetEntities())
 		{
 			if (!scene.GetWorld().IsEntityAlive(record.entity))
@@ -186,6 +188,8 @@ namespace Ludus
 		if (!Serialize(scene, components, systems, text, errors))
 			return false;
 
+		// write and close a complete sibling file before replacing the
+		// destination.
 		const std::filesystem::path temporary = TemporaryPath(path, errors);
 		if (temporary.empty())
 			return false;

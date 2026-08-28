@@ -23,6 +23,8 @@ namespace Ludus::ECS
 	{
 		using ComponentTypeID = std::size_t;
 
+		// component type ids are process-wide internal indices.
+		// their values depend on first-use order and are not serialization ids.
 		inline ComponentTypeID AllocateComponentTypeID() noexcept
 		{
 			static std::atomic<ComponentTypeID> nextId = 0;
@@ -52,11 +54,14 @@ namespace Ludus::ECS
 	class World
 	{
 	private:
+		// slot 0 keeps every default Entity handle invalid.
 		std::vector<Internal::EntitySlot> _entitySlots{ Internal::EntitySlot{0,false} };
 		std::vector<uint32_t> _freeSlots;
+		// each process-wide component type id selects one World-owned pool.
 		std::vector<std::unique_ptr<Internal::IComponentPool>> _componentPools;
 		uint32_t _entityAliveCount = 0;
 
+		// World owns systems and preserves insertion order as the final sort key.
 		std::vector<SystemEntry> _systems;
 		std::size_t _nextSystemInsertionIndex = 0;
 		bool _systemsNeedSorting = false;
@@ -207,7 +212,8 @@ namespace Ludus::ECS
 		template<typename Component>
 		ComponentView<Component> GetComponentView()
 		{
-			//find pool of component
+			// the returned spans remain valid only while this pool has no
+			// structural change.
 			auto* pool = FindPool<Component>();
 			if (!pool)
 				return {};
@@ -226,23 +232,23 @@ namespace Ludus::ECS
 		}
 
 		template<typename... Components, typename Func>
-		void ForEach(Func&& func) //this should not make any structural changes to the pools
+		void ForEach(Func&& func)
 		{
 			static_assert(sizeof...(Components) > 0, "ForEach requires at least one component type");
 
-			//look for pools
+			// a missing pool means that no entity can match the query.
 			std::array<Internal::IComponentPool*, sizeof...(Components)> pools
 			{
-				FindPool<Components>()... //unpack and find
+				FindPool<Components>()...
 			};
 
 			for (Internal::IComponentPool* pool : pools)
 			{
-				//check if any pool doesnt exist
 				if (!pool)
 					return;
 			}
 
+			// use the smallest pool to reduce candidate checks.
 			Internal::IComponentPool* iterationPool = pools[0];
 
 			for (Internal::IComponentPool* pool : pools)
@@ -251,6 +257,8 @@ namespace Ludus::ECS
 					iterationPool = pool;
 			}
 
+			// the callback must not structurally change a participating pool.
+			// such a change can invalidate this iteration and its pointers.
 			for (Entity entity : iterationPool->GetEntities())
 			{
 				std::tuple<Components*...> components
@@ -258,7 +266,6 @@ namespace Ludus::ECS
 					TryGetComponent<Components>(entity)...
 				};
 
-				//check if the entity has all components
 				const bool hasAllComponents = std::apply(
 					[](auto*... component)
 					{
@@ -266,7 +273,6 @@ namespace Ludus::ECS
 					},
 					components);
 
-				//skip if doesnt include all
 				if (!hasAllComponents)
 					continue;
 
@@ -284,19 +290,19 @@ namespace Ludus::ECS
 		{
 			static_assert(sizeof...(Components) > 0, "ForEach requires at least one component type");
 
-			//look for pools
+			// a missing pool means that no entity can match the query.
 			std::array<const Internal::IComponentPool*, sizeof...(Components)> pools
 			{
-				FindPool<Components>()... //unpack and find
+				FindPool<Components>()...
 			};
 
 			for (const Internal::IComponentPool* pool : pools)
 			{
-				//check if any pool doesnt exist
 				if (!pool)
 					return;
 			}
 
+			// use the smallest pool to reduce candidate checks.
 			const Internal::IComponentPool* iterationPool = pools[0];
 
 			for (const Internal::IComponentPool* pool : pools)
@@ -312,7 +318,6 @@ namespace Ludus::ECS
 					TryGetComponent<Components>(entity)...
 				};
 
-				//check if the entity has all components
 				const bool hasAllComponents = std::apply(
 					[](auto*... component)
 					{
@@ -320,7 +325,6 @@ namespace Ludus::ECS
 					},
 					components);
 
-				//skip if doesnt include all
 				if (!hasAllComponents)
 					continue;
 
@@ -333,7 +337,7 @@ namespace Ludus::ECS
 			}
 		}
 	
-		//checks if any entity matches the required components
+		// use the same smallest-pool query without invoking a callback.
 		template<typename... Components>
 		bool HasAnyEntityWith() const
 		{
@@ -392,6 +396,8 @@ namespace Ludus::ECS
 				std::move(system)
 			};
 
+			// transfer ownership before OnCreate and defer sorting until the
+			// next update or World destruction.
 			_systems.push_back(std::move(entry));
 			_systemsNeedSorting = true;
 			result.OnCreate(*this);

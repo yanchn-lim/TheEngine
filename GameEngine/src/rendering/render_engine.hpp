@@ -12,6 +12,9 @@
 
 namespace Ludus::Rendering
 {
+    // owns the graphics device, imgui integration, and renderer gpu caches.
+    // borrows AssetManager through RenderResourceManager.
+    // a successful Render call must be followed by EndFrame.
     class RenderEngine
     {
     public:

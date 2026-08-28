@@ -18,6 +18,8 @@ namespace Ludus
 	template<typename System>
 	struct SceneSystemCodec;
 
+	// stable ids connect serialized definitions to validators and ECS system
+	// factories.
 	class SystemRegistry
 	{
 	public:
@@ -59,6 +61,8 @@ namespace Ludus
 				},
 				"SceneSystemCodec<System>::Create does not accept these dependencies");
 
+			// the registry borrows these dependencies. they must outlive every
+			// later Create call.
 			const auto dependencyPointers =
 				std::tuple<Dependencies*...>{ &dependencies... };
 			return Register(

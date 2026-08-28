@@ -17,7 +17,8 @@ namespace Ludus::Assets
         virtual bool Import(const std::string& path, MeshImportData& outMesh) = 0;
     };
 
-    // selects the first registered importer that accepts a source path
+    // owns importers and selects the first one that accepts a source path.
+    // an import failure does not fall through to later importers.
     class ModelImporterRegistry
     {
     public:

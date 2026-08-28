@@ -18,6 +18,8 @@ namespace Ludus::Serialization
 	class LSceneValue
 	{
 	public:
+		// Object uses lexical key order. source declaration order is not
+		// preserved.
 		using Array = std::vector<LSceneValue>;
 		using Object = std::map<std::string, LSceneValue>;
 

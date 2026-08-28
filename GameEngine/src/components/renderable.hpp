@@ -7,7 +7,7 @@ namespace Ludus::Components
 	struct Renderable
 	{
 		Ludus::Assets::MeshHandle mesh;
-		// when valid, this replaces every surface material
+		// when valid, this handle replaces every surface material.
 		Ludus::Assets::MaterialHandle materialOverride;
 		bool visible = true;
 	};

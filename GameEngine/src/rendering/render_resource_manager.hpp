@@ -22,7 +22,9 @@ namespace Ludus::Rendering
         uint32_t indexCount = 0;
     };
 
-    // uploads CPU assets on first use and caches their GPU representation
+    // borrows AssetManager and IGraphicsDevice for its full lifetime.
+    // uploads cpu assets on first use and owns their cached gpu handles.
+    // cached records do not track later cpu asset changes or id reuse.
     class RenderResourceManager
     {
     public:

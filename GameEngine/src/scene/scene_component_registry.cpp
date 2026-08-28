@@ -18,6 +18,8 @@ namespace Ludus
 			Handle handle,
 			const std::string*& output)
 		{
+			// serialization requires one scene alias for each referenced
+			// handle. zero or multiple aliases are ambiguous.
 			output = nullptr;
 			size_t matches = 0;
 			for (const auto& [name, candidate] : assets)
@@ -72,6 +74,7 @@ namespace Ludus
 				return false;
 
 			transform.rotation = glm::quat(glm::radians(rotationDegrees));
+			// runtime rotation is a quaternion; the scene format uses Euler degrees.
 			return true;
 		}
 
@@ -89,6 +92,7 @@ namespace Ludus
 				return false;
 			}
 
+			// normalize before conversion so quaternion magnitude is not serialized.
 			const glm::vec3 rotationDegrees = glm::degrees(
 				glm::eulerAngles(glm::normalize(transform.rotation)));
 			if (!IsFinite(rotationDegrees))
@@ -324,6 +328,8 @@ namespace Ludus
 		size_t matchedComponents = 0;
 		for (const Entry& entry : _entries)
 		{
+			// registry order selects codecs; the output Object later provides
+			// deterministic lexical order.
 			if (!entry.has(world, entity))
 				continue;
 			++matchedComponents;
@@ -334,6 +340,8 @@ namespace Ludus
 			output.emplace(entry.name, std::move(value));
 		}
 
+		// reject silent data loss when the entity has an unregistered
+		// component type.
 		if (matchedComponents != world.GetComponentCount(entity))
 		{
 			errors.push_back(

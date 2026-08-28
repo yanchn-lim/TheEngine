@@ -6,6 +6,8 @@
 
 namespace Ludus::Serialization
 {
+	// the version 1 writer emits canonical CRLF text and rejects values that
+	// the format cannot represent.
 	class LSceneWriter
 	{
 	public:

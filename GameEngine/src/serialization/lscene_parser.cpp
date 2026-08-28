@@ -285,6 +285,8 @@ namespace Ludus::Serialization
 	LSceneParseResult LSceneParser::Parse(std::string_view source) const
 	{
 		LSceneParseResult result;
+		// each index is a tab depth. pointers remain stable because Object
+		// nodes are stored in std::map.
 		std::vector<LSceneValue*> levels{ &result.root };
 		bool hasDeclaration = false;
 		size_t lineNumber = 0;
@@ -299,6 +301,7 @@ namespace Ludus::Serialization
 			if (line.empty())
 				continue;
 
+			// the first content line declares the resource type and name.
 			if (!hasDeclaration)
 			{
 				const size_t separator = line.find_first_of(" \t");
@@ -323,6 +326,7 @@ namespace Ludus::Serialization
 				continue;
 			}
 
+			// one leading tab selects one object nesting level.
 			size_t indentation = 0;
 			while (indentation < line.size() && line[indentation] == '\t')
 				++indentation;

@@ -14,7 +14,8 @@ namespace Ludus::Graphics
         Fatal
     };
 
-    // owns GPU resources, frame submission, and presentation for one backend
+    // owns gpu resources, frame recording, submission, and presentation.
+    // one device supports one active frame and render pass at a time.
     class IGraphicsDevice
     {
     public:
@@ -22,7 +23,8 @@ namespace Ludus::Graphics
 
         virtual bool Initialize(const GraphicsDeviceDesc& desc) = 0;
 
-        // creation returns typed handles instead of native OpenGL or Vulkan objects
+        // creation copies or uploads borrowed description data before it returns.
+        // typed handles keep native opengl and vulkan objects behind this boundary.
         virtual GpuBufferHandle CreateBuffer(const BufferDesc& desc) = 0;
         virtual GpuTextureHandle CreateTexture(const TextureDesc& desc) = 0;
         virtual GpuSamplerHandle CreateSampler(const SamplerDesc& desc) = 0;

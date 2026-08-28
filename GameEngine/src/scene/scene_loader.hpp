@@ -16,6 +16,8 @@ namespace Ludus
 {
 	class Scene;
 
+	// loading stages scene-owned state before it replaces the empty
+	// destination Scene.
 	class SceneLoader
 	{
 	public:

@@ -47,6 +47,8 @@ namespace Ludus
         Ludus::Platform::Window _window;
         Ludus::Assets::AssetManager _assets;
         std::unique_ptr<Ludus::Rendering::RenderEngine> _renderEngine;
+
+        // borrows the application only for the active Run call
         IApplication* _application = nullptr;
         bool _running = false;
     };

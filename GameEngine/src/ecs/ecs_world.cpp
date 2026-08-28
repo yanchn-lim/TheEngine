@@ -12,6 +12,7 @@ namespace Ludus::ECS
 		if (_systemsNeedSorting)
 			SortSystems();
 
+		// destroy dependants before the systems that precede them.
 		for (auto system = _systems.rbegin(); system != _systems.rend(); ++system)
 		{
 			system->instance->OnDestroy(*this);
@@ -23,7 +24,7 @@ namespace Ludus::ECS
 		uint32_t entityId = 0;
 		uint32_t generation = 0;
 
-		//check free
+		// reuse the most recently freed slot and invalidate its old handles.
 		if (!_freeSlots.empty())
 		{
 			entityId = _freeSlots.back();
@@ -61,14 +62,13 @@ namespace Ludus::ECS
 
 	void World::RemoveEntity(Entity entity)
 	{
-		//find entity
 		if (!IsEntityAlive(entity))
 			return;
 
 		auto& slot = _entitySlots[entity.id];
 		if (slot.alive)
 		{
-			//remove components
+			// remove every component before the entity slot becomes reusable.
 			for(auto& pool : _componentPools)
 			{
 				if(pool)
@@ -109,6 +109,8 @@ namespace Ludus::ECS
 
 	void World::SortSystems()
 	{
+		// insertion order makes equal phase and order values deterministic.
+		// the same order applies to variable and fixed updates.
 		std::ranges::sort(
 			_systems,
 			{},
