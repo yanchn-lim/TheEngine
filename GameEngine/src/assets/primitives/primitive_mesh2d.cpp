@@ -37,6 +37,22 @@ namespace Ludus::Assets::Primitive2D
 		return data;
 	}
 
+	MeshSurface FullscreenTriangle()
+	{
+		// use one oversized clip-space triangle to avoid a diagonal seam
+		MeshSurface data;
+		data.vertices =
+		{
+			{ { -1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+			{ {  3.0f, -1.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 2.0f, 0.0f } },
+			{ { -1.0f,  3.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 2.0f } }
+		};
+		data.indices = { 0, 1, 2 };
+		data.topology = Ludus::Graphics::PrimitiveTopology::TRIANGLES;
+
+		return data;
+	}
+
 	MeshSurface Quad()
 	{
 		// indexed quad keeps shared corners explicit for texture and material tests

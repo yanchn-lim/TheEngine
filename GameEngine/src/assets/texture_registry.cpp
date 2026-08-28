@@ -40,6 +40,31 @@ namespace Ludus::Assets
         return handle;
     }
 
+	TextureHandle TextureRegistry::CreateSolidColor(
+		const std::string& name,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue,
+		unsigned char alpha)
+	{
+		if (const auto existing = _pathToHandle.find(name);
+			existing != _pathToHandle.end())
+		{
+			return existing->second;
+		}
+
+		TextureAsset asset;
+		asset.pixels = { red, green, blue, alpha };
+		asset.width = 1;
+		asset.height = 1;
+		asset.label = name;
+
+		const TextureHandle handle{ _nextId++ };
+		_pathToHandle[name] = handle;
+		_textures.emplace(handle.id, std::move(asset));
+		return handle;
+	}
+
     const TextureAsset* TextureRegistry::Get(TextureHandle handle) const
     {
         if (!handle)

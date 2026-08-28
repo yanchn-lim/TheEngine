@@ -154,8 +154,11 @@ void Engine::Update()
             Ludus::Graphics::FrameStatus frameStatus = Ludus::Graphics::FrameStatus::Skip;
             {
                 PROFILE_SCOPE("World Rendering");
-                Ludus::Graphics::Camera2D camera;
-                camera.SetViewport(
+				Ludus::Graphics::Camera camera;
+
+				// let the application select the view without owning the renderer
+				_application->ConfigureCamera(camera);
+				camera.SetViewport(
                     static_cast<float>(_window.GetWidth()),
                     static_cast<float>(_window.GetHeight()));
                 frameStatus = _renderEngine->Render(
@@ -192,10 +195,10 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
+    // release asset-backed GPU resources before clearing their CPU records
     if (_renderEngine)
         _renderEngine->Shutdown();
     _assets.Clear();
-    // release asset-backed GPU resources before clearing their CPU records
     _renderEngine.reset();
 	_window.SetInput(nullptr);
     _window.Shutdown();

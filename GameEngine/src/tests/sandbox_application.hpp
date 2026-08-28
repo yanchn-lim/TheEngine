@@ -36,6 +36,7 @@ namespace Tests
         void OnFixedUpdate(Ludus::Engine& engine, double fixedDeltaTime) override;
         void OnUpdate(Ludus::Engine& engine) override;
         void OnImGui(Ludus::Engine& engine) override;
+		void ConfigureCamera(Ludus::Graphics::Camera& camera) const override;
 	private:
 		bool LoadScene(Ludus::Engine& engine, const char* path);
 		void SaveScene();
@@ -50,6 +51,8 @@ namespace Tests
 		Ludus::Editor::EditorCommandHistory _history;
 		Ludus::ActionMap<EditorAction> _editorActions;
 		std::vector<Ludus::ActionConnection> _actionConnections;
+		Ludus::Assets::MeshHandle _worldGridMesh;
+		Ludus::Assets::MaterialHandle _worldGridMaterial;
 		Ludus::Scene _scene;
 		std::filesystem::path _scenePath;
     };

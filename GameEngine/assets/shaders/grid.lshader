@@ -1,0 +1,6 @@
+shader "Editor Grid"
+
+vertex: "assets/shaders/grid_gl.vert"
+fragment: "assets/shaders/grid_gl.frag"
+vertex_spirv: "assets/shaders/grid_vk.vert.spv"
+fragment_spirv: "assets/shaders/grid_vk.frag.spv"

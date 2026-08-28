@@ -23,6 +23,12 @@ namespace Ludus::Assets
 	{
 	public:
 		TextureHandle LoadTexture(const std::string& path);
+		TextureHandle CreateSolidColorTexture(
+			const std::string& name,
+			unsigned char red,
+			unsigned char green,
+			unsigned char blue,
+			unsigned char alpha);
 		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath,
 			const std::string& vertexSpirvPath = {}, const std::string& fragmentSpirvPath = {});
 		ShaderHandle LoadShaderResource(const std::string& path);

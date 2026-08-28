@@ -10,6 +10,12 @@ namespace Ludus::Assets
 	{
 	public:
 		TextureHandle Load(const std::string& path);
+		TextureHandle CreateSolidColor(
+			const std::string& name,
+			unsigned char red,
+			unsigned char green,
+			unsigned char blue,
+			unsigned char alpha);
 		const TextureAsset* Get(TextureHandle handle) const;
 		void Clear();
 

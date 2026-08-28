@@ -31,8 +31,9 @@ namespace Ludus::Rendering
 		void RequestEditorViewportSize(uint32_t width, uint32_t height);
 		ImTextureID GetEditorViewportTexture() const noexcept;
 		bool EditorViewportNeedsVerticalFlip() const noexcept;
-        // Render records world and scene draws while EndFrame waits for UI recording
-        Ludus::Graphics::FrameStatus Render(const Ludus::Graphics::Camera2D& camera, uint32_t width, uint32_t height);
+        // Render records scene draws and leaves the window pass open for ui.
+        // EndFrame closes that pass, clears submissions, and presents the frame.
+        Ludus::Graphics::FrameStatus Render(const Ludus::Graphics::Camera& camera, uint32_t width, uint32_t height);
         Ludus::Graphics::FrameStatus EndFrame();
         void OnResize(uint32_t width, uint32_t height);
         void Shutdown();

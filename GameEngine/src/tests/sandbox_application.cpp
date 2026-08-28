@@ -1,12 +1,16 @@
 #include "sandbox_application.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "assets/primitives/primitive_mesh2d.hpp"
 #include "core/engine.hpp"
 #include "debug/debug.hpp"
+#include "rendering/render_engine.hpp"
 #include "rotator.hpp"
 #include "rotator_system.hpp"
 #include "scene/scene_component_registry.hpp"
@@ -19,6 +23,37 @@ namespace Tests
 {
 	namespace
 	{
+		bool CreateWorldGrid(
+			Ludus::Assets::AssetManager& assets,
+			Ludus::Assets::MeshHandle& mesh,
+			Ludus::Assets::MaterialHandle& material)
+		{
+			// the shader expands this fullscreen triangle into a camera ray for
+			// each viewport pixel, so the grid needs no finite world mesh.
+			const Ludus::Assets::ShaderHandle shader =
+				assets.LoadShaderResource("assets/shaders/grid.lshader");
+			const Ludus::Assets::TextureHandle texture =
+				assets.CreateSolidColorTexture(
+					"editor::world_grid::white", 255, 255, 255, 255);
+			Ludus::Graphics::RenderState state;
+			state.depthTest = true;
+			state.depthWrite = false;
+			state.blendMode = Ludus::Graphics::BlendMode::ALPHA;
+			state.culling = false;
+			material = assets.CreateMaterial(
+				"editor::world_grid::material", shader, texture, state);
+			if (!material)
+				return false;
+
+			Ludus::Assets::MeshSurface surface =
+				Ludus::Assets::Primitive2D::FullscreenTriangle();
+			surface.name = "grid";
+			surface.material = material;
+
+			mesh = assets.CreateMesh("editor::world_grid::mesh", surface);
+			return static_cast<bool>(mesh);
+		}
+
 		void DrawEditorDockspace()
 		{
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -118,6 +153,12 @@ namespace Tests
 
         if (!LoadScene(engine, "assets/scenes/maxwell.lscene"))
             return false;
+		if (!CreateWorldGrid(
+			engine.GetAssets(), _worldGridMesh, _worldGridMaterial))
+		{
+			Ludus::Debug::LogError("Failed to create the editor world grid");
+			return false;
+		}
 
 		return true;
     }
@@ -167,10 +208,25 @@ namespace Tests
         _scene.FixedUpdate(fixedDeltaTime);
     }
 
-    void SandboxApplication::OnUpdate(Ludus::Engine&)
+    void SandboxApplication::OnUpdate(Ludus::Engine& engine)
     {
+		// submit the grid before Scene systems submit persistent renderables.
+		// depth testing keeps it behind geometry without changing scene data.
+		if (_sceneViewportPanel.IsGridVisible())
+		{
+			engine.GetRenderEngine().Submit({
+				_worldGridMesh,
+				_worldGridMaterial,
+				glm::mat4(1.0f) });
+		}
         _scene.Update();
     }
+
+	void SandboxApplication::ConfigureCamera(
+		Ludus::Graphics::Camera& camera) const
+	{
+		camera = _sceneViewportPanel.GetCamera();
+	}
 
     void SandboxApplication::OnImGui(Ludus::Engine& engine)
     {
@@ -179,7 +235,16 @@ namespace Tests
 		DrawEditorDockspace();
 		_debugOverlay.Draw();
 		_sceneViewportPanel.Draw(
-			engine.GetRenderEngine(), _history.IsDirty());
+			engine.GetRenderEngine(),
+			_history.IsDirty(),
+			_scene,
+			engine.GetAssets(),
+			_hierarchyPanel.GetSelectedEntityId());
+		if (std::optional<std::string> selection =
+			_sceneViewportPanel.TakeSelectionRequest())
+		{
+			_hierarchyPanel.SetSelectedEntityId(*selection);
+		}
 		_hierarchyPanel.Draw(_scene, _components, _systems, _history);
 		_inspectorPanel.Draw(
 			_scene, _components, _history,

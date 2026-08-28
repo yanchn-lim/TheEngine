@@ -25,9 +25,21 @@ namespace Ludus::Assets
 		if (it != _nameToHandle.end())
 			return it->second;
 
+		glm::vec3 boundsMinimum = data.surfaces.front().vertices.front().position;
+		glm::vec3 boundsMaximum = boundsMinimum;
+		for (const MeshSurface& surface : data.surfaces)
+		{
+			for (const MeshVertex& vertex : surface.vertices)
+			{
+				boundsMinimum = glm::min(boundsMinimum, vertex.position);
+				boundsMaximum = glm::max(boundsMaximum, vertex.position);
+			}
+		}
+
 		const MeshHandle handle{ _nextId++ };
 		_nameToHandle[name] = handle;
-		_meshes[handle.id] = MeshAsset{ data.surfaces, name };
+		_meshes[handle.id] = MeshAsset{
+			data.surfaces, boundsMinimum, boundsMaximum, name };
 
 		return handle;
 	}

@@ -13,3 +13,7 @@ $shaderDirectory = Join-Path $PSScriptRoot '..\assets\shaders'
 if ($LASTEXITCODE -ne 0) { throw 'Vertex shader compilation failed.' }
 & $compiler (Join-Path $shaderDirectory 'standard_vk.frag') '-o' (Join-Path $shaderDirectory 'standard_vk.frag.spv')
 if ($LASTEXITCODE -ne 0) { throw 'Fragment shader compilation failed.' }
+& $compiler (Join-Path $shaderDirectory 'grid_vk.vert') '-o' (Join-Path $shaderDirectory 'grid_vk.vert.spv')
+if ($LASTEXITCODE -ne 0) { throw 'Grid vertex shader compilation failed.' }
+& $compiler (Join-Path $shaderDirectory 'grid_vk.frag') '-o' (Join-Path $shaderDirectory 'grid_vk.frag.spv')
+if ($LASTEXITCODE -ne 0) { throw 'Grid fragment shader compilation failed.' }

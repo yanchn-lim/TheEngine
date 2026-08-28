@@ -1,5 +1,7 @@
 #include "graphics_api_tests.hpp"
 
+#include <cmath>
+
 #include "assets/asset_manager.hpp"
 #include "graphics/graphics_device.hpp"
 #include "graphics/graphics_handles.hpp"
@@ -57,6 +59,21 @@ namespace Tests
 {
     bool RunGraphicsApiTests()
     {
+		Ludus::Graphics::Camera camera;
+		camera.SetViewport(20.0f, 10.0f);
+		const glm::vec4 viewOrigin = camera.GetView() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		if (camera.projectionMode != Ludus::Graphics::ProjectionMode::Perspective ||
+			std::abs(camera.aspectRatio - 2.0f) > 0.0001f || viewOrigin.z >= 0.0f)
+		{
+			return false;
+		}
+
+		camera.projectionMode = Ludus::Graphics::ProjectionMode::Orthographic;
+		camera.orthographicSize = 10.0f;
+		const glm::mat4 orthographic = camera.GetProjection();
+		if (std::abs(orthographic[1][1] - 0.2f) > 0.0001f)
+			return false;
+
         Ludus::Graphics::ResourceTable<Ludus::Graphics::GpuBufferHandle, int> first;
         Ludus::Graphics::ResourceTable<Ludus::Graphics::GpuBufferHandle, int> second;
         Ludus::Graphics::ResourceTable<Ludus::Graphics::GpuBufferHandle, float> differentResourceType;
@@ -77,7 +94,7 @@ namespace Tests
         TestGraphicsDevice* deviceView = device.get();
         Ludus::Assets::AssetManager assets;
         Ludus::Rendering::RenderEngine renderEngine(std::move(device), assets);
-        Ludus::Graphics::Camera2D camera;
+		camera = {};
         camera.SetViewport(16.0f, 16.0f);
 
         deviceView->beginStatus = Ludus::Graphics::FrameStatus::ResizeRequired;

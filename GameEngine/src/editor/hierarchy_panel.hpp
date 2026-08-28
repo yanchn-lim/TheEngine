@@ -27,6 +27,7 @@ namespace Ludus::Editor
 			const Ludus::SystemRegistry& systems,
 			EditorCommandHistory& history);
 		std::string_view GetSelectedEntityId() const noexcept;
+		void SetSelectedEntityId(std::string_view id);
 
 	private:
 		void DrawEntityHierarchy(
@@ -47,11 +48,11 @@ namespace Ludus::Editor
 			Ludus::Serialization::LSceneValue after;
 		};
 
-		std::string _selectedEntityId;
 		// selection uses stable scene ids because undo can replace ECS handles.
+		std::string _selectedEntityId;
 		std::string _selectedSystemId;
-		std::optional<ActiveSystemEdit> _activeSystemEdit;
 		// repeated widget changes remain one command until editing finishes.
+		std::optional<ActiveSystemEdit> _activeSystemEdit;
 		char _newEntityName[128]{};
 		std::vector<std::string> _errors;
 	};

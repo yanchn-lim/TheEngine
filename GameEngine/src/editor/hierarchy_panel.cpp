@@ -49,6 +49,12 @@ namespace Ludus::Editor
 		return _selectedEntityId;
 	}
 
+	void HierarchyPanel::SetSelectedEntityId(std::string_view id)
+	{
+		_selectedEntityId = id;
+		_selectedSystemId.clear();
+	}
+
 	void HierarchyPanel::DrawEntityHierarchy(
 		Ludus::Scene& scene,
 		const Ludus::SceneComponentRegistry& components,

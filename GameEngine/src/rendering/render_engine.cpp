@@ -82,7 +82,7 @@ namespace Ludus::Rendering
 		return _backend == Ludus::Graphics::RendererBackend::OPENGL;
 	}
 
-    Ludus::Graphics::FrameStatus RenderEngine::Render(const Ludus::Graphics::Camera2D& camera, uint32_t width, uint32_t height)
+    Ludus::Graphics::FrameStatus RenderEngine::Render(const Ludus::Graphics::Camera& camera, uint32_t width, uint32_t height)
     {
 		ApplyEditorViewportSize();
         // begin the selected backend frame before collecting render data
@@ -93,7 +93,7 @@ namespace Ludus::Rendering
             return status;
         }
 
-		Ludus::Graphics::Camera2D renderCamera = camera;
+		Ludus::Graphics::Camera renderCamera = camera;
 		if (_editorTarget)
 		{
 			renderCamera.SetViewport(

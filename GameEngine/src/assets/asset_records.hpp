@@ -14,6 +14,8 @@ namespace Ludus::Assets
     struct MeshAsset
     {
         std::vector<MeshSurface> surfaces;
+        glm::vec3 boundsMinimum{};
+        glm::vec3 boundsMaximum{};
         std::string label;
         uint64_t version = 1;
     };

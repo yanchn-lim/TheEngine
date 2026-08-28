@@ -160,6 +160,10 @@ namespace Tests
 		const Ludus::Assets::MeshAsset* secondMeshAsset = assets.Get(secondMesh);
 		if (firstMesh.id == secondMesh.id || firstMaterial.id != secondMaterial.id ||
 			!firstMeshAsset || !secondMeshAsset ||
+			glm::any(glm::greaterThan(
+				firstMeshAsset->boundsMinimum, firstMeshAsset->boundsMaximum)) ||
+			glm::any(glm::greaterThan(
+				secondMeshAsset->boundsMinimum, secondMeshAsset->boundsMaximum)) ||
 			firstMeshAsset->label != "tests/first.lscene::mesh::shared" ||
 			secondMeshAsset->label != "tests/second.lscene::mesh::shared" ||
 			firstMeshAsset->surfaces.front().vertices.size() ==

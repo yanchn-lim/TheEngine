@@ -86,6 +86,16 @@ namespace Ludus::Assets
 		return _textures.Load(path);
 	}
 
+	TextureHandle AssetManager::CreateSolidColorTexture(
+		const std::string& name,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue,
+		unsigned char alpha)
+	{
+		return _textures.CreateSolidColor(name, red, green, blue, alpha);
+	}
+
 	ShaderHandle AssetManager::LoadShader(const std::string& vertexPath, const std::string& fragmentPath,
 		const std::string& vertexSpirvPath, const std::string& fragmentSpirvPath)
 	{

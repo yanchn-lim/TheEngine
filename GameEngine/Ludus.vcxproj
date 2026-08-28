@@ -341,6 +341,13 @@
     <None Include="assets\models\test_quad.obj" />
     <None Include="assets\models\test_triangle.obj" />
     <None Include="assets\models\test_two_shapes.obj" />
+    <None Include="assets\shaders\grid.lshader" />
+    <None Include="assets\shaders\grid_gl.frag" />
+    <None Include="assets\shaders\grid_gl.vert" />
+    <None Include="assets\shaders\grid_vk.frag" />
+    <None Include="assets\shaders\grid_vk.frag.spv" />
+    <None Include="assets\shaders\grid_vk.vert" />
+    <None Include="assets\shaders\grid_vk.vert.spv" />
     <None Include="assets\shaders\sprite.frag" />
     <None Include="assets\shaders\sprite.vert" />
     <None Include="assets\shaders\standard_gl.frag" />
