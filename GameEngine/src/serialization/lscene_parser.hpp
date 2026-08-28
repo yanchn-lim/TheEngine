@@ -17,6 +17,8 @@ namespace Ludus::Serialization
 	struct LSceneParseResult
 	{
 		LSceneValue root = LSceneValue::ObjectValue();
+		std::string resourceType;
+		std::string resourceName;
 		std::vector<LSceneParseError> errors;
 
 		explicit operator bool() const noexcept

@@ -1,11 +1,9 @@
 #include "scene_asset_loader.hpp"
 
 #include <algorithm>
-#include <optional>
 #include <string_view>
 
 #include "assets/asset_manager.hpp"
-#include "graphics/blend_mode.hpp"
 #include "scene_value_reader.hpp"
 
 namespace Ludus
@@ -25,106 +23,8 @@ namespace Ludus
 				std::string(category) + "::" + std::string(alias);
 		}
 
-		std::optional<Ludus::Graphics::BlendMode> ParseBlendMode(
-			const Object& object,
-			std::vector<SceneLoadError>& errors)
-		{
-			const Ludus::Serialization::LSceneValue* value = FindField(object, "blend");
-			if (!value)
-				return Ludus::Graphics::BlendMode::ALPHA;
-
-			const std::string* text = value->TryGetString();
-			if (!text)
-			{
-				AddError(errors, *value, "field 'blend' must be a string");
-				return std::nullopt;
-			}
-
-			if (*text == "none") return Ludus::Graphics::BlendMode::NONE;
-			if (*text == "alpha") return Ludus::Graphics::BlendMode::ALPHA;
-			if (*text == "additive") return Ludus::Graphics::BlendMode::ADDITIVE;
-			if (*text == "premultiplied_alpha") return Ludus::Graphics::BlendMode::PREMULTIPLIED_ALPHA;
-			if (*text == "multiply") return Ludus::Graphics::BlendMode::MULTIPLY;
-
-			AddError(errors, *value, "unknown blend mode '" + *text + "'");
-			return std::nullopt;
-		}
-
-		bool LoadShaders(
-			const Ludus::Serialization::LSceneValue& category,
-			Ludus::Assets::AssetManager& assets,
-			SceneAssetContext& context,
-			std::vector<SceneLoadError>& errors)
-		{
-			const Object* shaders = SceneValues::RequireObject(category, "shaders must be a block", errors);
-			if (!shaders) return false;
-
-			bool success = true;
-			for (const auto& [name, value] : *shaders)
-			{
-				const Object* fields = SceneValues::RequireObject(
-					value, name + " must be a block", errors);
-				if (!fields) { success = false; continue; }
-				if (!SceneValues::ValidateFields(
-					*fields, { "vertex", "fragment", "vertex_spirv", "fragment_spirv" }, {}, errors))
-				{ success = false; continue; }
-
-				const std::string* vertex = SceneValues::RequiredString(*fields, "vertex", value, errors);
-				const std::string* fragment = SceneValues::RequiredString(*fields, "fragment", value, errors);
-				std::string vertexSpirv;
-				std::string fragmentSpirv;
-				const bool optionalValid =
-					SceneValues::OptionalString(*fields, "vertex_spirv", vertexSpirv, errors) &&
-					SceneValues::OptionalString(*fields, "fragment_spirv", fragmentSpirv, errors);
-				if (!vertex || !fragment || !optionalValid) { success = false; continue; }
-
-				const Ludus::Assets::ShaderHandle handle = assets.LoadShader(*vertex, *fragment, vertexSpirv, fragmentSpirv);
-				if (!handle)
-				{
-					AddError(errors, value, "failed to load shader '" + name + "'");
-					success = false;
-					continue;
-				}
-				context.shaders.emplace(name, handle);
-			}
-			return success;
-		}
-
-		bool LoadTextures(
-			const Ludus::Serialization::LSceneValue& category,
-			Ludus::Assets::AssetManager& assets,
-			SceneAssetContext& context,
-			std::vector<SceneLoadError>& errors)
-		{
-			const Object* textures = SceneValues::RequireObject(category, "textures must be a block", errors);
-			if (!textures) return false;
-
-			bool success = true;
-			for (const auto& [name, value] : *textures)
-			{
-				const Object* fields = SceneValues::RequireObject(
-					value, name + " must be a block", errors);
-				if (!fields) { success = false; continue; }
-				if (!SceneValues::ValidateFields(*fields, { "source" }, {}, errors))
-				{ success = false; continue; }
-				const std::string* source = SceneValues::RequiredString(*fields, "source", value, errors);
-				if (!source) { success = false; continue; }
-
-				const Ludus::Assets::TextureHandle handle = assets.LoadTexture(*source);
-				if (!handle)
-				{
-					AddError(errors, value, "failed to load texture '" + name + "'");
-					success = false;
-					continue;
-				}
-				context.textures.emplace(name, handle);
-			}
-			return success;
-		}
-
 		bool LoadMaterials(
 			const Ludus::Serialization::LSceneValue& category,
-			std::string_view sceneNamespace,
 			Ludus::Assets::AssetManager& assets,
 			SceneAssetContext& context,
 			std::vector<SceneLoadError>& errors)
@@ -138,43 +38,14 @@ namespace Ludus
 				const Object* fields = SceneValues::RequireObject(
 					value, name + " must be a block", errors);
 				if (!fields) { success = false; continue; }
-				if (!SceneValues::ValidateFields(
-					*fields, { "shader", "texture", "depth_test", "depth_write", "blend", "culling" }, {}, errors))
+				if (!SceneValues::ValidateFields(*fields, { "source" }, {}, errors))
 				{ success = false; continue; }
-
-				const std::string* shaderName = SceneValues::RequiredString(*fields, "shader", value, errors);
-				const std::string* textureName = SceneValues::RequiredString(*fields, "texture", value, errors);
-				const auto blend = ParseBlendMode(*fields, errors);
-				if (!shaderName || !textureName || !blend) { success = false; continue; }
-
-				const auto shader = context.shaders.find(*shaderName);
-				const auto texture = context.textures.find(*textureName);
-				if (shader == context.shaders.end())
-				{
-					AddError(errors, *FindField(*fields, "shader"), "unknown shader '" + *shaderName + "'");
-					success = false;
-					continue;
-				}
-				if (texture == context.textures.end())
-				{
-					AddError(errors, *FindField(*fields, "texture"), "unknown texture '" + *textureName + "'");
-					success = false;
-					continue;
-				}
-
-				Ludus::Graphics::RenderState state;
-				if (!SceneValues::OptionalBoolean(*fields, "depth_test", state.depthTest, errors) ||
-					!SceneValues::OptionalBoolean(*fields, "depth_write", state.depthWrite, errors) ||
-					!SceneValues::OptionalBoolean(*fields, "culling", state.culling, errors))
-				{ success = false; continue; }
-				state.blendMode = *blend;
+				const std::string* source =
+					SceneValues::RequiredString(*fields, "source", value, errors);
+				if (!source) { success = false; continue; }
 
 				const Ludus::Assets::MaterialHandle handle =
-					assets.CreateMaterial(
-						RegistryName(sceneNamespace, "material", name),
-						shader->second,
-						texture->second,
-						state);
+					assets.LoadMaterialResource(*source);
 				if (!handle)
 				{
 					AddError(errors, value, "failed to create material '" + name + "'");
@@ -281,20 +152,14 @@ namespace Ludus
 
 		bool success = true;
 		for (const auto& [name, value] : *categories)
-		{
-			if (name == "shaders") success = LoadShaders(value, assets, loaded, errors) && success;
-			else if (name == "textures") success = LoadTextures(value, assets, loaded, errors) && success;
-		}
-		for (const auto& [name, value] : *categories)
-			if (name == "materials") success = LoadMaterials(
-				value, sceneNamespace, assets, loaded, errors) && success;
+			if (name == "materials") success = LoadMaterials(value, assets, loaded, errors) && success;
 		for (const auto& [name, value] : *categories)
 			if (name == "meshes") success = LoadMeshes(
 				value, sceneNamespace, assets, loaded, errors) && success;
 
 		for (const auto& [name, value] : *categories)
 		{
-			if (name != "shaders" && name != "textures" && name != "materials" && name != "meshes")
+			if (name != "materials" && name != "meshes")
 			{
 				AddError(errors, value, "unknown asset category '" + name + "'");
 				success = false;

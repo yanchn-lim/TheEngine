@@ -1,79 +1,49 @@
 scene "Maxwell Test"
 version: 1
 
-systems
-	rotator
-		enabled: true
-
 assets
-	shaders
-		standard
-			vertex: "assets/shaders/standard_gl.vert"
-			fragment: "assets/shaders/standard_gl.frag"
-			vertex_spirv: "assets/shaders/standard_vk.vert.spv"
-			fragment_spirv: "assets/shaders/standard_vk.frag.spv"
-
-	textures
-		maxwell
-			source: "assets/textures/maxwell.png"
-
-		steak
-			source: "assets/textures/steak.png"
-
 	materials
 		maxwell
-			shader: standard
-			texture: maxwell
-			depth_test: true
-			depth_write: true
-			blend: none
-			culling: true
-
+			source: "assets/materials/maxwell.lmaterial"
 		steak
-			shader: standard
-			texture: steak
-			depth_test: true
-			depth_write: true
-			blend: none
-			culling: true
-
+			source: "assets/materials/steak.lmaterial"
 	meshes
 		maxwell
 			source: "assets/models/maxwell.obj"
 
+systems
+	rotator
+		enabled: true
+
 entities
+	entity_cb7ea6fa4de4aa04073a3d8d9193e590
+		components
+		name: "test"
 	maxwell_left
+		components
+			Renderable
+				material_override: "maxwell"
+				mesh: "maxwell"
+				visible: true
+			Rotator
+				axis: [0.0, 1.0, 0.0]
+				speed_degrees: 34.376998901367188
+			Transform
+				position: [-0.85000002384185791, -0.4699999988079071, 0.25]
+				rotation_degrees: [-0.0, 82.890357971191406, -0.0]
+				scale: [0.0040000001899898052, 0.0040000001899898052, 0.0040000001899898052]
 		name: "Maxwell Left"
-
-		components
-			Transform
-				position: [-0.85, -0.47, 0.25]
-				rotation_degrees: [0.0, 0.0, 0.0]
-				scale: [0.004, 0.004, 0.004]
-
-			Renderable
-				mesh: maxwell
-				material_override: maxwell
-				visible: true
-
-			Rotator
-				axis: [0.0, 1.0, 0.0]
-				speed_degrees: 34.377
-
 	maxwell_right
-		name: "Maxwell Right"
-
 		components
-			Transform
-				position: [0.85, -0.47, -0.25]
-				rotation_degrees: [0.0, 0.0, 0.0]
-				scale: [0.004, 0.004, 0.004]
-
 			Renderable
-				mesh: maxwell
-				material_override: steak
+				material_override: "steak"
+				mesh: "maxwell"
 				visible: true
-
 			Rotator
 				axis: [0.0, 1.0, 0.0]
-				speed_degrees: -34.377
+				speed_degrees: -34.376998901367188
+			Transform
+				position: [0.85000002384185791, -0.4699999988079071, -0.25]
+				rotation_degrees: [0.0, -82.890357971191406, 0.0]
+				scale: [0.0040000001899898052, 0.0040000001899898052, 0.0040000001899898052]
+		name: "Maxwell Right"

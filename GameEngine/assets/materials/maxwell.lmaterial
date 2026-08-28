@@ -1,0 +1,8 @@
+material "Maxwell"
+
+shader: "assets/shaders/standard.lshader"
+texture: "assets/textures/maxwell.png"
+depth_test: true
+depth_write: true
+blend: none
+culling: true

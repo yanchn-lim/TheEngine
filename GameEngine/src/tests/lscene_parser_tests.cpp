@@ -34,12 +34,26 @@ namespace Tests
 		if (!parsed)
 			return false;
 
-		const Ludus::Serialization::LSceneValue* scene = parsed.root.Find("scene");
 		const Ludus::Serialization::LSceneValue* version = parsed.root.Find("version");
 		const Ludus::Serialization::LSceneValue* entities = parsed.root.Find("entities");
-		if (!scene || !scene->TryGetString() || *scene->TryGetString() != "Parser Test" ||
+		if (parsed.resourceType != "scene" || parsed.resourceName != "Parser Test" ||
 			!version || !version->TryGetInteger() || *version->TryGetInteger() != 1 ||
 			!entities)
+		{
+			return false;
+		}
+
+		const auto material = Ludus::Serialization::LSceneParser{}.Parse(
+			"material \"Default\"\nshader: \"assets/shaders/default.lshader\"\n");
+		const auto shader = Ludus::Serialization::LSceneParser{}.Parse(
+			"shader \"Default\"\nvertex: \"default.vert\"\n");
+		const auto emptyArray = Ludus::Serialization::LSceneParser{}.Parse(
+			"scene \"Empty Array\"\nvalue: []\n");
+		if (!material || material.resourceType != "material" || material.resourceName != "Default" ||
+			!shader || shader.resourceType != "shader" || shader.resourceName != "Default" ||
+			!emptyArray || !emptyArray.root.Find("value") ||
+			!emptyArray.root.Find("value")->TryGetArray() ||
+			!emptyArray.root.Find("value")->TryGetArray()->empty())
 		{
 			return false;
 		}
@@ -73,7 +87,6 @@ namespace Tests
 		return
 			HasError("version: 1\n") &&
 			HasError("scene Test\nversion: 1\n") &&
-			HasError("scene \"Test\"\nversion: 2\n") &&
 			HasError("scene \"Test\"\n version: 1\n") &&
 			HasError("scene \"Test\"\nversion: 1\n\t\tchild\n") &&
 			HasError("scene \"Test\"\nversion: 1\nvalue: 1\nvalue: 2\n") &&
@@ -82,6 +95,8 @@ namespace Tests
 			HasError("scene \"Test\"\nversion: 1\nvalue: [1, \"unterminated]\n") &&
 			HasError("scene \"Test\"\nversion: 1\nvalue: [\"dangling\\]\n") &&
 			HasError("scene \"Test\"\nversion: 1\nvalue: 1e999\n") &&
+			!HasError("scene \"Test\"\n") &&
+			!HasError("scene \"Test\"\nversion: 2\n") &&
 			!HasError("scene \"Test\"\nversion: 1\nvalue: 1.7976931348623157e308\n");
 	}
 }

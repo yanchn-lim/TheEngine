@@ -9,8 +9,6 @@ namespace Ludus
 {
 	struct SceneAssetContext
 	{
-		std::unordered_map<std::string, Ludus::Assets::ShaderHandle> shaders;
-		std::unordered_map<std::string, Ludus::Assets::TextureHandle> textures;
 		std::unordered_map<std::string, Ludus::Assets::MaterialHandle> materials;
 		std::unordered_map<std::string, Ludus::Assets::MeshHandle> meshes;
 		std::unordered_map<std::string, bool> meshHasDefaultMaterials;

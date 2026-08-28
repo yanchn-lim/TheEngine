@@ -1,0 +1,8 @@
+material "Steak"
+
+shader: "assets/shaders/standard.lshader"
+texture: "assets/textures/steak.png"
+depth_test: true
+depth_write: true
+blend: none
+culling: true

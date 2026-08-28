@@ -200,6 +200,7 @@
 	<ClCompile Include="src\editor\editor_command_history.cpp" />
 	<ClCompile Include="src\editor\inspector_panel.cpp" />
 	<ClCompile Include="src\editor\scene_viewport_panel.cpp" />
+	<ClCompile Include="src\editor\asset_browser_panel.cpp" />
 	<ClCompile Include="src\editor\value_editor.cpp" />
     <ClCompile Include="src\graphics\camera.cpp" />
     <ClCompile Include="src\rendering\render_engine.cpp" />
@@ -290,6 +291,7 @@
 	<ClInclude Include="src\editor\editor_command_history.hpp" />
 	<ClInclude Include="src\editor\inspector_panel.hpp" />
 	<ClInclude Include="src\editor\scene_viewport_panel.hpp" />
+	<ClInclude Include="src\editor\asset_browser_panel.hpp" />
 	<ClInclude Include="src\editor\value_editor.hpp" />
     <ClInclude Include="src\core\time.hpp" />
     <ClInclude Include="src\graphics\camera.hpp" />

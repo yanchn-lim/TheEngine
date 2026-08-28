@@ -14,23 +14,9 @@ namespace Tests
 			"scene \"Asset Test\"\n"
 			"version: 1\n"
 			"assets\n"
-			"\tshaders\n"
-			"\t\tstandard\n"
-			"\t\t\tvertex: \"assets/shaders/standard_gl.vert\"\n"
-			"\t\t\tfragment: \"assets/shaders/standard_gl.frag\"\n"
-			"\t\t\tvertex_spirv: \"assets/shaders/standard_vk.vert.spv\"\n"
-			"\t\t\tfragment_spirv: \"assets/shaders/standard_vk.frag.spv\"\n"
-			"\ttextures\n"
-			"\t\tmaxwell\n"
-			"\t\t\tsource: \"assets/textures/maxwell.png\"\n"
 			"\tmaterials\n"
 			"\t\tmaxwell\n"
-			"\t\t\tshader: standard\n"
-			"\t\t\ttexture: maxwell\n"
-			"\t\t\tdepth_test: true\n"
-			"\t\t\tdepth_write: true\n"
-			"\t\t\tblend: none\n"
-			"\t\t\tculling: true\n"
+			"\t\t\tsource: \"assets/materials/maxwell.lmaterial\"\n"
 			"\tmeshes\n"
 			"\t\tmaxwell\n"
 			"\t\t\tsource: \"assets/models/maxwell.obj\"\n";
@@ -41,12 +27,35 @@ namespace Tests
 			return false;
 
 		Ludus::Assets::AssetManager assets;
+		const Ludus::Assets::ShaderHandle shaderResource =
+			assets.LoadShaderResource("assets/shaders/standard.lshader");
+		const Ludus::Assets::ShaderHandle normalizedShaderResource =
+			assets.LoadShaderResource("assets/shaders/./standard.lshader");
+		if (!shaderResource || shaderResource.id != normalizedShaderResource.id ||
+			assets.LoadShaderResource("assets/shaders/missing.lshader"))
+		{
+			return false;
+		}
+		const Ludus::Assets::MaterialHandle materialResource =
+			assets.LoadMaterialResource("assets/materials/maxwell.lmaterial");
+		const Ludus::Assets::MaterialHandle normalizedMaterialResource =
+			assets.LoadMaterialResource("assets/materials/./maxwell.lmaterial");
+		const Ludus::Assets::MaterialAsset* materialAsset = assets.Get(materialResource);
+		if (!materialResource || materialResource.id != normalizedMaterialResource.id ||
+			!materialAsset || materialAsset->shader.id != shaderResource.id ||
+			!materialAsset->texture || !materialAsset->state.depthTest ||
+			!materialAsset->state.depthWrite || !materialAsset->state.culling ||
+			materialAsset->state.blendMode != Ludus::Graphics::BlendMode::NONE ||
+			assets.LoadMaterialResource("assets/materials/missing.lmaterial"))
+		{
+			return false;
+		}
+
 		Ludus::SceneAssetContext context;
 		std::vector<Ludus::SceneLoadError> errors;
 		if (!Ludus::SceneAssetLoader::Load(
 			parsed.root, "tests/asset_test.lscene", assets, context, errors) ||
-			!errors.empty() || context.shaders.size() != 1 ||
-			context.textures.size() != 1 || context.materials.size() != 1 ||
+			!errors.empty() || context.materials.size() != 1 ||
 			context.meshes.size() != 1)
 		{
 			return false;
@@ -58,8 +67,7 @@ namespace Tests
 			"assets\n"
 			"\tmaterials\n"
 			"\t\tbroken\n"
-			"\t\t\tshader: missing\n"
-			"\t\t\ttexture: missing\n";
+			"\t\t\tsource: \"assets/materials/missing.lmaterial\"\n";
 
 		const Ludus::Serialization::LSceneParseResult invalidParsed =
 			Ludus::Serialization::LSceneParser{}.Parse(invalidSource);
@@ -74,7 +82,6 @@ namespace Tests
 			assets,
 			invalidContext,
 			invalidErrors) || invalidErrors.empty() ||
-			!invalidContext.shaders.empty() || !invalidContext.textures.empty() ||
 			!invalidContext.materials.empty() || !invalidContext.meshes.empty())
 		{
 			return false;
@@ -84,10 +91,9 @@ namespace Tests
 			"scene \"Invalid Definition\"\n"
 			"version: 1\n"
 			"assets\n"
-			"\tshaders\n"
+			"\tmaterials\n"
 			"\t\tstandard\n"
-			"\t\t\tvertex: \"assets/shaders/standard_gl.vert\"\n"
-			"\t\t\tfragment: \"assets/shaders/standard_gl.frag\"\n"
+			"\t\t\tsource: \"assets/materials/maxwell.lmaterial\"\n"
 			"\t\t\tunknown: true\n";
 		const Ludus::Serialization::LSceneParseResult invalidDefinition =
 			Ludus::Serialization::LSceneParser{}.Parse(invalidDefinitionSource);
@@ -103,7 +109,7 @@ namespace Tests
 			invalidDefinitionContext,
 			invalidDefinitionErrors) ||
 			invalidDefinitionErrors.empty() ||
-			!invalidDefinitionContext.shaders.empty())
+			!invalidDefinitionContext.materials.empty())
 		{
 			return false;
 		}
@@ -112,17 +118,9 @@ namespace Tests
 			"scene \"First Collision Scene\"\n"
 			"version: 1\n"
 			"assets\n"
-			"\tshaders\n"
-			"\t\tshared\n"
-			"\t\t\tvertex: \"assets/shaders/standard_gl.vert\"\n"
-			"\t\t\tfragment: \"assets/shaders/standard_gl.frag\"\n"
-			"\ttextures\n"
-			"\t\tshared\n"
-			"\t\t\tsource: \"assets/textures/maxwell.png\"\n"
 			"\tmaterials\n"
 			"\t\tshared\n"
-			"\t\t\tshader: shared\n"
-			"\t\t\ttexture: shared\n"
+			"\t\t\tsource: \"assets/materials/maxwell.lmaterial\"\n"
 			"\tmeshes\n"
 			"\t\tshared\n"
 			"\t\t\tsource: \"assets/models/test_triangle.obj\"\n";
@@ -131,17 +129,9 @@ namespace Tests
 			"scene \"Second Collision Scene\"\n"
 			"version: 1\n"
 			"assets\n"
-			"\tshaders\n"
-			"\t\tshared\n"
-			"\t\t\tvertex: \"assets/shaders/standard_gl.vert\"\n"
-			"\t\t\tfragment: \"assets/shaders/standard_gl.frag\"\n"
-			"\ttextures\n"
-			"\t\tshared\n"
-			"\t\t\tsource: \"assets/textures/steak.png\"\n"
 			"\tmaterials\n"
 			"\t\tshared\n"
-			"\t\t\tshader: shared\n"
-			"\t\t\ttexture: shared\n"
+			"\t\t\tsource: \"assets/materials/maxwell.lmaterial\"\n"
 			"\tmeshes\n"
 			"\t\tshared\n"
 			"\t\t\tsource: \"assets/models/test_quad.obj\"\n";
@@ -168,7 +158,7 @@ namespace Tests
 		const Ludus::Assets::MaterialHandle secondMaterial = secondContext.materials.at("shared");
 		const Ludus::Assets::MeshAsset* firstMeshAsset = assets.Get(firstMesh);
 		const Ludus::Assets::MeshAsset* secondMeshAsset = assets.Get(secondMesh);
-		if (firstMesh.id == secondMesh.id || firstMaterial.id == secondMaterial.id ||
+		if (firstMesh.id == secondMesh.id || firstMaterial.id != secondMaterial.id ||
 			!firstMeshAsset || !secondMeshAsset ||
 			firstMeshAsset->label != "tests/first.lscene::mesh::shared" ||
 			secondMeshAsset->label != "tests/second.lscene::mesh::shared" ||

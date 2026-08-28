@@ -228,11 +228,10 @@ namespace Tests
 				return false;
 			const Ludus::Serialization::LSceneParseResult parsed =
 				Ludus::Serialization::LSceneParser{}.Parse(text);
-			const std::string* parsedName = parsed.root.Find("scene")
-				? parsed.root.Find("scene")->TryGetString()
-				: nullptr;
 
-			return parsed && parsedName && *parsedName == escapedName &&
+			return parsed &&
+				parsed.resourceType == "scene" &&
+				parsed.resourceName == escapedName &&
 				WriterRejects(std::move(invalidVersion)) &&
 				WriterRejects(std::move(missingEntities)) &&
 				WriterRejects(std::move(invalidIdentifier)) &&

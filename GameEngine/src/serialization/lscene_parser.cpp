@@ -145,10 +145,7 @@ namespace Ludus::Serialization
 
 			std::string_view contents = Trim(text.substr(1, text.size() - 2));
 			if (contents.empty())
-			{
-				AddError(result, location.line, location.column, "arrays cannot be empty in version 1");
-				return std::nullopt;
-			}
+				return LSceneValue::ArrayValue({}, location);
 
 			LSceneValue::Array values;
 			size_t start = 0;
@@ -290,7 +287,6 @@ namespace Ludus::Serialization
 		LSceneParseResult result;
 		std::vector<LSceneValue*> levels{ &result.root };
 		bool hasDeclaration = false;
-		bool hasVersion = false;
 		size_t lineNumber = 0;
 
 		while (!source.empty())
@@ -305,23 +301,24 @@ namespace Ludus::Serialization
 
 			if (!hasDeclaration)
 			{
-				constexpr std::string_view prefix = "scene";
-				if (!line.starts_with(prefix) || line.size() == prefix.size() ||
-					(line[prefix.size()] != ' ' && line[prefix.size()] != '\t'))
+				const size_t separator = line.find_first_of(" \t");
+				const std::string_view type = line.substr(0, separator);
+				if (separator == std::string_view::npos || !IsIdentifier(type))
 				{
-					AddError(result, lineNumber, 1, "expected scene declaration");
+					AddError(result, lineNumber, 1, "expected resource declaration");
 					return result;
 				}
-				const std::string_view nameText = Trim(line.substr(prefix.size()));
+				const std::string_view nameText = Trim(line.substr(separator));
 				if (nameText.empty() || nameText.front() != '"')
 				{
-					AddError(result, lineNumber, prefix.size() + 2, "scene name must be a quoted string");
+					AddError(result, lineNumber, separator + 2, "resource name must be a quoted string");
 					return result;
 				}
-				auto name = ParseQuotedString(nameText, result, { lineNumber, prefix.size() + 2 });
+				auto name = ParseQuotedString(nameText, result, { lineNumber, separator + 2 });
 				if (!name)
 					return result;
-				InsertValue(result, result.root, "scene", LSceneValue::String(std::move(*name), { lineNumber, 1 }), { lineNumber, 1 });
+				result.resourceType = std::string(type);
+				result.resourceName = std::move(*name);
 				hasDeclaration = true;
 				continue;
 			}
@@ -373,27 +370,10 @@ namespace Ludus::Serialization
 			if (!InsertValue(result, *parent, std::string(key), std::move(*value), { lineNumber, indentation + 1 }))
 				continue;
 
-			if (!hasVersion)
-			{
-				const LSceneValue* version = result.root.Find("version");
-				if (indentation != 0 || key != "version" || !version || !version->TryGetInteger())
-				{
-					AddError(result, lineNumber, 1, "expected integer version property after scene declaration");
-					return result;
-				}
-				if (*version->TryGetInteger() != 1)
-				{
-					AddError(result, lineNumber, 1, "unsupported scene version");
-					return result;
-				}
-				hasVersion = true;
-			}
 		}
 
 		if (!hasDeclaration)
-			AddError(result, 1, 1, "expected scene declaration");
-		else if (!hasVersion)
-			AddError(result, lineNumber + 1, 1, "scene version is missing");
+			AddError(result, 1, 1, "expected resource declaration");
 
 		return result;
 	}

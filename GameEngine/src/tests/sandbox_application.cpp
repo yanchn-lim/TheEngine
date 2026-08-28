@@ -39,9 +39,13 @@ namespace Tests
 					center, ImGuiDir_Left, 0.22f, &left, &center);
 				ImGui::DockBuilderSplitNode(
 					center, ImGuiDir_Right, 0.32f, &right, &center);
+				ImGuiID bottom = 0;
+				ImGui::DockBuilderSplitNode(
+					center, ImGuiDir_Down, 0.25f, &bottom, &center);
 				ImGui::DockBuilderDockWindow("Hierarchy", left);
 				ImGui::DockBuilderDockWindow("Inspector", right);
 				ImGui::DockBuilderDockWindow("Scene", center);
+				ImGui::DockBuilderDockWindow("Asset Browser", bottom);
 				ImGui::DockBuilderFinish(dockspace);
 			}
 
@@ -180,5 +184,6 @@ namespace Tests
 		_inspectorPanel.Draw(
 			_scene, _components, _history,
 			_hierarchyPanel.GetSelectedEntityId());
-    }
+		_assetBrowserPanel.Draw("assets");
+	}
 }

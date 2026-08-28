@@ -265,6 +265,11 @@ namespace Ludus
 				errors.push_back({ error.message, error.location });
 			return finish(false);
 		}
+		if (parsed.resourceType != "scene")
+		{
+			errors.push_back({ "expected scene resource", { 1, 1 } });
+			return finish(false);
+		}
 
 		if (!ValidateRoot(parsed.root, errors))
 			return finish(false);
@@ -284,12 +289,11 @@ namespace Ludus
 		if (!LoadEntities(parsed.root, stagedScene, assetContext, components, errors))
 			return finish(false);
 
-		const std::string* sceneName = parsed.root.Find("scene")->TryGetString();
 		Ludus::Serialization::LSceneValue assetDeclarations = Ludus::Serialization::LSceneValue::ObjectValue();
 		if (const Ludus::Serialization::LSceneValue* value = parsed.root.Find("assets"))
 			assetDeclarations = *value;
 		stagedScene.SetSerializationData(
-			sceneName ? *sceneName : "Untitled",
+			parsed.resourceName.empty() ? "Untitled" : parsed.resourceName,
 			std::move(assetDeclarations),
 			std::move(assetContext),
 			std::move(systemDefinitions));

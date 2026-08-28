@@ -1,6 +1,8 @@
 #pragma once
 
+#include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include "graphics/render_state.hpp"
@@ -21,6 +23,8 @@ namespace Ludus::Assets
 		TextureHandle LoadTexture(const std::string& path);
 		ShaderHandle LoadShader(const std::string& vertexPath, const std::string& fragmentPath,
 			const std::string& vertexSpirvPath = {}, const std::string& fragmentSpirvPath = {});
+		ShaderHandle LoadShaderResource(const std::string& path);
+		MaterialHandle LoadMaterialResource(const std::string& path);
 		MeshHandle LoadMesh(const std::string& name, const std::string& path);
 
 		MaterialHandle CreateMaterial(
@@ -49,6 +53,8 @@ namespace Ludus::Assets
 		MaterialRegistry _materials;
 		MeshRegistry _meshes;
 		ModelImporterRegistry _modelImporters;
+		std::unordered_map<std::string, ShaderHandle> _shaderResources;
+		std::unordered_map<std::string, MaterialHandle> _materialResources;
 
 	};
 }

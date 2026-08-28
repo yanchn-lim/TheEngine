@@ -201,6 +201,9 @@
 	<ClCompile Include="src\editor\scene_viewport_panel.cpp">
 	  <Filter>Source Files\editor</Filter>
 	</ClCompile>
+	<ClCompile Include="src\editor\asset_browser_panel.cpp">
+	  <Filter>Source Files\editor</Filter>
+	</ClCompile>
 	<ClCompile Include="src\editor\value_editor.cpp">
 	  <Filter>Source Files\editor</Filter>
 	</ClCompile>
@@ -426,6 +429,9 @@
 	  <Filter>Header Files\editor</Filter>
 	</ClInclude>
 	<ClInclude Include="src\editor\scene_viewport_panel.hpp">
+	  <Filter>Header Files\editor</Filter>
+	</ClInclude>
+	<ClInclude Include="src\editor\asset_browser_panel.hpp">
 	  <Filter>Header Files\editor</Filter>
 	</ClInclude>
 	<ClInclude Include="src\editor\value_editor.hpp">

@@ -7,6 +7,7 @@
 #include "core/action_map.hpp"
 #include "core/application.hpp"
 #include "debug/debug_overlay.hpp"
+#include "editor/asset_browser_panel.hpp"
 #include "editor/editor_command_history.hpp"
 #include "editor/hierarchy_panel.hpp"
 #include "editor/inspector_panel.hpp"
@@ -45,6 +46,7 @@ namespace Tests
 		Ludus::Editor::HierarchyPanel _hierarchyPanel;
 		Ludus::Editor::InspectorPanel _inspectorPanel;
 		Ludus::Editor::SceneViewportPanel _sceneViewportPanel;
+		Ludus::Editor::AssetBrowserPanel _assetBrowserPanel;
 		Ludus::Editor::EditorCommandHistory _history;
 		Ludus::ActionMap<EditorAction> _editorActions;
 		std::vector<Ludus::ActionConnection> _actionConnections;

@@ -1,0 +1,6 @@
+shader "Standard"
+
+vertex: "assets/shaders/standard_gl.vert"
+fragment: "assets/shaders/standard_gl.frag"
+vertex_spirv: "assets/shaders/standard_vk.vert.spv"
+fragment_spirv: "assets/shaders/standard_vk.frag.spv"
