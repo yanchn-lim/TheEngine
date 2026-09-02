@@ -4,6 +4,7 @@
 
 #include "debug/debug.hpp"
 #include "ecs_tests.hpp"
+#include "geometry_tests.hpp"
 #include "graphics_api_tests.hpp"
 #include "input_tests.hpp"
 #include "lscene_parser_tests.hpp"
@@ -30,6 +31,7 @@ namespace Tests
 		bool passed = true;
 		passed = Run("ECS", RunEcsTests) && passed;
 		passed = Run("Input", RunInputTests) && passed;
+		passed = Run("Geometry", RunGeometryTests) && passed;
 		passed = Run("LScene parser", RunLSceneParserTests) && passed;
 		passed = Run("Scene assets", RunSceneAssetLoaderTests) && passed;
 		passed = Run("Scene loading", RunSceneLoaderTests) && passed;

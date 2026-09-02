@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <limits>
 
 #include <imgui.h>
 #include <glm/gtc/constants.hpp>
@@ -13,6 +12,7 @@
 #include "assets/asset_manager.hpp"
 #include "components/renderable.hpp"
 #include "components/transform.hpp"
+#include "geometry/intersection.hpp"
 #include "rendering/render_engine.hpp"
 #include "scene/scene.hpp"
 
@@ -30,17 +30,11 @@ namespace Ludus::Editor
 		constexpr float MinimumPitch = -glm::half_pi<float>() + 0.0174533f;
 		constexpr float MaximumPitch = glm::half_pi<float>() - 0.0174533f;
 
-		struct WorldBounds
-		{
-			glm::vec3 minimum;
-			glm::vec3 maximum;
-		};
-
 		bool GetWorldBounds(
 			const Ludus::Scene& scene,
 			const Ludus::Assets::AssetManager& assets,
 			std::string_view entityId,
-			WorldBounds& output)
+			Ludus::Geometry::Aabb& output)
 		{
 			// picking, focus, and overlays share the transformed mesh bounds.
 			// hidden or incomplete renderables have no selectable bounds.
@@ -76,36 +70,6 @@ namespace Ludus::Editor
 					}
 				}
 			}
-			return true;
-		}
-
-		bool IntersectRayBounds(
-			glm::vec3 origin,
-			glm::vec3 direction,
-			const WorldBounds& bounds,
-			float& distance)
-		{
-			float minimumDistance = 0.0f;
-			float maximumDistance = std::numeric_limits<float>::max();
-			for (int axis = 0; axis < 3; ++axis)
-			{
-				if (std::abs(direction[axis]) < 1.0e-6f)
-				{
-					if (origin[axis] < bounds.minimum[axis] ||
-						origin[axis] > bounds.maximum[axis])
-						return false;
-					continue;
-				}
-				float first = (bounds.minimum[axis] - origin[axis]) / direction[axis];
-				float second = (bounds.maximum[axis] - origin[axis]) / direction[axis];
-				if (first > second)
-					std::swap(first, second);
-				minimumDistance = std::max(minimumDistance, first);
-				maximumDistance = std::min(maximumDistance, second);
-				if (minimumDistance > maximumDistance)
-					return false;
-			}
-			distance = minimumDistance;
 			return true;
 		}
 	}
@@ -423,18 +387,20 @@ namespace Ludus::Editor
 		farPoint /= farPoint.w;
 		const glm::vec3 origin = glm::vec3(nearPoint);
 		const glm::vec3 direction = glm::normalize(glm::vec3(farPoint - nearPoint));
+		const Ludus::Geometry::Ray ray{ origin, direction };
 
-		float nearestDistance = std::numeric_limits<float>::max();
+		std::optional<Ludus::Geometry::RayHit> nearestHit;
 		std::string nearestEntity;
 		for (const auto& [id, record] : scene.GetEntities())
 		{
-			WorldBounds bounds;
-			float distance = 0.0f;
-			if (GetWorldBounds(scene, assets, id, bounds) &&
-				IntersectRayBounds(origin, direction, bounds, distance) &&
-				distance < nearestDistance)
+			Ludus::Geometry::Aabb bounds;
+			if (!GetWorldBounds(scene, assets, id, bounds))
+				continue;
+
+			const auto hit = Ludus::Geometry::Intersect(ray, bounds);
+			if (hit && (!nearestHit || hit->distance < nearestHit->distance))
 			{
-				nearestDistance = distance;
+				nearestHit = hit;
 				nearestEntity = id;
 			}
 		}
@@ -446,7 +412,7 @@ namespace Ludus::Editor
 		const Ludus::Assets::AssetManager& assets,
 		std::string_view selectedEntityId)
 	{
-		WorldBounds bounds;
+		Ludus::Geometry::Aabb bounds;
 		if (selectedEntityId.empty() ||
 			!GetWorldBounds(scene, assets, selectedEntityId, bounds))
 			return;
@@ -480,7 +446,7 @@ namespace Ludus::Editor
 		glm::vec2 imageMinimum,
 		glm::vec2 imageSize)
 	{
-		WorldBounds bounds;
+		Ludus::Geometry::Aabb bounds;
 		if (selectedEntityId.empty() || imageSize.x <= 0.0f || imageSize.y <= 0.0f ||
 			!GetWorldBounds(scene, assets, selectedEntityId, bounds))
 		{
